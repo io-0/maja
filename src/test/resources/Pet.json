@@ -1,0 +1,92 @@
+{
+  "name": "Gerti",
+  "tag": "GuterTag",
+  "id": 12,
+  "colorEnum": "blue",
+  "colorList": [
+    "violet",
+    "gray",
+    "yellow",
+    "violet"
+  ],
+  "colorSet": [
+    "violet",
+    "gray",
+    "yellow"
+  ],
+  "colorSubType": {
+    "id": 19,
+    "name": "rgb123"
+  },
+  "num": 20000000,
+  "numFloat": 20.1,
+  "numDouble": 220.1,
+  "integ": 4,
+  "intInt": 5,
+  "intLong": 2147483648,
+  "strLen": "some text",
+  "strDate": "2019-07-23",
+  "strDateTime": "2010-01-01T10:00:10+01:00",
+  "strPassword": "superSecure",
+  "strByte": "dGVzdA==",
+  "strBinary": "/1f03ff",
+  "strEmail": "user@example.com",
+  "strUuid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "strUri": "http://www.example.com/eula",
+  "strhostname": "example.com",
+  "strIpv4": "198.51.100.42",
+  "strIpv6": "2001:0db8:5b96:0000:0000:426f:8e17:642a",
+  "ssn": "102-21-2001",
+  "toKindsOfPeople": true,
+  "nullable": false,
+  "zoo": [
+    {
+      "name": "ZooPet1",
+      "tag": "ZooTag1",
+      "id": 93,
+      "colorEnum": "blue"
+    },
+    {
+      "name": "ZooPet2",
+      "tag": "ZooTag2",
+      "id": 94,
+      "colorEnum": "green"
+    }
+  ],
+  "enums": [
+    "blue",
+    "red"
+  ],
+  "arrayRange": [
+    0,
+    1,
+    2
+  ],
+  "binFile": "/1f03ff",
+  "base64file": "dGVzdA==",
+  "strMap": {
+    "additionalProp1": "I",
+    "additionalProp2": "am",
+    "additionalProp3": "a",
+    "additionalProp4": "map"
+  },
+  "longMap": {
+    "additionalProp1": 1,
+    "additionalProp2": 2,
+    "additionalProp3": 3
+  },
+  "petMap": {
+    "aPet": {
+      "name": "MapPet1",
+      "tag": "MapTag1",
+      "id": 42,
+      "colorEnum": "red"
+    }
+  },
+  "enumMap": {
+    "additionalProp1": "red",
+    "additionalProp2": "blue",
+    "additionalProp3": "green"
+  },
+  "maybeNull": null
+}

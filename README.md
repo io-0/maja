@@ -1,0 +1,3 @@
+# property
+
+I often implement API's that use JSON. A property in JSON can have a value (null or otherwise) or be absent/undefined. There are multiple ways to deal with that in JAVA. A lot of designs just ignore the difference between the value null and absent/undefined which is fine in most cases. Since JAVA 8 one could utilize java.util.Optional for properties where this difference matters and a lot of designs do this successfully. I however strive for simplicity and in my opinion it is simpler to store a boolean if a property was (re) assigned. This project aims to test how far I can push this concept and if it's viable.
