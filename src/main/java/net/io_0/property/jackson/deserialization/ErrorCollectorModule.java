@@ -9,10 +9,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Instead of stopping deserialization on the first problem this module collects failure messages in a map.
@@ -94,7 +92,6 @@ public class ErrorCollectorModule extends Module {
     private Object addErrorAndReturnNull(DeserializationContext ctx, String msg) {
       try {
         Map<String, String> deserializationErrors = (Map<String, String>) ctx.getAttribute(DESERIALIZATION_ERRORS_ATTR);
-        Objects.requireNonNull(deserializationErrors);
 
         deserializationErrors.put(extractAttributeName(ctx.getParser()), msg);
       } catch (ClassCastException | NullPointerException e) {

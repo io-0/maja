@@ -11,4 +11,8 @@ public interface PropertyValidator<T> extends Validator<Property<T>> {
       valid(property) :
       invalid(new Reason(property.getName(), String.format(errorMessage, property.isEmpty() ? null : property.getValue())));
   }
+
+  default PropertyValidator<T> and(PropertyValidator<T> other) {
+    return t -> this.apply(t).and(other.apply(t));
+  }
 }

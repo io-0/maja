@@ -12,7 +12,6 @@ public interface Validation {
   }
 
   static Invalid invalid(Reason... reason) {
-    Objects.requireNonNull(reason);
     return new Invalid(Arrays.asList(reason));
   }
 

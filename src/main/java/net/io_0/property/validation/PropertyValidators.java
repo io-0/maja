@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import static net.io_0.property.validation.PropertyPredicates.*;
 import static net.io_0.property.validation.PropertyValidator.of;
+import static net.io_0.property.validation.Validation.invalid;
+import static net.io_0.property.validation.Validation.valid;
 
 public interface PropertyValidators {
   String BINARY_PATTERN = "^([A-Fa-f0-9]{2})+$";
@@ -56,7 +58,7 @@ public interface PropertyValidators {
     return of(unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)), String.format("Must be a multiple of %s", parameter));
   }
 
-  PropertyValidator<Object> notNull = of(unassignedOrNotEmpty, "Can't be literally null");
+  PropertyValidator notNull = of(unassignedOrNotEmpty, "Can't be literally null");
 
   String PASSWORD_PATTERN = "^(?=.*?\\p{Lu})(?=.*?\\p{Ll})(?=.*?\\d)" + "(?=.*?[`~!@#$%^&*()\\-_=+\\\\|\\[{\\]};:'\",<.>/?]).*$";
   PropertyValidator<String> passwordFormat = of(
@@ -68,5 +70,23 @@ public interface PropertyValidators {
     return of(unassignedOrNotEmptyAnd(regexMatch(parameter)), String.format("Must match '%s' pattern", parameter));
   }
 
-  PropertyValidator<Object> required = of(assigned, "Is required but missing");
+  PropertyValidator required = of(assigned, "Is required but missing");
+
+  static <T> PropertyValidator<T> validator(Validator<T> validator) {
+    return property -> {
+      if (unassignedOrEmpty.test(property)) {
+        return valid(property);
+      }
+
+      Validation validation = validator.apply(property.getValue());
+      if (validation.isValid()) {
+        return validation;
+      }
+
+      return invalid(((Validation.Invalid) validation).getReasons().stream()
+        .map(reason -> new Reason(String.format("%s.%s", property.getName(), reason.getSubject()), reason.getArgument()))
+        .toArray(Reason[]::new)
+      );
+    };
+  }
 }

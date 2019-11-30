@@ -1,7 +1,6 @@
 package net.io_0.property.validation;
 
 import net.io_0.property.Property;
-
 import java.util.Objects;
 
 @FunctionalInterface
@@ -9,7 +8,6 @@ public interface PropertyPredicate<T> {
   boolean test(Property<? extends T> var1);
 
   default PropertyPredicate<T> and(PropertyPredicate<? super T> other) {
-    Objects.requireNonNull(other);
     return t -> this.test(t) && other.test(t);
   }
 
@@ -18,7 +16,6 @@ public interface PropertyPredicate<T> {
   }
 
   default PropertyPredicate<T> or(PropertyPredicate<? super T> other) {
-    Objects.requireNonNull(other);
     return t -> this.test(t) || other.test(t);
   }
 
@@ -27,7 +24,6 @@ public interface PropertyPredicate<T> {
   }
 
   static <T> PropertyPredicate<? super T> not(PropertyPredicate<? super T> target) {
-    Objects.requireNonNull(target);
     return target.negate();
   }
 }

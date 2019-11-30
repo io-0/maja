@@ -5,7 +5,6 @@ import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.RegexValidator;
-
 import java.math.BigDecimal;
 import java.util.Collection;
 
@@ -17,6 +16,8 @@ public interface PropertyPredicates {
   PropertyPredicate empty = Property::isEmpty;
 
   PropertyPredicate assignedAndNotEmpty = assigned.and(not(empty));
+
+  PropertyPredicate unassignedOrEmpty = not(assignedAndNotEmpty);
 
   PropertyPredicate unassignedOrNotEmpty = not(assigned).or(not(empty));
 
