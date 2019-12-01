@@ -1,7 +1,8 @@
 package net.io_0.property.validation;
 
 import net.io_0.property.Property;
-
+import net.io_0.property.PropertyIssue;
+import net.io_0.property.PropertyIssues;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -85,9 +86,9 @@ public interface PropertyValidators {
         return validation;
       }
 
-      return invalid(((Validation.Invalid) validation).getReasons().stream()
-        .map(reason -> new Reason(String.format("%s.%s", property.getName(), reason.getSubject()), reason.getArgument()))
-        .toArray(Reason[]::new)
+      return invalid(PropertyIssues.of(((Validation.Invalid) validation).getPropertyIssues().stream()
+        .map(propertyIssue -> PropertyIssue.of(String.format("%s.%s", property.getName(), propertyIssue.getPropertyName()), propertyIssue.getIssue()))
+        .toArray(PropertyIssue[]::new))
       );
     };
   }

@@ -7,11 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import net.io_0.property.jackson.deserialization.ErrorCollectorModule;
+import net.io_0.property.jackson.deserialization.PropertyIssueCollectorModule;
 import net.io_0.property.models.ColorEnum;
 import net.io_0.property.models.Pet;
+import net.io_0.property.PropertyIssues;
 import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,12 +19,10 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static net.io_0.property.TestUtils.loadJsonResource;
-import static net.io_0.property.jackson.deserialization.ErrorCollectorModule.DESERIALIZATION_ERRORS_ATTR;
+import static net.io_0.property.jackson.deserialization.PropertyIssueCollectorModule.PROPERTY_ISSUES_ATTR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -32,7 +30,7 @@ public class DeserializationTests {
   private ObjectMapper objectMapper = new ObjectMapper()
     .registerModules(
       new JavaTimeModule(),
-      new ErrorCollectorModule()
+      new PropertyIssueCollectorModule()
     )
     .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -117,12 +115,12 @@ public class DeserializationTests {
       .replace(": \"2019-07-23\",", ": \"C\",")
       .replace("\"colorEnum\": \"green\"", "\"colorEnum\": \"greeni\"");
 
-    Map<String, String> deserializationErrors = new HashMap<>();
+    PropertyIssues propertyIssues = PropertyIssues.of();
 
-    Pet pet = objectMapper
+    Pet pet = objectMapper // objectMapper has PropertyIssueCollectorModule installed
       .reader()
       .forType(Pet.class)
-      .withAttribute(DESERIALIZATION_ERRORS_ATTR, deserializationErrors)
+      .withAttribute(PROPERTY_ISSUES_ATTR, propertyIssues)
       .readValue(json);
 
     assertEquals("Gerti", pet.getName());
@@ -184,10 +182,10 @@ public class DeserializationTests {
     assertNull(pet.getMaybeNull());
     assertTrue(pet.isPropertySet(Pet.MAYBE_NULL));
 
-    assertEquals(4, deserializationErrors.size());
-    assertTrue(deserializationErrors.containsKey("integ"));
-    assertTrue(deserializationErrors.containsKey("numDouble"));
-    assertTrue(deserializationErrors.containsKey("strDate"));
-    assertTrue(deserializationErrors.containsKey("zoo.1.colorEnum"));
+    assertEquals(4, propertyIssues.size());
+    assertTrue(propertyIssues.containsPropertyName("integ"));
+    assertTrue(propertyIssues.containsPropertyName("numDouble"));
+    assertTrue(propertyIssues.containsPropertyName("strDate"));
+    assertTrue(propertyIssues.containsPropertyName("zoo.1.colorEnum"));
   }
 }

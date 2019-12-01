@@ -2,8 +2,8 @@ package net.io_0.property.validation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.*;
+import net.io_0.property.PropertyIssue;
+import net.io_0.property.PropertyIssues;
 import java.util.stream.Stream;
 
 public interface Validation {
@@ -11,8 +11,8 @@ public interface Validation {
     return new Valid<>(value);
   }
 
-  static Invalid invalid(Reason... reason) {
-    return new Invalid(Arrays.asList(reason));
+  static Invalid invalid(PropertyIssues propertyIssues) {
+    return new Invalid(propertyIssues);
   }
 
   boolean isValid();
@@ -46,7 +46,7 @@ public interface Validation {
   @RequiredArgsConstructor
   @Getter
   final class Invalid implements Validation {
-    private final List<Reason> reasons;
+    private final PropertyIssues propertyIssues;
 
     @Override
     public boolean isValid() {
@@ -55,10 +55,10 @@ public interface Validation {
 
     @Override
     public Validation and(Validation other) {
-      return other.isValid() ? this : Validation.invalid(
-        Stream.concat(this.reasons.stream(), ((Invalid)other).getReasons().stream())
-          .toArray(Reason[]::new)
-      );
+      return other.isValid() ? this : Validation.invalid(PropertyIssues.of(
+        Stream.concat(this.propertyIssues.stream(), ((Invalid)other).getPropertyIssues().stream())
+          .toArray(PropertyIssue[]::new)
+      ));
     }
   }
 }

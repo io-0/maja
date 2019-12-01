@@ -3,9 +3,6 @@ package net.io_0.property.models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * ColorEnum
- */
 public enum ColorEnum {
   RED("red"),
   BLUE("blue"),

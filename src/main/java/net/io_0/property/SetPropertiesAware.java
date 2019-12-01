@@ -23,19 +23,10 @@ public abstract class SetPropertiesAware {
     setProperties.add(name);
   }
 
-  /**
-   * Removes set mark for property
-   * @param name property name
-   */
   public void unmarkPropertySet(String name) {
     setProperties.remove(name);
   }
 
-  /**
-   * Tells if a property was set
-   * @param name property name
-   * @return true if property was set trough setter, false otherwise
-   */
   public boolean isPropertySet(String name) {
     return setProperties.contains(name);
   }

@@ -9,27 +9,28 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import lombok.extern.slf4j.Slf4j;
+import net.io_0.property.PropertyIssue;
+import net.io_0.property.PropertyIssues;
 import java.io.IOException;
-import java.util.Map;
 
 /**
- * Instead of stopping deserialization on the first problem this module collects failure messages in a map.
+ * Instead of stopping deserialization on the first problem this module collects failure messages as issues.
  * Fields with deserialization problems / exceptions will be set to null.
- * The collecting map has to be provided via attribute.
+ * The collecting issue container has to be provided via attribute.
  *
  * Implementation example:
- *     Map<String, String> deserializationErrors = new HashMap<>();
+ *     PropertyIssues propertyIssues = PropertyIssues.of();
  *
- *     Pet pet = objectMapper // objectMapper has ErrorCollectorModule installed
+ *     Pet pet = objectMapper // objectMapper has PropertyIssueCollectorModule installed
  *       .reader()
  *       .forType(Pet.class)
- *       .withAttribute(DESERIALIZATION_ERRORS_ATTR, deserializationErrors)
+ *       .withAttribute(PROPERTY_ISSUES_ATTR, propertyIssues)
  *       .readValue(json);
  */
 @Slf4j
-public class ErrorCollectorModule extends Module {
-  public static final String DESERIALIZATION_ERRORS_ATTR = "deserializationErrors";
-  public static final String MODULE_NAME = "ErrorCollectorModule";
+public class PropertyIssueCollectorModule extends Module {
+  public static final String PROPERTY_ISSUES_ATTR = "propertyIssues";
+  public static final String MODULE_NAME = "PropertyIssueCollectorModule";
 
   @Override
   public String getModuleName() {
@@ -91,11 +92,11 @@ public class ErrorCollectorModule extends Module {
     @SuppressWarnings("unchecked")
     private Object addErrorAndReturnNull(DeserializationContext ctx, String msg) {
       try {
-        Map<String, String> deserializationErrors = (Map<String, String>) ctx.getAttribute(DESERIALIZATION_ERRORS_ATTR);
+        PropertyIssues propertyIssues = (PropertyIssues) ctx.getAttribute(PROPERTY_ISSUES_ATTR);
 
-        deserializationErrors.put(extractAttributeName(ctx.getParser()), msg);
+        propertyIssues.add(PropertyIssue.of(extractAttributeName(ctx.getParser()), msg));
       } catch (ClassCastException | NullPointerException e) {
-        log.error("Deserialization context attribute \"{}\" is either not set or not of type Map<String, String>.", DESERIALIZATION_ERRORS_ATTR);
+        log.error("Deserialization context attribute \"{}\" is either not set or not of type PropertyIssues.", PROPERTY_ISSUES_ATTR);
       }
 
       return null;
