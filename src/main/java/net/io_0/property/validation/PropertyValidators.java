@@ -1,11 +1,13 @@
 package net.io_0.property.validation;
 
-import java.util.Collection;
+import net.io_0.property.Property;
+
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static net.io_0.property.validation.PropertyPredicates.*;
 import static net.io_0.property.validation.PropertyValidator.of;
 import static net.io_0.property.validation.Validation.invalid;
-import static net.io_0.property.validation.Validation.valid;
 
 public interface PropertyValidators {
   String BINARY_PATTERN = "^([A-Fa-f0-9]{2})+$";
@@ -16,11 +18,11 @@ public interface PropertyValidators {
 
   PropertyValidator<String> emailFormat = of(unassignedOrNotEmptyAnd(email), "Must fit email format");
 
-  static PropertyValidator<Number> exclusiveMaximum(Number parameter) {
+  static PropertyValidator<? extends Number> exclusiveMaximum(Number parameter) {
     return of(unassignedOrNotEmptyAnd(gt(parameter)), String.format("Must be lessen than %s", parameter));
   }
 
-  static PropertyValidator<Number> exclusiveMinimum(Number parameter) {
+  static PropertyValidator<? extends Number> exclusiveMinimum(Number parameter) {
     return of(unassignedOrNotEmptyAnd(lt(parameter)), String.format("Must be greater than %s", parameter));
   }
 
@@ -30,11 +32,11 @@ public interface PropertyValidators {
 
   PropertyValidator<String> ipV6Format = of(unassignedOrNotEmptyAnd(inet6Address), "Must fit IP v6 format");
 
-  static PropertyValidator<Number> maximum(Number parameter) {
+  static PropertyValidator<? extends Number> maximum(Number parameter) {
     return of(unassignedOrNotEmptyAnd(gte(parameter)), String.format("Must be %s or lesser", parameter));
   }
 
-  static PropertyValidator<Collection> maxItems(Integer parameter) {
+  static PropertyValidator<? extends Collection<?>> maxItems(Integer parameter) {
     return of(unassignedOrNotEmptyAnd(sizeLt(parameter)), String.format("Must contain %s items or less", parameter));
   }
 
@@ -42,11 +44,11 @@ public interface PropertyValidators {
     return of(unassignedOrNotEmptyAnd(lengthLte(parameter)), String.format("Must be shorter than %s characters", parameter));
   }
 
-  static PropertyValidator<Number> minimum(Number parameter) {
+  static PropertyValidator<? extends Number> minimum(Number parameter) {
     return of(unassignedOrNotEmptyAnd(lte(parameter)), String.format("Must be %s or greater", parameter));
   }
 
-  static PropertyValidator<Collection> minItems(Integer parameter) {
+  static PropertyValidator<? extends Collection<?>> minItems(Integer parameter) {
     return of(unassignedOrNotEmptyAnd(sizeGt(parameter)), String.format("Must contain %s items or more", parameter));
   }
 
@@ -54,7 +56,7 @@ public interface PropertyValidators {
     return of(unassignedOrNotEmptyAnd(lengthGte(parameter)), String.format("Must be longer than %s characters", parameter));
   }
 
-  static PropertyValidator<Number> multipleOf(Number parameter) {
+  static PropertyValidator<? extends Number> multipleOf(Number parameter) {
     return of(unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)), String.format("Must be a multiple of %s", parameter));
   }
 
@@ -72,10 +74,10 @@ public interface PropertyValidators {
 
   PropertyValidator required = of(assigned, "Is required but missing");
 
-  static <T> PropertyValidator<T> validator(Validator<T> validator) {
+  static <T> PropertyValidator<T> valid(Validator<T> validator) {
     return property -> {
       if (unassignedOrEmpty.test(property)) {
-        return valid(property);
+        return Validation.valid(property);
       }
 
       Validation validation = validator.apply(property.getValue());
@@ -87,6 +89,32 @@ public interface PropertyValidators {
         .map(reason -> new Reason(String.format("%s.%s", property.getName(), reason.getSubject()), reason.getArgument()))
         .toArray(Reason[]::new)
       );
+    };
+  }
+
+  static <T> PropertyValidator<? extends Collection<T>> each(PropertyValidator<T> validator) {
+    return property -> {
+      if (unassignedOrEmpty.test(property)) {
+        return Validation.valid(property);
+      }
+
+      if (Map.class.isAssignableFrom(property.getValue().getClass())) {
+        Map<String, T> values = ((Map<String, T>) property.getValue());
+
+        return values.entrySet().stream()
+          .map(entry -> new Property<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue(), true))
+          .map(validator)
+          .filter(Validation::isInvalid)
+          .reduce(Validation.valid(property.getValue()), Validation::and);
+      } else {
+        List<T> values = new ArrayList<>(property.getValue());
+
+        return IntStream.range(0, values.size())
+          .mapToObj(i -> new Property<>(String.format("%s.%d", property.getName(), i), values.get(i), true))
+          .map(validator)
+          .filter(Validation::isInvalid)
+          .reduce(Validation.valid(property.getValue()), Validation::and);
+      }
     };
   }
 }

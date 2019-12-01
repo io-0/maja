@@ -23,7 +23,7 @@ public class PropertyConstraint<T> {
     return new PropertyConstraint<>(property, Arrays.stream(validators).reduce(PropertyValidator::and).get());
   }
 
-  static Stream<PropertyConstraint<?>> stream(PropertyConstraint<?>... validators) {
+  public static Stream<PropertyConstraint<?>> stream(PropertyConstraint<?>... validators) {
     return Arrays.stream(validators);
   }
 

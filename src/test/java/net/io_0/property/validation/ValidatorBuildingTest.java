@@ -3,28 +3,12 @@ package net.io_0.property.validation;
 import net.io_0.property.models.ColorSubType;
 import net.io_0.property.models.Pet;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 
-import static net.io_0.property.validation.PropertyConstraint.of;
-import static net.io_0.property.validation.PropertyConstraint.stream;
-import static net.io_0.property.validation.PropertyValidators.*;
+import static net.io_0.property.Validators.petValidator;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidatorBuildingTest {
-  Validator<ColorSubType> colorSubTypeValidator = Validator.of(cst -> stream(
-    of(cst.getProperty(ColorSubType.NAME), required, minLength(3)),
-    of(cst.getProperty(ColorSubType.ID), required, minimum(17))
-  ));
-
-  Validator<Pet> petValidator = Validator.of(pet -> stream(
-    of(pet.getProperty(Pet.NAME), required, minLength(4)),
-    of(pet.getProperty(Pet.INTEG), required, minimum(18)),
-    of(pet.getProperty(Pet.OPTIONAL_PET), notNull),
-    of(pet.getProperty(Pet.COLOR_SUB_TYPE), validator(colorSubTypeValidator))
-    // more ..
-    // TODO list/set/map of obj
-  ));
-
-
   @Test
   public void all_good_test() {
     Validation validation = petValidator.apply(new Pet().setName("jenny").setInteg(22));
@@ -74,16 +58,33 @@ public class ValidatorBuildingTest {
 
   @Test
   public void deep_validation_all_good_test() {
-    Validation validation = petValidator.apply(new Pet().setName("jenny").setInteg(22).setColorSubType(new ColorSubType().setName("purple").setId(887L)));
+    Validation validation = petValidator.apply(new Pet()
+      .setName("jenny").setInteg(22)
+      .setColorSubType(new ColorSubType().setName("purple").setId(887L))
+      .setZoo(List.of(
+        new Pet().setName("hugo").setInteg(61),
+        new Pet().setName("luke").setInteg(59)
+      ))
+    );
     assertTrue(validation.isValid());
   }
 
   @Test
   public void deep_validation_partial_fails_test() {
-    Validation validation = petValidator.apply(new Pet().setName("jenny").setInteg(2).setColorSubType(new ColorSubType().setName("purple").setId(1L)));
+    Validation validation = petValidator.apply(new Pet()
+      .setName("jenny")
+      .setInteg(2)
+      .setColorSubType(new ColorSubType().setName("purple").setId(1L))
+      .setZoo(List.of(
+        new Pet().setName("h").setInteg(61),
+        new Pet().setName("luke").setInteg(14)
+      ))
+    );
     assertTrue(validation.isInvalid());
-    assertEquals(2, ((Validation.Invalid) validation).getReasons().size());
+    assertEquals(4, ((Validation.Invalid) validation).getReasons().size());
     assertEquals("Reason(subject=integ, argument=Must be 18 or greater)", ((Validation.Invalid) validation).getReasons().get(0).toString());
     assertEquals("Reason(subject=colorSubType.id, argument=Must be 17 or greater)", ((Validation.Invalid) validation).getReasons().get(1).toString());
+    assertEquals("Reason(subject=zoo.0.name, argument=Must be longer than 4 characters)", ((Validation.Invalid) validation).getReasons().get(2).toString());
+    assertEquals("Reason(subject=zoo.1.integ, argument=Must be 18 or greater)", ((Validation.Invalid) validation).getReasons().get(3).toString());
   }
 }
