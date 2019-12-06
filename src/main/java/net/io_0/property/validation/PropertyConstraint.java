@@ -14,12 +14,21 @@ public class PropertyConstraint<T> {
   private final PropertyValidator<T> validator;
 
   public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<T> validator) {
-    return model -> new PropertyConstraint<>(model.getProperty(propertyName), validator);
+    return on(propertyName, propertyName, validator);
+  }
+
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, String propertyLabel, PropertyValidator<T> validator) {
+    return model -> new PropertyConstraint<>(model.getProperty(propertyName, propertyLabel), validator);
   }
 
   @SafeVarargs
   public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<T>... validators) {
-    return model -> new PropertyConstraint<>(model.getProperty(propertyName), Arrays.stream(validators).reduce(PropertyValidator::and).get());
+    return on(propertyName, propertyName, validators);
+  }
+
+  @SafeVarargs
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, String propertyLabel, PropertyValidator<T>... validators) {
+    return model -> new PropertyConstraint<>(model.getProperty(propertyName, propertyLabel), Arrays.stream(validators).reduce(PropertyValidator::and).get());
   }
 
   public Validation check() {
