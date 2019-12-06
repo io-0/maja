@@ -34,7 +34,7 @@ public interface Validation {
     @Override
     public Validation and(Validation other) {
       if (other.isValid()) {
-        if (!this.getValue().getClass().equals(((Valid) other).getValue().getClass())) {
+        if (!this.getValue().getClass().equals(((Valid<?>) other).getValue().getClass())) {
           throw new IllegalArgumentException("Class mismatch");
         }
         return this;

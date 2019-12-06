@@ -4,6 +4,7 @@ import net.io_0.property.Property;
 import net.io_0.property.PropertyIssue;
 import net.io_0.property.PropertyIssues;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static net.io_0.property.validation.PropertyPredicates.*;
@@ -91,6 +92,10 @@ public interface PropertyValidators {
         .toArray(PropertyIssue[]::new))
       );
     };
+  }
+
+  static <T> Validator<T> lazy(Supplier<Validator<T>> validatorSupplier) {
+    return t -> validatorSupplier.get().apply(t);
   }
 
   static <T> PropertyValidator<? extends Collection<T>> each(PropertyValidator<T> validator) {

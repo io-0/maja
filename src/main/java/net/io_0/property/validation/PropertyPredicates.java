@@ -49,11 +49,11 @@ public interface PropertyPredicates {
     return property -> property.getValue().length() <= number;
   }
 
-  static PropertyPredicate<Collection> sizeGt(Integer number) {
+  static PropertyPredicate<Collection<?>> sizeGt(Integer number) {
     return property -> property.getValue().size() > number;
   }
 
-  static PropertyPredicate<Collection> sizeLt(Integer number) {
+  static PropertyPredicate<Collection<?>> sizeLt(Integer number) {
     return property -> property.getValue().size() < number;
   }
 

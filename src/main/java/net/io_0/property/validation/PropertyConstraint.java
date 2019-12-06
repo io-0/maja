@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.io_0.property.Property;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
@@ -14,17 +13,13 @@ public class PropertyConstraint<T> {
   private final Property<T> property;
   private final PropertyValidator<T> validator;
 
-  public static <T> PropertyConstraint<T> of(Property<T> property, PropertyValidator<T> validator) {
-    return new PropertyConstraint<>(property, validator);
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<T> validator) {
+    return model -> new PropertyConstraint<>(model.getProperty(propertyName), validator);
   }
 
   @SafeVarargs
-  public static <T> PropertyConstraint<T> of(Property<T> property, PropertyValidator<T>... validators) {
-    return new PropertyConstraint<>(property, Arrays.stream(validators).reduce(PropertyValidator::and).get());
-  }
-
-  public static Stream<PropertyConstraint<?>> stream(PropertyConstraint<?>... validators) {
-    return Arrays.stream(validators);
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<T>... validators) {
+    return model -> new PropertyConstraint<>(model.getProperty(propertyName), Arrays.stream(validators).reduce(PropertyValidator::and).get());
   }
 
   public Validation check() {
