@@ -19,6 +19,7 @@ public interface Validation {
   default boolean isInvalid() {
     return !isValid();
   }
+  PropertyIssues getPropertyIssues();
   Validation and(Validation other);
 
   @RequiredArgsConstructor
@@ -29,6 +30,11 @@ public interface Validation {
     @Override
     public boolean isValid() {
       return true;
+    }
+
+    @Override
+    public PropertyIssues getPropertyIssues() {
+      return PropertyIssues.of();
     }
 
     @Override
@@ -56,7 +62,7 @@ public interface Validation {
     @Override
     public Validation and(Validation other) {
       return other.isValid() ? this : Validation.invalid(PropertyIssues.of(
-        Stream.concat(this.propertyIssues.stream(), ((Invalid)other).getPropertyIssues().stream())
+        Stream.concat(this.propertyIssues.stream(), other.getPropertyIssues().stream())
           .toArray(PropertyIssue[]::new)
       ));
     }

@@ -11,7 +11,7 @@ public class PropertyIssue {
   private final String propertyName;
   private final String issue;
 
-  public static PropertyIssue of(String name, String format) {
-    return new PropertyIssue(name, format);
+  public static PropertyIssue of(String propertyName, String issue) {
+    return new PropertyIssue(propertyName, issue);
   }
 }

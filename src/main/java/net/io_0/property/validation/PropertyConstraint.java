@@ -23,6 +23,6 @@ public class PropertyConstraint<T> {
   }
 
   public Validation check() {
-    return validator.apply(property);
+    return validator.validate(property);
   }
 }

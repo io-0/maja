@@ -82,12 +82,12 @@ public interface PropertyValidators {
         return Validation.valid(property);
       }
 
-      Validation validation = validator.apply(property.getValue());
+      Validation validation = validator.validate(property.getValue());
       if (validation.isValid()) {
         return validation;
       }
 
-      return invalid(PropertyIssues.of(((Validation.Invalid) validation).getPropertyIssues().stream()
+      return invalid(PropertyIssues.of(validation.getPropertyIssues().stream()
         .map(propertyIssue -> PropertyIssue.of(String.format("%s.%s", property.getName(), propertyIssue.getPropertyName()), propertyIssue.getIssue()))
         .toArray(PropertyIssue[]::new))
       );
@@ -95,7 +95,7 @@ public interface PropertyValidators {
   }
 
   static <T> Validator<T> lazy(Supplier<Validator<T>> validatorSupplier) {
-    return t -> validatorSupplier.get().apply(t);
+    return t -> validatorSupplier.get().validate(t);
   }
 
   static <T> PropertyValidator<? extends Collection<T>> each(PropertyValidator<T> validator) {
@@ -109,7 +109,7 @@ public interface PropertyValidators {
 
         return values.entrySet().stream()
           .map(entry -> new Property<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue(), true))
-          .map(validator)
+          .map(validator::validate)
           .filter(Validation::isInvalid)
           .reduce(Validation.valid(property.getValue()), Validation::and);
       } else {
@@ -117,7 +117,7 @@ public interface PropertyValidators {
 
         return IntStream.range(0, values.size())
           .mapToObj(i -> new Property<>(String.format("%s.%d", property.getName(), i), values.get(i), true))
-          .map(validator)
+          .map(validator::validate)
           .filter(Validation::isInvalid)
           .reduce(Validation.valid(property.getValue()), Validation::and);
       }

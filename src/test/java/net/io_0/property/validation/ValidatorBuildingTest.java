@@ -2,6 +2,7 @@ package net.io_0.property.validation;
 
 import net.io_0.property.models.ColorSubType;
 import net.io_0.property.models.Pet;
+import net.io_0.property.validation.Validation.Valid;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
@@ -11,54 +12,55 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ValidatorBuildingTest {
   @Test
   public void all_good_test() {
-    Validation validation = petValidator.apply(new Pet().setName("jenny").setInteg(22));
+    Valid<Pet> validation = petValidator.proceedIfValid(new Pet().setName("jenny").setInteg(22));
     assertTrue(validation.isValid());
+    assertTrue(validation.getPropertyIssues().isEmpty());
   }
 
   @Test
   public void partial_fails_test() {
-    Validation validation = petValidator.apply(new Pet().setName("jenny").setInteg(12));
+    Validation validation = petValidator.validate(new Pet().setName("jenny").setInteg(12));
     assertTrue(validation.isInvalid());
-    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
+    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(0).toString());
 
-    validation = petValidator.apply(new Pet().setName("x").setInteg(22));
+    validation = petValidator.validate(new Pet().setName("x").setInteg(22));
     assertTrue(validation.isInvalid());
-    assertEquals(1, ((Validation.Invalid) validation).getPropertyIssues().size());
-    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
+    assertEquals(1, validation.getPropertyIssues().size());
+    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", validation.getPropertyIssues().get(0).toString());
   }
 
   @Test
   public void all_fails_test() {
-    Validation validation = petValidator.apply(new Pet().setColorSubType(new ColorSubType()));
+    Validation validation = petValidator.validate(new Pet().setColorSubType(new ColorSubType()));
     assertTrue(validation.isInvalid());
-    assertEquals(4, ((Validation.Invalid) validation).getPropertyIssues().size());
-    assertEquals("PropertyIssue(propertyName=name, issue=Is required but missing)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
-    assertEquals("PropertyIssue(propertyName=integ, issue=Is required but missing)", ((Validation.Invalid) validation).getPropertyIssues().get(1).toString());
-    assertEquals("PropertyIssue(propertyName=colorSubType.name, issue=Is required but missing)", ((Validation.Invalid) validation).getPropertyIssues().get(2).toString());
-    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Is required but missing)", ((Validation.Invalid) validation).getPropertyIssues().get(3).toString());
+    assertEquals(4, validation.getPropertyIssues().size());
+    assertEquals("PropertyIssue(propertyName=name, issue=Is required but missing)", validation.getPropertyIssues().get(0).toString());
+    assertEquals("PropertyIssue(propertyName=integ, issue=Is required but missing)", validation.getPropertyIssues().get(1).toString());
+    assertEquals("PropertyIssue(propertyName=colorSubType.name, issue=Is required but missing)", validation.getPropertyIssues().get(2).toString());
+    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Is required but missing)", validation.getPropertyIssues().get(3).toString());
 
-    validation = petValidator.apply(new Pet().setName("x").setInteg(12).setColorSubType(new ColorSubType().setName("y").setId(1L)));
+    validation = petValidator.validate(new Pet().setName("x").setInteg(12).setColorSubType(new ColorSubType().setName("y").setId(1L)));
     assertTrue(validation.isInvalid());
-    assertEquals(4, ((Validation.Invalid) validation).getPropertyIssues().size());
-    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
-    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(1).toString());
-    assertEquals("PropertyIssue(propertyName=colorSubType.name, issue=Must be longer than 3 characters)", ((Validation.Invalid) validation).getPropertyIssues().get(2).toString());
-    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Must be 17 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(3).toString());
+    assertEquals(4, validation.getPropertyIssues().size());
+    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", validation.getPropertyIssues().get(0).toString());
+    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(1).toString());
+    assertEquals("PropertyIssue(propertyName=colorSubType.name, issue=Must be longer than 3 characters)", validation.getPropertyIssues().get(2).toString());
+    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Must be 17 or greater)", validation.getPropertyIssues().get(3).toString());
   }
 
   @Test
   public void conditional_validation_test() {
-    Validation validation = petValidator.apply(new Pet().setName("x").setInteg(12).setOptionalPet(null).setColorSubType(null));
+    Validation validation = petValidator.validate(new Pet().setName("x").setInteg(12).setOptionalPet(null).setColorSubType(null));
     assertTrue(validation.isInvalid());
-    assertEquals(3, ((Validation.Invalid) validation).getPropertyIssues().size());
-    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
-    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(1).toString());
-    assertEquals("PropertyIssue(propertyName=optionalPet, issue=Can't be literally null)", ((Validation.Invalid) validation).getPropertyIssues().get(2).toString());
+    assertEquals(3, validation.getPropertyIssues().size());
+    assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", validation.getPropertyIssues().get(0).toString());
+    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(1).toString());
+    assertEquals("PropertyIssue(propertyName=optionalPet, issue=Can't be literally null)", validation.getPropertyIssues().get(2).toString());
   }
 
   @Test
   public void deep_validation_all_good_test() {
-    Validation validation = petValidator.apply(new Pet()
+    Valid<Pet> validation = petValidator.proceedIfValid(new Pet()
       .setName("jenny").setInteg(22)
       .setColorSubType(new ColorSubType().setName("purple").setId(887L))
       .setZoo(List.of(
@@ -67,11 +69,12 @@ public class ValidatorBuildingTest {
       ))
     );
     assertTrue(validation.isValid());
+    assertTrue(validation.getPropertyIssues().isEmpty());
   }
 
   @Test
   public void deep_validation_partial_fails_test() {
-    Validation validation = petValidator.apply(new Pet()
+    Validation validation = petValidator.validate(new Pet()
       .setName("jenny")
       .setInteg(2)
       .setColorSubType(new ColorSubType().setName("purple").setId(1L))
@@ -81,10 +84,10 @@ public class ValidatorBuildingTest {
       ))
     );
     assertTrue(validation.isInvalid());
-    assertEquals(4, ((Validation.Invalid) validation).getPropertyIssues().size());
-    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(0).toString());
-    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Must be 17 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(1).toString());
-    assertEquals("PropertyIssue(propertyName=zoo.0.name, issue=Must be longer than 4 characters)", ((Validation.Invalid) validation).getPropertyIssues().get(2).toString());
-    assertEquals("PropertyIssue(propertyName=zoo.1.integ, issue=Must be 18 or greater)", ((Validation.Invalid) validation).getPropertyIssues().get(3).toString());
+    assertEquals(4, validation.getPropertyIssues().size());
+    assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(0).toString());
+    assertEquals("PropertyIssue(propertyName=colorSubType.id, issue=Must be 17 or greater)", validation.getPropertyIssues().get(1).toString());
+    assertEquals("PropertyIssue(propertyName=zoo.0.name, issue=Must be longer than 4 characters)", validation.getPropertyIssues().get(2).toString());
+    assertEquals("PropertyIssue(propertyName=zoo.1.integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(3).toString());
   }
 }
