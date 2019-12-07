@@ -60,7 +60,7 @@ public class DeserializationTests {
     assertTrue(pet.isPropertySet(Pet.NUM_FLOAT));
     assertEquals(220.1, pet.getNumDouble(), 0.01);
     assertTrue(pet.isPropertySet(Pet.NUM_DOUBLE));
-    assertEquals(4, (int) pet.getInteg());
+    assertEquals(21, (int) pet.getInteg());
     assertTrue(pet.isPropertySet(Pet.INTEG));
     assertEquals(5, (int) pet.getIntInt());
     assertTrue(pet.isPropertySet(Pet.INT_INT));
@@ -110,7 +110,7 @@ public class DeserializationTests {
   public void jackson_can_deserialize_with_exceptions() throws IOException {
     String json = loadJsonResource("Pet.json");
     json = json
-      .replace(": 4,", ": \"A\",")
+      .replace(": 21,", ": \"A\",")
       .replace(": 220.1,", ": \"B\",")
       .replace(": \"2019-07-23\",", ": \"C\",")
       .replace("\"colorEnum\": \"green\"", "\"colorEnum\": \"greeni\"");

@@ -111,7 +111,9 @@ public interface PropertyValidators {
           .map(entry -> new Property<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue(), true))
           .map(validator::validate)
           .filter(Validation::isInvalid)
-          .reduce(Validation.valid(property.getValue()), Validation::and);
+          .reduce(Validation::and)
+          .map(validation -> Validation.of(property, validation.getPropertyIssues()))
+          .orElse(Validation.valid(property));
       } else {
         List<T> values = new ArrayList<>(property.getValue());
 
@@ -119,7 +121,9 @@ public interface PropertyValidators {
           .mapToObj(i -> new Property<>(String.format("%s.%d", property.getName(), i), values.get(i), true))
           .map(validator::validate)
           .filter(Validation::isInvalid)
-          .reduce(Validation.valid(property.getValue()), Validation::and);
+          .reduce(Validation::and)
+          .map(validation -> Validation.of(property, validation.getPropertyIssues()))
+          .orElse(Validation.valid(property));
       }
     };
   }

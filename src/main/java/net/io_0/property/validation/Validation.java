@@ -4,27 +4,38 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.io_0.property.PropertyIssue;
 import net.io_0.property.PropertyIssues;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface Validation {
+public interface Validation<T> {
+  boolean isValid();
+  PropertyIssues getPropertyIssues();
+  Validation<T> and(Validation<T> other);
+  Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow);
+
+  default boolean isInvalid() {
+    return !isValid();
+  }
+
+  default Valid<T> proceedIfValid() {
+    return proceedIfValid(ValidationException::new);
+  }
+
   static <T> Valid<T> valid(T value) {
     return new Valid<>(value);
   }
 
-  static Invalid invalid(PropertyIssues propertyIssues) {
-    return new Invalid(propertyIssues);
+  static <T> Invalid<T> invalid(PropertyIssues propertyIssues) {
+    return new Invalid<>(propertyIssues);
   }
 
-  boolean isValid();
-  default boolean isInvalid() {
-    return !isValid();
+  static <T> Validation<T> of(T value, PropertyIssues propertyIssues) {
+    return propertyIssues.isEmpty() ? valid(value) : invalid(propertyIssues);
   }
-  PropertyIssues getPropertyIssues();
-  Validation and(Validation other);
 
   @RequiredArgsConstructor
   @Getter
-  final class Valid<T> implements Validation {
+  final class Valid<T> implements Validation<T> {
     private final T value;
 
     @Override
@@ -38,20 +49,25 @@ public interface Validation {
     }
 
     @Override
-    public Validation and(Validation other) {
+    public Validation<T> and(Validation<T> other) {
       if (other.isValid()) {
-        if (!this.getValue().getClass().equals(((Valid<?>) other).getValue().getClass())) {
+        if (!this.getValue().getClass().equals(((Valid<T>) other).getValue().getClass())) {
           throw new IllegalArgumentException("Class mismatch");
         }
         return this;
       }
       return other;
     }
+
+    @Override
+    public Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
+      return this;
+    }
   }
 
   @RequiredArgsConstructor
   @Getter
-  final class Invalid implements Validation {
+  final class Invalid<T> implements Validation<T> {
     private final PropertyIssues propertyIssues;
 
     @Override
@@ -60,11 +76,16 @@ public interface Validation {
     }
 
     @Override
-    public Validation and(Validation other) {
+    public Validation<T> and(Validation<T> other) {
       return other.isValid() ? this : Validation.invalid(PropertyIssues.of(
         Stream.concat(this.propertyIssues.stream(), other.getPropertyIssues().stream())
           .toArray(PropertyIssue[]::new)
       ));
+    }
+
+    @Override
+    public Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
+      throw orThrow.apply(this);
     }
   }
 }

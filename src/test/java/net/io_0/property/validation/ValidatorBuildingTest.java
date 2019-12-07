@@ -19,7 +19,7 @@ public class ValidatorBuildingTest {
 
   @Test
   public void partial_fails_test() {
-    Validation validation = petValidator.validate(new Pet().setName("jenny").setInteg(12));
+    Validation<Pet> validation = petValidator.validate(new Pet().setName("jenny").setInteg(12));
     assertTrue(validation.isInvalid());
     assertEquals("PropertyIssue(propertyName=integ, issue=Must be 18 or greater)", validation.getPropertyIssues().get(0).toString());
 
@@ -31,7 +31,7 @@ public class ValidatorBuildingTest {
 
   @Test
   public void all_fails_test() {
-    Validation validation = petValidator.validate(new Pet().setColorSubType(new ColorSubType()));
+    Validation<Pet> validation = petValidator.validate(new Pet().setColorSubType(new ColorSubType()));
     assertTrue(validation.isInvalid());
     assertEquals(4, validation.getPropertyIssues().size());
     assertEquals("PropertyIssue(propertyName=name, issue=Is required but missing)", validation.getPropertyIssues().get(0).toString());
@@ -50,7 +50,7 @@ public class ValidatorBuildingTest {
 
   @Test
   public void conditional_validation_test() {
-    Validation validation = petValidator.validate(new Pet().setName("x").setInteg(12).setOptionalPet(null).setColorSubType(null));
+    Validation<Pet> validation = petValidator.validate(new Pet().setName("x").setInteg(12).setOptionalPet(null).setColorSubType(null));
     assertTrue(validation.isInvalid());
     assertEquals(3, validation.getPropertyIssues().size());
     assertEquals("PropertyIssue(propertyName=name, issue=Must be longer than 4 characters)", validation.getPropertyIssues().get(0).toString());
@@ -74,7 +74,7 @@ public class ValidatorBuildingTest {
 
   @Test
   public void deep_validation_partial_fails_test() {
-    Validation validation = petValidator.validate(new Pet()
+    Validation<Pet> validation = petValidator.validate(new Pet()
       .setName("jenny")
       .setInteg(2)
       .setColorSubType(new ColorSubType().setName("purple").setId(1L))

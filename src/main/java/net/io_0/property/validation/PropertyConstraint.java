@@ -31,7 +31,7 @@ public class PropertyConstraint<T> {
     return model -> new PropertyConstraint<>(model.getProperty(propertyName, propertyLabel), Arrays.stream(validators).reduce(PropertyValidator::and).get());
   }
 
-  public Validation check() {
+  public Validation<Property<T>> check() {
     return validator.validate(property);
   }
 }
