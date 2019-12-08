@@ -73,9 +73,8 @@
     "additionalProp4": "map"
   },
   "longMap": {
-    "additionalProp1": 1,
-    "additionalProp2": 2,
-    "additionalProp3": 3
+    "additionalProp1": 9,
+    "additionalProp2": 12
   },
   "petMap": {
     "aPet": {

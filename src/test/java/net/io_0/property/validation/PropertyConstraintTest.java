@@ -13,8 +13,8 @@ class PropertyConstraintTest {
   @Test
   void onAndCheckTests() {
     PropertyIssues propertyIssues;
-    PropertyValidator<Object> validator1 = p -> invalid(PropertyIssues.of(PropertyIssue.of(p.getName(), "Failed")));
-    PropertyValidator<Object> validator2 = p -> invalid(PropertyIssues.of(PropertyIssue.of(p.getName(), "Failed too")));
+    PropertyValidator<Object> validator1 = p -> invalid(PropertyIssue.of(p.getName(), "Failed"));
+    PropertyValidator<Object> validator2 = p -> invalid(PropertyIssue.of(p.getName(), "Failed too"));
 
     propertyIssues = on(Pet.NAME, validator1).apply(new Pet()).check().getPropertyIssues();
     assertEquals("[PropertyIssue(propertyName=name, issue=Failed)]", propertyIssues.toString());

@@ -49,12 +49,12 @@ public interface PropertyPredicates {
     return property -> property.getValue().length() <= number;
   }
 
-  static PropertyPredicate<Collection<?>> sizeGt(Integer number) {
-    return property -> property.getValue().size() > number;
+  static PropertyPredicate<Collection<?>> sizeGte(Integer number) {
+    return property -> property.getValue().size() >= number;
   }
 
-  static PropertyPredicate<Collection<?>> sizeLt(Integer number) {
-    return property -> property.getValue().size() < number;
+  static PropertyPredicate<Collection<?>> sizeLte(Integer number) {
+    return property -> property.getValue().size() <= number;
   }
 
   static PropertyPredicate<String> regexMatch(String pattern) {
@@ -70,7 +70,7 @@ public interface PropertyPredicates {
   PropertyPredicate<String> inet6Address = property -> InetAddressValidator.getInstance().isValidInet6Address(property.getValue());
 
   static PropertyPredicate<Number> multipleOf(Number number) {
-    return property -> new BigDecimal(number.toString()).remainder(new BigDecimal(property.getValue().toString())).abs().doubleValue() < 0.000000000001;
+    return property -> new BigDecimal(property.getValue().toString()).remainder(new BigDecimal(number.toString())).abs().doubleValue() < 0.000000000001;
   }
 
   static Integer compare(Number a, Number b) {

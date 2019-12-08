@@ -64,12 +64,11 @@ public class DeserializationAndValidationTest {
       .withAttribute(PROPERTY_ISSUES_ATTR, propertyIssues)
       .readValue(json);
 
-    Validator<Pet> customValidator = p -> invalid(PropertyIssues.of(PropertyIssue.of(Pet.NAME, "I don't like " + p.getName())));
+    Validator<Pet> customValidator = p -> invalid(PropertyIssue.of(Pet.NAME, "I don't like " + p.getName()));
 
     Validation<Pet> validation = Validator.<Pet> of(propertyIssues).and(petValidator).and(customValidator).validate(pet);
 
     assertTrue(validation.isInvalid());
-    assertEquals(6, validation.getPropertyIssues().size());
     assertEquals("[" +
         "PropertyIssue(propertyName=numDouble, issue=B, not a valid Double value), " +
         "PropertyIssue(propertyName=integ, issue=A, not a valid Integer value), " +

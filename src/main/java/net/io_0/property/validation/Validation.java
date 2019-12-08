@@ -25,6 +25,10 @@ public interface Validation<T> {
     return new Valid<>(value);
   }
 
+  static <T> Invalid<T> invalid(PropertyIssue... propertyIssues) {
+    return invalid(PropertyIssues.of(propertyIssues));
+  }
+
   static <T> Invalid<T> invalid(PropertyIssues propertyIssues) {
     return new Invalid<>(propertyIssues);
   }

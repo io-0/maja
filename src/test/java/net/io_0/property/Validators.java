@@ -19,10 +19,11 @@ public interface Validators {
     on(Pet.INTEG, required, minimum(18)),
     on(Pet.OPTIONAL_PET, notNull),
     on(Pet.COLOR_SUB_TYPE, valid(colorSubTypeValidator)),
-    on(Pet.ZOO, each(valid(lazy(() -> Validators.petValidator))))
-      // more ..
-      // TODO list/set/map of primitive
-      // TODO custom validators
-      // TODO preload errors
+    on(Pet.ZOO, each(valid(lazy(() -> Validators.petValidator)))),
+    on(Pet.COLOR_LIST, each(minLength(4))),
+    on(Pet.COLOR_SET, each(maxLength(6))),
+    on(Pet.LONG_MAP, maxItems(2)),
+    on(Pet.LONG_MAP, each(multipleOf(3)))
+    // todo  on(Pet.LONG_MAP, maxItems(2), each(multipleOf(3)))
   );
 }

@@ -1,5 +1,6 @@
 package net.io_0.property.validation;
 
+import net.io_0.property.PropertyIssue;
 import net.io_0.property.PropertyIssues;
 import net.io_0.property.SetPropertiesAware;
 import net.io_0.property.validation.Validation.Invalid;
@@ -20,6 +21,10 @@ public interface Validator<T> {
 
   default Validator<T> and(Validator<T> other) {
     return t -> this.validate(t).and(other.validate(t));
+  }
+
+  static <T> Validator<T> of(PropertyIssue... propertyIssues) {
+    return of(PropertyIssues.of(propertyIssues));
   }
 
   static <T> Validator<T> of(PropertyIssues propertyIssues) {
