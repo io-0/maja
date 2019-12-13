@@ -89,7 +89,6 @@ public class PropertyIssueCollectorModule extends Module {
      * @param msg message to add as error
      * @return null, as value substitute
      */
-    @SuppressWarnings("unchecked")
     private Object addErrorAndReturnNull(DeserializationContext ctx, String msg) {
       try {
         PropertyIssues propertyIssues = (PropertyIssues) ctx.getAttribute(PROPERTY_ISSUES_ATTR);
