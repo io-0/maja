@@ -81,6 +81,7 @@
       "name": "MapPet1",
       "tag": "MapTag1",
       "id": 42,
+      "integ": 21,
       "colorEnum": "red"
     }
   },

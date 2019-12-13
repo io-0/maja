@@ -22,8 +22,7 @@ public interface Validators {
     on(Pet.ZOO, each(valid(lazy(() -> Validators.petValidator)))),
     on(Pet.COLOR_LIST, each(minLength(4))),
     on(Pet.COLOR_SET, each(maxLength(6))),
-    on(Pet.LONG_MAP, maxItems(2)),
-    on(Pet.LONG_MAP, each(multipleOf(3)))
-    // todo  on(Pet.LONG_MAP, maxItems(2), each(multipleOf(3)))
+    on(Pet.LONG_MAP, maxItems(2), each(multipleOf(3))),
+    on(Pet.PET_MAP, minItems(1), each(valid(lazy(() -> Validators.petValidator))))
   );
 }

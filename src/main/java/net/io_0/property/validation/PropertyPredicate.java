@@ -5,9 +5,9 @@ import java.util.Objects;
 
 @FunctionalInterface
 public interface PropertyPredicate<T> {
-  boolean test(Property<? extends T> var1);
+  boolean test(Property<T> property);
 
-  default PropertyPredicate<T> and(PropertyPredicate<? super T> other) {
+  default PropertyPredicate<T> and(PropertyPredicate<T> other) {
     return t -> this.test(t) && other.test(t);
   }
 
@@ -15,15 +15,15 @@ public interface PropertyPredicate<T> {
     return t -> !this.test(t);
   }
 
-  default PropertyPredicate<T> or(PropertyPredicate<? super T> other) {
+  default PropertyPredicate<T> or(PropertyPredicate<T> other) {
     return t -> this.test(t) || other.test(t);
   }
 
-  static <T> PropertyPredicate<? super T> isEqual(Object targetRef) {
+  static <T> PropertyPredicate<T> isEqual(Object targetRef) {
     return null == targetRef ? Objects::isNull : targetRef::equals;
   }
 
-  static <T> PropertyPredicate<? super T> not(PropertyPredicate<? super T> target) {
+  static <T> PropertyPredicate<T> not(PropertyPredicate<T> target) {
     return target.negate();
   }
 }

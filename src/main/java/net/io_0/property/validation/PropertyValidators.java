@@ -68,21 +68,21 @@ public interface PropertyValidators {
 
   PropertyValidator required = of(assigned, "Is required but missing");
 
-  static PropertyValidator<? extends Collection<?>> maxItems(Integer parameter) {
+  static PropertyValidator<Collection> maxItems(Integer parameter) {
     return mapOrCollection(sizeLte(parameter), String.format("Must contain %s items or less", parameter));
   }
 
-  static PropertyValidator<? extends Collection<?>> minItems(Integer parameter) {
+  static PropertyValidator<Collection> minItems(Integer parameter) {
     return mapOrCollection(sizeGte(parameter), String.format("Must contain %s items or more", parameter));
   }
 
-  static PropertyValidator<? extends Collection<?>> mapOrCollection(PropertyPredicate<Collection<?>> predicate, String issue) {
+  static PropertyValidator<Collection> mapOrCollection(PropertyPredicate predicate, String issue) {
     return property -> {
       if (unassignedOrEmpty.test(property)) {
         return Validation.valid(property);
       }
 
-      Property<Collection<?>> propertyToTest = (property.getValue() instanceof Map) ?
+      Property<Collection> propertyToTest = (property.getValue() instanceof Map) ?
         new Property<>(null, ((Map) property.getValue()).entrySet(), true) :
         property;
 
@@ -92,7 +92,7 @@ public interface PropertyValidators {
     };
   }
 
-  static <T> PropertyValidator<? extends Collection<T>> each(PropertyValidator<T> validator) {
+  static <T> PropertyValidator<Collection> each(PropertyValidator<T> validator) {
     return property -> {
       if (unassignedOrEmpty.test(property)) {
         return Validation.valid(property);

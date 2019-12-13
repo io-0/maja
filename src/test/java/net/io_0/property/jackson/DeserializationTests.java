@@ -104,6 +104,8 @@ public class DeserializationTests {
     assertFalse(pet.isPropertySet(Pet.OPTIONAL_PET));
     assertNull(pet.getMaybeNull());
     assertTrue(pet.isPropertySet(Pet.MAYBE_NULL));
+    assertEquals("MapPet1", pet.getPetMap().get("aPet").getName());
+    assertTrue(pet.isPropertySet(Pet.PET_MAP));
   }
 
   @Test
@@ -181,11 +183,14 @@ public class DeserializationTests {
     assertFalse(pet.isPropertySet(Pet.OPTIONAL_PET));
     assertNull(pet.getMaybeNull());
     assertTrue(pet.isPropertySet(Pet.MAYBE_NULL));
+    assertEquals("MapPet1", pet.getPetMap().get("aPet").getName());
+    assertTrue(pet.isPropertySet(Pet.PET_MAP));
 
-    assertEquals(4, propertyIssues.size());
+    assertEquals(5, propertyIssues.size());
     assertTrue(propertyIssues.containsPropertyName("integ"));
     assertTrue(propertyIssues.containsPropertyName("numDouble"));
     assertTrue(propertyIssues.containsPropertyName("strDate"));
     assertTrue(propertyIssues.containsPropertyName("zoo.1.colorEnum"));
+    assertTrue(propertyIssues.containsPropertyName("petMap.aPet.integ"));
   }
 }

@@ -74,7 +74,9 @@ public class DeserializationAndValidationTest {
         "PropertyIssue(propertyName=integ, issue=A, not a valid Integer value), " +
         "PropertyIssue(propertyName=strDate, issue=C, Failed to deserialize java.time.LocalDate: (java.time.format.DateTimeParseException) Text 'C' could not be parsed at index 0), " +
         "PropertyIssue(propertyName=zoo.1.colorEnum, issue=greeni, Unexpected value 'greeni'), " +
+        "PropertyIssue(propertyName=petMap.aPet.integ, issue=A, not a valid Integer value), " +
         "PropertyIssue(propertyName=integ, issue=Must be 18 or greater), " +
+        "PropertyIssue(propertyName=petMap.aPet.integ, issue=Must be 18 or greater), " +
         "PropertyIssue(propertyName=name, issue=I don't like Gerti)" +
       "]", validation.getPropertyIssues().toString());
   }
