@@ -5,6 +5,7 @@ import net.io_0.property.validation.Validation.Invalid;
 import java.util.stream.Collectors;
 
 @Getter
+@SuppressWarnings("rawtypes")
 public class ValidationException extends RuntimeException {
   private final Invalid validation;
 

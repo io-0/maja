@@ -11,33 +11,33 @@ import java.util.Collection;
 import static net.io_0.property.validation.PropertyPredicate.not;
 
 public interface PropertyPredicates {
-  PropertyPredicate assigned = Property::isAssigned;
+  PropertyPredicate<?> assigned = Property::isAssigned;
 
-  PropertyPredicate empty = Property::isEmpty;
+  PropertyPredicate<?> empty = Property::isEmpty;
 
-  PropertyPredicate assignedAndNotEmpty = assigned.and(not(empty));
+  PropertyPredicate<?> assignedAndNotEmpty = assigned.and(not(Property::isEmpty));
 
-  PropertyPredicate unassignedOrEmpty = not(assignedAndNotEmpty);
+  PropertyPredicate<?> unassignedOrEmpty = not(assignedAndNotEmpty);
 
-  PropertyPredicate unassignedOrNotEmpty = not(assigned).or(not(empty));
+  PropertyPredicate<?> unassignedOrNotEmpty = not(assigned).or(not(Property::isEmpty));
 
-  static PropertyPredicate unassignedOrNotEmptyAnd(PropertyPredicate predicate) {
-    return not(assigned).or(not(empty).and(predicate));
+  static <T> PropertyPredicate<T> unassignedOrNotEmptyAnd(PropertyPredicate<T> predicate) {
+    return not(Property<T>::isAssigned).or(not(Property<T>::isEmpty).and(predicate));
   }
 
-  static PropertyPredicate<Number> lte(Number number) {
+  static PropertyPredicate<? extends Number> lte(Number number) {
     return property -> compare(number, property.getValue()) <= 0;
   }
 
-  static PropertyPredicate<Number> lt(Number number) {
+  static PropertyPredicate<? extends Number> lt(Number number) {
     return property -> compare(number, property.getValue()) < 0;
   }
 
-  static PropertyPredicate<Number> gte(Number number) {
+  static PropertyPredicate<? extends Number> gte(Number number) {
     return property -> compare(number, property.getValue()) >= 0;
   }
 
-  static PropertyPredicate<Number> gt(Number number) {
+  static PropertyPredicate<? extends Number> gt(Number number) {
     return property -> compare(number, property.getValue()) > 0;
   }
 
@@ -49,11 +49,11 @@ public interface PropertyPredicates {
     return property -> property.getValue().length() <= number;
   }
 
-  static PropertyPredicate<Collection> sizeGte(Integer number) {
+  static PropertyPredicate<Collection<?>> sizeGte(Integer number) {
     return property -> property.getValue().size() >= number;
   }
 
-  static PropertyPredicate<Collection> sizeLte(Integer number) {
+  static PropertyPredicate<Collection<?>> sizeLte(Integer number) {
     return property -> property.getValue().size() <= number;
   }
 
@@ -69,7 +69,7 @@ public interface PropertyPredicates {
 
   PropertyPredicate<String> inet6Address = property -> InetAddressValidator.getInstance().isValidInet6Address(property.getValue());
 
-  static PropertyPredicate<Number> multipleOf(Number number) {
+  static PropertyPredicate<? extends Number> multipleOf(Number number) {
     return property -> new BigDecimal(property.getValue().toString()).remainder(new BigDecimal(number.toString())).abs().doubleValue() < 0.000000000001;
   }
 

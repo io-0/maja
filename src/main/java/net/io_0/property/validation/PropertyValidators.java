@@ -64,37 +64,39 @@ public interface PropertyValidators {
     return of(unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)), String.format("Must be a multiple of %s", parameter));
   }
 
-  PropertyValidator notNull = of(unassignedOrNotEmpty, "Can't be literally null");
+  PropertyValidator<?> notNull = of(unassignedOrNotEmpty, "Can't be literally null");
 
-  PropertyValidator required = of(assigned, "Is required but missing");
+  PropertyValidator<?> required = of(assigned, "Is required but missing");
 
-  static PropertyValidator<Collection> maxItems(Integer parameter) {
+  static PropertyValidator<?> maxItems(Integer parameter) {
     return mapOrCollection(sizeLte(parameter), String.format("Must contain %s items or less", parameter));
   }
 
-  static PropertyValidator<Collection> minItems(Integer parameter) {
+  static PropertyValidator<?> minItems(Integer parameter) {
     return mapOrCollection(sizeGte(parameter), String.format("Must contain %s items or more", parameter));
   }
 
-  static PropertyValidator<Collection> mapOrCollection(PropertyPredicate predicate, String issue) {
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static PropertyValidator<?> mapOrCollection(PropertyPredicate<?> predicate, String issue) {
     return property -> {
-      if (unassignedOrEmpty.test(property)) {
+      if (unassignedOrEmpty.test((Property) property)) {
         return Validation.valid(property);
       }
 
-      Property<Collection> propertyToTest = (property.getValue() instanceof Map) ?
-        new Property<>(null, ((Map) property.getValue()).entrySet(), true) :
+      Property<?> propertyToTest = (property.getValue() instanceof Map) ?
+        new Property<>(property.getName(), ((Map) property.getValue()).entrySet(), true) :
         property;
 
-      return predicate.test(propertyToTest) ?
+      return predicate.test((Property) propertyToTest) ?
         Validation.valid(property) :
         invalid(PropertyIssue.of(property.getName(), issue));
     };
   }
 
-  static <T> PropertyValidator<Collection> each(PropertyValidator<T> validator) {
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static <T> PropertyValidator<?> each(PropertyValidator<T> validator) {
     return property -> {
-      if (unassignedOrEmpty.test(property)) {
+      if (unassignedOrEmpty.test((Property) property)) {
         return Validation.valid(property);
       }
 
@@ -109,7 +111,7 @@ public interface PropertyValidators {
           .map(validation -> Validation.of(property, validation.getPropertyIssues()))
           .orElse(Validation.valid(property));
       } else {
-        List<T> values = new ArrayList<>(property.getValue());
+        List<T> values = new ArrayList<>((Collection<T>) property.getValue());
 
         return IntStream.range(0, values.size())
           .mapToObj(i -> new Property<>(String.format("%s.%d", property.getName(), i), values.get(i), true))
@@ -122,15 +124,16 @@ public interface PropertyValidators {
     };
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   static <T> PropertyValidator<T> valid(Validator<T> validator) {
     return property -> {
-      if (unassignedOrEmpty.test(property)) {
+      if (unassignedOrEmpty.test((Property) property)) {
         return Validation.valid(property);
       }
 
-      Validation validation = validator.validate(property.getValue());
+      Validation<T> validation = validator.validate(property.getValue());
       if (validation.isValid()) {
-        return validation;
+        return Validation.valid(property);
       }
 
       return invalid(PropertyIssues.of(validation.getPropertyIssues().stream()

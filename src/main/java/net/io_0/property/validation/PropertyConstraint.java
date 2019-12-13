@@ -22,13 +22,17 @@ public class PropertyConstraint<T> {
   }
 
   @SafeVarargs
-  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<T>... validators) {
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<? extends T>... validators) {
     return on(propertyName, propertyName, validators);
   }
 
   @SafeVarargs
-  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, String propertyLabel, PropertyValidator<T>... validators) {
-    return model -> new PropertyConstraint<>(model.getProperty(propertyName, propertyLabel), Arrays.stream(validators).reduce(PropertyValidator::and).get());
+  @SuppressWarnings("unchecked")
+  public static <T> NameBoundPropertyConstraint<T> on(String propertyName, String propertyLabel, PropertyValidator<? extends T>... validators) {
+    return model -> new PropertyConstraint<>(
+        model.getProperty(propertyName, propertyLabel),
+        Arrays.stream(validators).map(v -> (PropertyValidator<T>) v).reduce(PropertyValidator::and).orElseThrow(IllegalArgumentException::new)
+      );
   }
 
   public Validation<Property<T>> check() {

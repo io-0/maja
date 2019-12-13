@@ -8,11 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PropertyPredicatesTest {
   @Test
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void assignedAndNotEmpty() {
     Property<String> p = new Property<>("name", null, false);
 
-    assertTrue(empty.test(p));
-    assertFalse(assigned.test(p));
-    assertFalse(assignedAndNotEmpty.test(p));
+    assertTrue(empty.test((Property) p));
+    assertFalse(assigned.test((Property) p));
+    assertFalse(assignedAndNotEmpty.test((Property) p));
   }
 }

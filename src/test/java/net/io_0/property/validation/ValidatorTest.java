@@ -4,7 +4,6 @@ import net.io_0.property.PropertyIssues;
 import org.junit.jupiter.api.Test;
 
 import static net.io_0.property.validation.Validation.invalid;
-import static net.io_0.property.validation.Validation.valid;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ValidatorTest {

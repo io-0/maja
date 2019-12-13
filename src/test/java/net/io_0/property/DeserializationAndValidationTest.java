@@ -41,7 +41,7 @@ public class DeserializationAndValidationTest {
 
     Pet pet = objectMapper.readValue(json, Pet.class);
 
-    Valid<Pet> validation = petValidator.validate(pet).proceedIfValid();
+    Valid<Pet> validation = petValidator.proceedIfValid(pet);
 
     assertTrue(validation.isValid());
     assertTrue(validation.getPropertyIssues().isEmpty());
@@ -64,9 +64,11 @@ public class DeserializationAndValidationTest {
       .withAttribute(PROPERTY_ISSUES_ATTR, propertyIssues)
       .readValue(json);
 
-    Validator<Pet> customValidator = p -> invalid(PropertyIssue.of(Pet.NAME, "I don't like " + p.getName()));
+    Validator<Pet> customValidator1 = p -> invalid(PropertyIssue.of(Pet.NAME, "I don't like " + p.getName()));
+    Validator<Pet> customValidator2 = Validation::valid;
+    Validator<Pet> customValidators = customValidator1.and(customValidator2);
 
-    Validation<Pet> validation = Validator.<Pet> of(propertyIssues).and(petValidator).and(customValidator).validate(pet);
+    Validation<Pet> validation = Validator.<Pet> of(propertyIssues).and(petValidator).and(customValidators).validate(pet);
 
     assertTrue(validation.isInvalid());
     assertEquals("[" +
