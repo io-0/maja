@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import net.io_0.pb.jackson.deserialization.CustomBeanDeserializerFactory;
 import net.io_0.pb.validation.Validator;
 import net.io_0.pb.models.Pet;
 import net.io_0.pb.validation.Validation;
@@ -17,17 +19,18 @@ import static net.io_0.pb.validation.Validation.invalid;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DeserializerTest {
-  private ObjectMapper objectMapper = new ObjectMapper()
-    .registerModules(
-      new JavaTimeModule()
-    )
-    .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .disable(
-      DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
-      DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
-    )
-    .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+  private ObjectMapper objectMapper =
+    new ObjectMapper(null, null, new DefaultDeserializationContext.Impl(CustomBeanDeserializerFactory.instance))
+      .registerModules(
+        new JavaTimeModule()
+      )
+      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .disable(
+        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
+        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
+      )
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
   @Test
   public void deserializeAndValidate_test() {

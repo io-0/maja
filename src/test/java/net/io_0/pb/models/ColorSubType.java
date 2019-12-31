@@ -1,20 +1,19 @@
 package net.io_0.pb.models;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import net.io_0.pb.SetPropertiesAware;
 
 @NoArgsConstructor
-@Getter
-@ToString
+@AllArgsConstructor
+@Getter @Setter
+@ToString @Builder
 public class ColorSubType extends SetPropertiesAware {
   public static final String ID = "id";
   public static final String NAME = "name";
 
   private Long id = 1L;
   private String name = "violet";
-
+/*
   public ColorSubType setId(Long id) {
     this.id = id;
     markPropertySet(ID);
@@ -26,4 +25,5 @@ public class ColorSubType extends SetPropertiesAware {
     markPropertySet(NAME);
     return this;
   }
+ */
 }

@@ -1,8 +1,6 @@
 package net.io_0.pb.models;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import net.io_0.pb.SetPropertiesAware;
 
 import java.io.File;
@@ -12,8 +10,9 @@ import java.time.OffsetDateTime;
 import java.util.*;
 
 @NoArgsConstructor
-@Getter
-@ToString
+@AllArgsConstructor
+@Getter @Setter
+@ToString @Builder
 public class Pet extends SetPropertiesAware {
   public static final String NAME = "name";
   public static final String TAG = "tag";
@@ -96,7 +95,7 @@ public class Pet extends SetPropertiesAware {
   private Map<String, ColorEnum> enumMap = new HashMap<>();
   private Pet optionalPet;
   private String maybeNull;
-
+/*
   public Pet setName(String name) {
     this.name = name;
     markPropertySet(NAME);
@@ -336,4 +335,5 @@ public class Pet extends SetPropertiesAware {
     markPropertySet(MAYBE_NULL);
     return this;
   }
+ */
 }

@@ -48,32 +48,59 @@ public class SerializationTests {
   public void jackson_can_serialize() throws IOException, JSONException {
     Pet pet = new Pet();
     pet.setName("Gerti");
+    pet.markPropertySet(Pet.NAME);
     pet.setTag("GuterTag");
+    pet.markPropertySet(Pet.TAG);
     pet.setId(12L);
+    pet.markPropertySet(Pet.ID);
     pet.setColorEnum(ColorEnum.BLUE);
+    pet.markPropertySet(Pet.COLOR_ENUM);
     pet.setNum(BigDecimal.valueOf(20000000));
+    pet.markPropertySet(Pet.NUM);
     pet.setNumFloat(20.1F);
+    pet.markPropertySet(Pet.NUM_FLOAT);
     pet.setNumDouble(220.1);
+    pet.markPropertySet(Pet.NUM_DOUBLE);
     pet.setInteg(4);
+    pet.markPropertySet(Pet.INTEG);
     pet.setIntInt(5);
+    pet.markPropertySet(Pet.INT_INT);
     pet.setIntLong((long) Integer.MAX_VALUE + 1);
+    pet.markPropertySet(Pet.INT_LONG);
     pet.setStrLen("some text");
+    pet.markPropertySet(Pet.STR_LEN);
     pet.setStrDate(LocalDate.of(2019, 7, 23));
+    pet.markPropertySet(Pet.STR_DATE);
     pet.setStrDateTime(OffsetDateTime.of(2010, 1, 1, 10, 0, 10, 0, ZoneOffset.ofHours(1)));
+    pet.markPropertySet(Pet.STR_DATE_TIME);
     pet.setStrPassword("superSecure");
+    pet.markPropertySet(Pet.STR_PASSWORD);
     pet.setStrByte("test".getBytes());
+    pet.markPropertySet(Pet.STR_BYTE);
     pet.setStrBinary(new File("/1f03ff"));
+    pet.markPropertySet(Pet.STR_BINARY);
     pet.setStrEmail("user@example.com");
+    pet.markPropertySet(Pet.STR_EMAIL);
     pet.setStrUuid(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
+    pet.markPropertySet(Pet.STR_UUID);
     pet.setStrUri(URI.create("http://www.example.com/eula").toString());
+    pet.markPropertySet(Pet.STR_URI);
     pet.setStrhostname("example.com");
+    pet.markPropertySet(Pet.STRHOSTNAME);
     pet.setStrIpv4("198.51.100.42");
+    pet.markPropertySet(Pet.STR_IPV4);
     pet.setStrIpv6("2001:0db8:5b96:0000:0000:426f:8e17:642a");
+    pet.markPropertySet(Pet.STR_IPV6);
     pet.setSsn("102-21-2001");
+    pet.markPropertySet(Pet.SSN);
     pet.setToKindsOfPeople(true);
+    pet.markPropertySet(Pet.TO_KINDS_OF_PEOPLE);
     pet.setNullable(false);
+    pet.markPropertySet(Pet.NULLABLE);
     pet.setBinFile(new File("/1f03ff"));
+    pet.markPropertySet(Pet.BIN_FILE);
     pet.setBase64file("test".getBytes());
+    pet.markPropertySet(Pet.BASE64FILE);
     pet.setColorList(List.of(
       "violet",
       "gray",
@@ -85,7 +112,9 @@ public class SerializationTests {
       "gray",
       "yellow"
     ));
-    pet.setColorSubType(new ColorSubType().setId(19L).setName("rgb123"));
+    pet.setColorSubType(ColorSubType.builder().id(19L).name("rgb123").build());
+    pet.getColorSubType().markPropertySet(ColorSubType.ID);
+    pet.getColorSubType().markPropertySet(ColorSubType.NAME);
     pet.setStrMap(Map.of(
       "additionalProp1", "I",
       "additionalProp2", "am",
@@ -103,14 +132,27 @@ public class SerializationTests {
       "additionalProp3", ColorEnum.GREEN
     ));
     pet.setPetMap(Map.of(
-      "aPet", new Pet().setName("MapPet1").setTag("MapTag1").setId(42L).setColorEnum(ColorEnum.RED)
+      "aPet", Pet.builder().name("MapPet1").tag("MapTag1").id(42L).colorEnum(ColorEnum.RED).build()
     ));
+    pet.getPetMap().get("aPet").markPropertySet(Pet.NAME);
+    pet.getPetMap().get("aPet").markPropertySet(Pet.TAG);
+    pet.getPetMap().get("aPet").markPropertySet(Pet.ID);
+    pet.getPetMap().get("aPet").markPropertySet(Pet.COLOR_ENUM);
     pet.setZoo(List.of(
-      new Pet().setName("ZooPet1").setTag("ZooTag1").setId(93L).setColorEnum(ColorEnum.BLUE),
-      new Pet().setName("ZooPet2").setTag("ZooTag2").setId(94L).setColorEnum(ColorEnum.GREEN)
+      Pet.builder().name("ZooPet1").tag("ZooTag1").id(93L).colorEnum(ColorEnum.BLUE).build(),
+      Pet.builder().name("ZooPet2").tag("ZooTag2").id(94L).colorEnum(ColorEnum.GREEN).build()
     ));
+    pet.getZoo().get(0).markPropertySet(Pet.NAME);
+    pet.getZoo().get(0).markPropertySet(Pet.TAG);
+    pet.getZoo().get(0).markPropertySet(Pet.ID);
+    pet.getZoo().get(0).markPropertySet(Pet.COLOR_ENUM);
+    pet.getZoo().get(1).markPropertySet(Pet.NAME);
+    pet.getZoo().get(1).markPropertySet(Pet.TAG);
+    pet.getZoo().get(1).markPropertySet(Pet.ID);
+    pet.getZoo().get(1).markPropertySet(Pet.COLOR_ENUM);
 
     pet.setMaybeNull(null);
+    pet.markPropertySet(Pet.MAYBE_NULL);
 
     String json = objectMapper.writeValueAsString(pet);
     String reference = TestUtils.loadJsonResource("PetWithDefaults.json");
