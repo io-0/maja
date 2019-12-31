@@ -113,7 +113,7 @@ public class SerializationTests {
     pet.setMaybeNull(null);
 
     String json = objectMapper.writeValueAsString(pet);
-    String reference = TestUtils.loadJsonResource("PetWithDefaults.json");
+    String reference = TestUtils.loadJsonResource("experiments/PetWithDefaults.json");
 
     JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
   }

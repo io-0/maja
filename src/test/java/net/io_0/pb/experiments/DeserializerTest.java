@@ -31,7 +31,7 @@ class DeserializerTest {
 
   @Test
   public void deserializeAndValidate_test() {
-    String json = TestUtils.loadJsonResource("Pet.json");
+    String json = TestUtils.loadJsonResource("experiments/Pet.json");
     json = json
       .replace(": 21,", ": \"A\",")
       .replace(": 220.1,", ": \"B\",")
@@ -59,7 +59,7 @@ class DeserializerTest {
 
   @Test
   public void deserializeAndProceedIfValid_test() {
-    String json = TestUtils.loadJsonResource("Pet.json");
+    String json = TestUtils.loadJsonResource("experiments/Pet.json");
 
     Valid<Pet> validation = deserialize(objectMapper, json, Pet.class).apply(Validators.petValidator).proceedIfValid();
 

@@ -42,7 +42,7 @@ public class DeserializationTests {
 
   @Test
   public void jackson_can_deserialize() throws IOException {
-    String json = TestUtils.loadJsonResource("Pet.json");
+    String json = TestUtils.loadJsonResource("experiments/Pet.json");
 
     Pet pet = objectMapper.readValue(json, Pet.class);
 
@@ -110,7 +110,7 @@ public class DeserializationTests {
 
   @Test
   public void jackson_can_deserialize_with_exceptions() throws IOException {
-    String json = TestUtils.loadJsonResource("Pet.json");
+    String json = TestUtils.loadJsonResource("experiments/Pet.json");
     json = json
       .replace(": 21,", ": \"A\",")
       .replace(": 220.1,", ": \"B\",")
