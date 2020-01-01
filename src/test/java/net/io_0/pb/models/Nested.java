@@ -1,7 +1,7 @@
 package net.io_0.pb.models;
 
 import lombok.*;
-import net.io_0.pb.JsonName;
+import net.io_0.pb.mapping.JsonName;
 import net.io_0.pb.SetPropertiesAware;
 
 import java.math.BigDecimal;

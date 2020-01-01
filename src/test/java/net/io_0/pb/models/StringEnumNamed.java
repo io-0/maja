@@ -1,7 +1,7 @@
 package net.io_0.pb.models;
 
 import lombok.Getter;
-import net.io_0.pb.JsonName;
+import net.io_0.pb.mapping.JsonName;
 
 public enum StringEnumNamed {
   @JsonName("str 1") STR1(1),

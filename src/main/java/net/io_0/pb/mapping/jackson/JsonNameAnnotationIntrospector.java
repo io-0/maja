@@ -1,9 +1,9 @@
-package net.io_0.pb.jackson;
+package net.io_0.pb.mapping.jackson;
 
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
-import net.io_0.pb.JsonName;
+import net.io_0.pb.mapping.JsonName;
 import java.util.Arrays;
 import java.util.List;
 

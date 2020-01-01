@@ -4,10 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import net.io_0.pb.JsonName;
+import net.io_0.pb.mapping.JsonName;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @NoArgsConstructor

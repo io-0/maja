@@ -1,4 +1,4 @@
-package net.io_0.pb.jackson;
+package net.io_0.pb.mapping.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -12,7 +12,7 @@ import net.io_0.pb.PropertyIssue;
 import java.util.function.Consumer;
 
 /**
- * Instead of stopping deserialization on the first problem this module collects failure messages as issues.
+ * Instead of stopping deserialization on the first problem this handler collects failure messages as issues.
  * Fields with deserialization problems / exceptions will be set to null.
  */
 @Slf4j
