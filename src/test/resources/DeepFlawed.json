@@ -1,4 +1,7 @@
 {
+  "stringToObject": "42",
+  "numberToObject": 42,
+  "numberToEnum": 9,
   "objectToPojo": {
     "stringToUUID": "no uuid",
     "numberToBigDecimal": "string",
@@ -12,6 +15,9 @@
     "stringArrayToStringList": 42,
     "numberArrayToIntegerSet": [0, "string"],
     "booleanToBoolean": "string"
+  },
+  "objectToIntMap": {
+    "string": 2
   },
   "objectArrayToObjectList": [
     {

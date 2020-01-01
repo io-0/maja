@@ -199,10 +199,14 @@ public class JsonDeserializerTests {
 
     // When it is converted
     PropertyIssues propertyIssues = PropertyIssues.of();
-    Deep pojo = JsonDeserializer.deserialize(json, Deep.class, propertyIssues::add);
+    DeepFlawed pojo = JsonDeserializer.deserialize(json, DeepFlawed.class, propertyIssues::add);
 
     // Then the convertible data should be present in the POJO
     assertNotNull(pojo);
+
+    assertNull(pojo.getStringToObject());
+    assertNull(pojo.getNumberToObject());
+    assertNull(pojo.getNumberToEnum());
 
     assertNotNull(pojo.getObjectToPojo());
     assertNull(pojo.getObjectToPojo().getStringToUUID());
@@ -232,13 +236,16 @@ public class JsonDeserializerTests {
       pojo.getObjectArrayToObjectSet().toArray()[0].toString());
 
     // And the issues should be collected
-    assertTrue(propertyIssues.containsPropertyName("objectToPojo." + STRING_TO_UUID));
     assertEquals("[" +
+      "PropertyIssue(propertyName=stringToObject, issue=com.fasterxml.jackson.databind.deser.std.StdValueInstantiator, no String-argument constructor/factory method to deserialize from String value ('42')), " +
+      "PropertyIssue(propertyName=numberToObject, issue=42, Cannot construct instance of `net.io_0.pb.models.DeepFlawed$PublicInner`, problem: `java.lang.IllegalStateException` at [Source: (InputStreamReader); line: 3, column: 21]), " +
+      "PropertyIssue(propertyName=numberToEnum, issue=9, index value outside legal index range [0..2]), " +
       "PropertyIssue(propertyName=objectToPojo.stringToUUID, issue=no uuid, UUID has to be represented by standard 36-char representation), " +
       "PropertyIssue(propertyName=objectToPojo.numberToBigDecimal, issue=string, not a valid representation), " +
       "PropertyIssue(propertyName=objectToPojo.stringArrayToStringList, issue=VALUE_NUMBER_INT, null), " +
       "PropertyIssue(propertyName=objectToPojo.numberArrayToIntegerSet.1, issue=string, not a valid Integer value), " +
       "PropertyIssue(propertyName=objectToPojo.booleanToBoolean, issue=string, only \"true\" or \"false\" recognized), " +
+      "PropertyIssue(propertyName=objectToIntMap.string, issue=string, not a valid representation, problem: (java.lang.NumberFormatException) For input string: \"string\"), " +
       "PropertyIssue(propertyName=objectArrayToObjectList.0.stringToUUID, issue=no uuid, UUID has to be represented by standard 36-char representation), " +
       "PropertyIssue(propertyName=objectArrayToObjectList.0.numberToBigDecimal, issue=string, not a valid representation), " +
       "PropertyIssue(propertyName=objectArrayToObjectList.0.stringArrayToStringList, issue=VALUE_NUMBER_INT, null), " +
@@ -258,6 +265,7 @@ public class JsonDeserializerTests {
       "PropertyIssue(propertyName=objectArrayToObjectSet.1.numberToBigDecimal, issue=string, not a valid representation), " +
       "PropertyIssue(propertyName=objectArrayToObjectSet.1.stringArrayToStringList, issue=VALUE_NUMBER_INT, null), " +
       "PropertyIssue(propertyName=objectArrayToObjectSet.1.numberArrayToIntegerSet.1, issue=string, not a valid Integer value), " +
-      "PropertyIssue(propertyName=objectArrayToObjectSet.1.booleanToBoolean, issue=string, only \"true\" or \"false\" recognized)]", propertyIssues.toString());
+      "PropertyIssue(propertyName=objectArrayToObjectSet.1.booleanToBoolean, issue=string, only \"true\" or \"false\" recognized)]",
+      propertyIssues.toString().replaceAll("@[\\w]+", ""));
   }
 }

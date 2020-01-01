@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.io_0.pb.jackson.JsonNameAnnotationIntrospector;
-import net.io_0.pb.jackson.PropertyIssueCollectorModule;
+import net.io_0.pb.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import java.io.Reader;
 import java.util.function.Consumer;
-
-import static net.io_0.pb.jackson.PropertyIssueCollectorModule.PROPERTY_ISSUE_CONSUMER_ATTR;
 
 public interface JsonDeserializer {
   static <T> T deserialize(Reader json, Class<T> type) {
@@ -18,10 +16,10 @@ public interface JsonDeserializer {
   static <T> T deserialize(Reader json, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
     ObjectMapper objectMapper = new ObjectMapper()
       .registerModules(
-        new JavaTimeModule(),
-        new PropertyIssueCollectorModule()
+        new JavaTimeModule()
       )
       .setAnnotationIntrospector(new JsonNameAnnotationIntrospector())
+      .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(propertyIssueConsumer))
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .disable(
@@ -34,7 +32,6 @@ public interface JsonDeserializer {
       return objectMapper
         .reader()
         .forType(type)
-        .withAttribute(PROPERTY_ISSUE_CONSUMER_ATTR, propertyIssueConsumer)
         .readValue(json);
     } catch (Exception e) {
       throw new DeserializationException(e);
