@@ -3,15 +3,19 @@ package net.io_0.pb.mapping;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.pb.PropertyIssues;
 import net.io_0.pb.models.*;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-import java.io.File;
-import java.io.Reader;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.io_0.pb.TestUtils.assertCollectionEquals;
 import static net.io_0.pb.TestUtils.loadJsonResource;
@@ -21,8 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 public class MapperTests {
   @Test
-  public void mapFromNothing() {
+  public void mapNothing() {
     assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(null, null));
+
+    assertThrows(Mapper.MappingException.class, () -> Mapper.writeJson(null, null));
   }
 
   /**
@@ -51,6 +57,10 @@ public class MapperTests {
     Flat pojo = Mapper.readJson(json, Flat.class);
 
     // Then the data should be present in the POJO
+    assertFlatDataPresent(pojo);
+  }
+
+  private void assertFlatDataPresent(Flat pojo) {
     assertNotNull(pojo);
     assertEquals("str", pojo.getStringToString());
     assertEquals(StringEnum.STR2, pojo.getStringToEnum());
@@ -96,6 +106,10 @@ public class MapperTests {
     Deep pojo = Mapper.readJson(json, Deep.class);
 
     // Then the data should be present in the POJO
+    assertDeepDataPresent(pojo);
+  }
+
+  private void assertDeepDataPresent(Deep pojo) {
     assertNotNull(pojo);
 
     assertNotNull(pojo.getObjectToPojo());
@@ -110,7 +124,7 @@ public class MapperTests {
     assertTrue(pojo.getObjectToMap().containsKey("numberToBigDecimal"));
     assertTrue(pojo.getObjectToMap().containsKey("stringArrayToStringList"));
     assertTrue(pojo.getObjectToMap().containsKey("numberArrayToIntegerSet"));
-    assertTrue(pojo.getObjectToMap().containsKey("booleanToBoolean"));
+    assertTrue(pojo.getObjectToMap().containsKey("booleanToBoolean") || pojo.getObjectToMap().containsKey("bool"));
 
     assertNotNull(pojo.getObjectArrayToObjectList());
     assertEquals(2, pojo.getObjectArrayToObjectList().size());
@@ -145,14 +159,22 @@ public class MapperTests {
     Nested pojo = Mapper.readJson(json, Nested.class);
 
     // Then the data should be present in the POJO
+    assertNestedDataPresent(pojo);
+
+    // And the markers should be set correctly
+    assertNestedDataMarkedCorrectly(pojo);
+  }
+
+  private void assertNestedDataPresent(Nested pojo) {
     assertNotNull(pojo);
     assertNull(pojo.getStringToUUID());
     assertEquals(BigDecimal.valueOf(4), pojo.getNumberToBigDecimal());
     assertNull(pojo.getStringArrayToStringList());
     assertNull(pojo.getNumberArrayToIntegerSet());
     assertEquals(true, pojo.getBooleanToBoolean());
+  }
 
-    // And the markers should be set correctly
+  private void assertNestedDataMarkedCorrectly(Nested pojo) {
     assertTrue(pojo.isPropertySet(STRING_TO_UUID));
     assertTrue(pojo.isPropertySet(NUMBER_TO_BIG_DECIMAL));
     assertFalse(pojo.isPropertySet(STRING_ARRAY_TO_STRING_LIST));
@@ -172,6 +194,10 @@ public class MapperTests {
     DeepNamed pojo = Mapper.readJson(json, DeepNamed.class);
 
     // Then the data should be present in the POJO
+    assertDeepNamedDataPresent(pojo);
+  }
+
+  private void assertDeepNamedDataPresent(DeepNamed pojo) {
     assertNotNull(pojo);
 
     assertNotNull(pojo.getObjectToPojo());
@@ -276,5 +302,96 @@ public class MapperTests {
     Reader json = loadJsonResource("DeepFlawed.json");
     Mapper.MappingException t = assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(json, DeepFlawed.class));
     assertEquals("java.lang.IllegalStateException: " + deepFlawedJsonIssuesString, t.getMessage().replaceAll("@[\\w]+", ""));
+  }
+
+  /**
+   * Scenario: A flat JSON object should be mapped to a POJO and back
+   */
+  @Test
+  public void mapFlatJson() throws JSONException {
+    // Given a flat JSON object
+    Reader jsonReader = loadJsonResource("HonestFlat.json");
+
+    // When it is mapped
+    Flat pojo = Mapper.readJson(jsonReader, Flat.class);
+
+    // Then the data should be present in the POJO
+    assertFlatDataPresent(pojo);
+
+    // And mapping back should not loose information
+    String reference = new BufferedReader(loadJsonResource("HonestFlat.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriter = new StringWriter();
+    Mapper.writeJson(jsonWriter, pojo);
+
+    JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  /**
+   * Scenario: A JSON object with nested objects should be mapped to a POJO and back
+   */
+  @Test
+  public void mapDeepJson() throws JSONException {
+    // Given a deep JSON object
+    Reader jsonReader = loadJsonResource("HonestDeep.json");
+
+    // When it is mapped
+    Deep pojo = Mapper.readJson(jsonReader, Deep.class);
+
+    // Then the data should be present in the POJO
+    assertDeepDataPresent(pojo);
+
+    // And mapping back should not loose information
+    String reference = new BufferedReader(loadJsonResource("HonestDeep.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriter = new StringWriter();
+    Mapper.writeJson(jsonWriter, pojo);
+
+    JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  /**
+   * Scenario: It should be possible to map JSON with absent properties and null to POJO and back
+   */
+  @Test
+  public void mapJsonWithNullAndAbsentProperties() throws JSONException {
+    // Given a JSON object with nulls and absent properties
+    Reader jsonReader = loadJsonResource("HonestPartial.json");
+
+    // When it is mapped
+    Nested pojo = Mapper.readJson(jsonReader, Nested.class);
+
+    // Then the data should be present in the POJO
+    assertNestedDataPresent(pojo);
+
+    // And the markers should be set correctly
+    assertNestedDataMarkedCorrectly(pojo);
+
+    // And mapping back should not loose information
+    String reference = new BufferedReader(loadJsonResource("HonestPartial.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriter = new StringWriter();
+    Mapper.writeJson(jsonWriter, pojo);
+
+    JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  /**
+   * Scenario: It should be possible to have different names in JSON and POJOs (and Enums)
+   */
+  @Test
+  public void mapDeepNamedJson() throws JSONException {
+    // Given a deep JSON object with java special names
+    Reader json = loadJsonResource("HonestDeepNamed.json");
+
+    // When it is mapped
+    DeepNamed pojo = Mapper.readJson(json, DeepNamed.class);
+
+    // Then the data should be present in the POJO
+    assertDeepNamedDataPresent(pojo);
+
+    // And mapping back should not loose information
+    String reference = new BufferedReader(loadJsonResource("HonestDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriter = new StringWriter();
+    Mapper.writeJson(jsonWriter, pojo);
+
+    JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
   }
 }

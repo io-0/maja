@@ -21,4 +21,11 @@ public class JsonNameAnnotationIntrospector extends NopAnnotationIntrospector {
       field.isAnnotationPresent(JsonName.class) ? field.getAnnotation(JsonName.class).value() : field.getName()
     ).toArray(String[]::new);
   }
+
+  @Override
+  public PropertyName findNameForSerialization(Annotated annotated) {
+    if (annotated.hasAnnotation(JsonName.class))
+      return PropertyName.construct(annotated.getAnnotation(JsonName.class).value());
+    return null;
+  }
 }

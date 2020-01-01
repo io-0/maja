@@ -1,48 +1,47 @@
 package net.io_0.pb.mapping;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.*;
 import net.io_0.pb.PropertyIssue;
 import net.io_0.pb.PropertyIssues;
-import net.io_0.pb.mapping.jackson.JsonNameAnnotationIntrospector;
 import net.io_0.pb.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
-
+import net.io_0.pb.mapping.jackson.SetPropertiesAwareBeanSerializerModifier;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.function.Consumer;
 
+import static net.io_0.pb.mapping.JacksonMapper.*;
+
 public interface Mapper {
-  static <T> T readJson(Reader json, Class<T> type) {
+  static <T> T readJson(Reader reader, Class<T> type) {
     PropertyIssues propertyIssues = PropertyIssues.of();
-    T t = readJson(json, type, propertyIssues::add);
+    T t = readJson(reader, type, propertyIssues::add);
     if (!propertyIssues.isEmpty())
       throw new MappingException(new IllegalStateException(propertyIssues.toString()));
     return t;
   }
 
-  static <T> T readJson(Reader json, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    ObjectMapper objectMapper = new ObjectMapper()
-      .registerModules(
-        new JavaTimeModule()
-      )
-      .setAnnotationIntrospector(new JsonNameAnnotationIntrospector())
-      .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(propertyIssueConsumer))
-      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .disable(
-        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
-        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
-      )
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+  static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
+    ObjectMapper objectMapper = getPreConfiguredObjectMapper();
+    objectMapper.addHandler(new PropertyIssueCollectingDeserializationProblemHandler(propertyIssueConsumer));
 
     try {
       return objectMapper
         .reader()
         .forType(type)
-        .readValue(json);
+        .readValue(reader);
+    } catch (Exception e) {
+      throw new MappingException(e);
+    }
+  }
+
+  static <T> void writeJson(Writer writer, T obj) {
+    ObjectMapper objectMapper = getPreConfiguredObjectMapper();
+    objectMapper.setSerializerFactory(objectMapper.getSerializerFactory().withSerializerModifier(
+      new SetPropertiesAwareBeanSerializerModifier()
+    ));
+
+    try {
+      objectMapper.writeValue(writer, obj);
     } catch (Exception e) {
       throw new MappingException(e);
     }
