@@ -35,6 +35,7 @@ public class MapFromJsonTests {
   @Test
   public void mapFromNothing() {
     assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(null, null));
+    assertThrows(Mapper.MappingException.class, () -> Mapper.fromJson(null, null));
   }
 
   /**
@@ -57,13 +58,16 @@ public class MapFromJsonTests {
   @Test
   public void mapFromFlatJson() {
     // Given a flat JSON object
-    Reader json = loadJsonResource("Flat.json");
+    Reader jsonReader = resourceAsReader("Flat.json");
+    String json = resourceAsString("Flat.json");
 
     // When it is mapped
-    Flat pojo = Mapper.readJson(json, Flat.class);
+    Flat pojoR = Mapper.readJson(jsonReader, Flat.class);
+    Flat pojoF = Mapper.fromJson(json, Flat.class);
 
     // Then the data should be present in the POJO
-    assertFlatDataPresent(pojo);
+    assertFlatDataPresent(pojoR);
+    assertFlatDataPresent(pojoF);
   }
 
   /**
@@ -76,13 +80,16 @@ public class MapFromJsonTests {
   @Test
   public void mapFromDeepJson() {
     // Given a deep JSON object
-    Reader json = loadJsonResource("Deep.json");
+    Reader jsonReader = resourceAsReader("Deep.json");
+    String json = resourceAsString("Deep.json");
 
     // When it is mapped
-    Deep pojo = Mapper.readJson(json, Deep.class);
+    Deep pojoR = Mapper.readJson(jsonReader, Deep.class);
+    Deep pojoF = Mapper.fromJson(json, Deep.class);
 
     // Then the data should be present in the POJO
-    assertDeepDataPresent(pojo);
+    assertDeepDataPresent(pojoR);
+    assertDeepDataPresent(pojoF);
   }
 
   /**
@@ -96,16 +103,20 @@ public class MapFromJsonTests {
   @Test
   public void mapFromJsonWithNullAndAbsentProperties() {
     // Given a JSON object with nulls and absent properties
-    Reader json = loadJsonResource("Partial.json");
+    Reader jsonReader = resourceAsReader("Partial.json");
+    String json = resourceAsString("Partial.json");
 
     // When it is mapped
-    Nested pojo = Mapper.readJson(json, Nested.class);
+    Nested pojoR = Mapper.readJson(jsonReader, Nested.class);
+    Nested pojoF = Mapper.fromJson(json, Nested.class);
 
     // Then the data should be present in the POJO
-    assertNestedDataPresent(pojo);
+    assertNestedDataPresent(pojoR);
+    assertNestedDataPresent(pojoF);
 
     // And the markers should be set correctly
-    assertNestedDataMarkedCorrectly(pojo);
+    assertNestedDataMarkedCorrectly(pojoR);
+    assertNestedDataMarkedCorrectly(pojoF);
   }
 
   /**
@@ -114,13 +125,16 @@ public class MapFromJsonTests {
   @Test
   public void mapFromDeepNamedJson() {
     // Given a deep JSON object with java special names
-    Reader json = loadJsonResource("DeepNamed.json");
+    Reader jsonReader = resourceAsReader("DeepNamed.json");
+    String json = resourceAsString("DeepNamed.json");
 
     // When it is mapped
-    DeepNamed pojo = Mapper.readJson(json, DeepNamed.class);
+    DeepNamed pojoR = Mapper.readJson(jsonReader, DeepNamed.class);
+    DeepNamed pojoF = Mapper.fromJson(json, DeepNamed.class);
 
     // Then the data should be present in the POJO
-    assertDeepNamedDataPresent(pojo);
+    assertDeepNamedDataPresent(pojoR);
+    assertDeepNamedDataPresent(pojoF);
   }
 
   /**
@@ -129,13 +143,40 @@ public class MapFromJsonTests {
   @Test
   public void mapFromDeepFlawedJsonManaged() {
     // Given a deep JSON object with flawed data
-    Reader json = loadJsonResource("DeepFlawed.json");
+    Reader jsonReader = resourceAsReader("DeepFlawed.json");
+    String json = resourceAsString("DeepFlawed.json");
 
     // When it is mapped
-    PropertyIssues propertyIssues = PropertyIssues.of();
-    DeepFlawed pojo = Mapper.readJson(json, DeepFlawed.class, propertyIssues::add);
+    PropertyIssues propertyIssuesR = PropertyIssues.of();
+    PropertyIssues propertyIssuesF = PropertyIssues.of();
+    DeepFlawed pojoR = Mapper.readJson(jsonReader, DeepFlawed.class, propertyIssuesR::add);
+    DeepFlawed pojoF = Mapper.fromJson(json, DeepFlawed.class, propertyIssuesF::add);
 
     // Then the convertible data should be present in the POJO
+    assertDeepFlawedDataPresent(pojoR);
+    assertDeepFlawedDataPresent(pojoF);
+
+    // And the issues should be collected
+    assertDeepFlawedPropertyIssuesCollected(propertyIssuesR.toString());
+    assertDeepFlawedPropertyIssuesCollected(propertyIssuesF.toString());
+  }
+
+  /**
+   * Scenario: If no report is requested but conversion errors happen, an exception should contain the report
+   */
+  @Test
+  public void mapFromDeepFlawedJson() {
+    Reader jsonReader = resourceAsReader("DeepFlawed.json");
+    String json = resourceAsString("DeepFlawed.json");
+
+    Mapper.MappingException tR = assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(jsonReader, DeepFlawed.class));
+    Mapper.MappingException tF = assertThrows(Mapper.MappingException.class, () -> Mapper.fromJson(json, DeepFlawed.class));
+
+    assertDeepFlawedPropertyIssuesCollected(tR.getMessage());
+    assertDeepFlawedPropertyIssuesCollected(tF.getMessage());
+  }
+
+  private void assertDeepFlawedDataPresent(DeepFlawed pojo) {
     assertNotNull(pojo);
 
     assertNull(pojo.getStringToObject());
@@ -168,49 +209,37 @@ public class MapFromJsonTests {
     assertEquals(1, pojo.getObjectArrayToObjectSet().size());
     assertEquals("Nested(stringToUUID=null, numberToBigDecimal=null, stringArrayToStringList=null, numberArrayToIntegerSet=[0, null], booleanToBoolean=null)",
       pojo.getObjectArrayToObjectSet().toArray()[0].toString());
-
-    // And the issues should be collected
-    assertEquals(deepFlawedJsonIssuesString, propertyIssues.toString().replaceAll("@[\\w]+", ""));
   }
 
-  private static final String deepFlawedJsonIssuesString =
-    "stringToObject -> com.fasterxml.jackson.databind.deser.std.StdValueInstantiator, no String-argument constructor/factory method to deserialize from String value ('42'); " +
-    "numberToObject -> 42, Cannot construct instance of `net.io_0.pb.models.DeepFlawed$PublicInner`, problem: `java.lang.IllegalStateException` at [Source: (InputStreamReader); line: 3, column: 21]; " +
-    "numberToEnum -> 9, index value outside legal index range [0..2]; " +
-    "objectToPojo.stringToUUID -> no uuid, UUID has to be represented by standard 36-char representation; " +
-    "objectToPojo.numberToBigDecimal -> string, not a valid representation; " +
-    "objectToPojo.stringArrayToStringList -> VALUE_NUMBER_INT, null; " +
-    "objectToPojo.numberArrayToIntegerSet.1 -> string, not a valid Integer value; " +
-    "objectToPojo.booleanToBoolean -> string, only \"true\" or \"false\" recognized; " +
-    "objectToIntMap.string -> string, not a valid representation, problem: (java.lang.NumberFormatException) For input string: \"string\"; " +
-    "objectArrayToObjectList.0.stringToUUID -> no uuid, UUID has to be represented by standard 36-char representation; " +
-    "objectArrayToObjectList.0.numberToBigDecimal -> string, not a valid representation; " +
-    "objectArrayToObjectList.0.stringArrayToStringList -> VALUE_NUMBER_INT, null; " +
-    "objectArrayToObjectList.0.numberArrayToIntegerSet.1 -> string, not a valid Integer value; " +
-    "objectArrayToObjectList.0.booleanToBoolean -> string, only \"true\" or \"false\" recognized; " +
-    "objectArrayToObjectList.1.stringToUUID -> no uuid, UUID has to be represented by standard 36-char representation; " +
-    "objectArrayToObjectList.1.numberToBigDecimal -> string, not a valid representation; " +
-    "objectArrayToObjectList.1.stringArrayToStringList -> VALUE_NUMBER_INT, null; " +
-    "objectArrayToObjectList.1.numberArrayToIntegerSet.1 -> string, not a valid Integer value; " +
-    "objectArrayToObjectList.1.booleanToBoolean -> string, only \"true\" or \"false\" recognized; " +
-    "objectArrayToObjectSet.0.stringToUUID -> no uuid, UUID has to be represented by standard 36-char representation; " +
-    "objectArrayToObjectSet.0.numberToBigDecimal -> string, not a valid representation; " +
-    "objectArrayToObjectSet.0.stringArrayToStringList -> VALUE_NUMBER_INT, null; " +
-    "objectArrayToObjectSet.0.numberArrayToIntegerSet.1 -> string, not a valid Integer value; " +
-    "objectArrayToObjectSet.0.booleanToBoolean -> string, only \"true\" or \"false\" recognized; " +
-    "objectArrayToObjectSet.1.stringToUUID -> no uuid, UUID has to be represented by standard 36-char representation; " +
-    "objectArrayToObjectSet.1.numberToBigDecimal -> string, not a valid representation; " +
-    "objectArrayToObjectSet.1.stringArrayToStringList -> VALUE_NUMBER_INT, null; " +
-    "objectArrayToObjectSet.1.numberArrayToIntegerSet.1 -> string, not a valid Integer value; " +
-    "objectArrayToObjectSet.1.booleanToBoolean -> string, only \"true\" or \"false\" recognized";
-
-  /**
-   * Scenario: If no report is requested but conversion errors happen, an exception should contain the report
-   */
-  @Test
-  public void mapFromDeepFlawedJson() {
-    Reader json = loadJsonResource("DeepFlawed.json");
-    Mapper.MappingException t = assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(json, DeepFlawed.class));
-    assertEquals("java.lang.IllegalStateException: " + deepFlawedJsonIssuesString, t.getMessage().replaceAll("@[\\w]+", ""));
+  private void assertDeepFlawedPropertyIssuesCollected(String propertyIssues) {
+    assertTrue(propertyIssues.contains("stringToObject"));
+    assertTrue(propertyIssues.contains("numberToObject"));
+    assertTrue(propertyIssues.contains("numberToEnum"));
+    assertTrue(propertyIssues.contains("objectToPojo.stringToUUID"));
+    assertTrue(propertyIssues.contains("objectToPojo.numberToBigDecimal"));
+    assertTrue(propertyIssues.contains("objectToPojo.stringArrayToStringList"));
+    assertTrue(propertyIssues.contains("objectToPojo.numberArrayToIntegerSet.1"));
+    assertTrue(propertyIssues.contains("objectToPojo.booleanToBoolean"));
+    assertTrue(propertyIssues.contains("objectToIntMap.string"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.0.stringToUUID"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.0.numberToBigDecimal"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.0.stringArrayToStringList"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.0.numberArrayToIntegerSet.1"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.0.booleanToBoolean"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.1.stringToUUID"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.1.numberToBigDecimal"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.1.stringArrayToStringList"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.1.numberArrayToIntegerSet.1"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectList.1.booleanToBoolean"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.0.stringToUUID"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.0.numberToBigDecimal"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.0.stringArrayToStringList"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.0.numberArrayToIntegerSet.1"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.0.booleanToBoolean"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.1.stringToUUID"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.1.numberToBigDecimal"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.1.stringArrayToStringList"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.1.numberArrayToIntegerSet.1"));
+    assertTrue(propertyIssues.contains("objectArrayToObjectSet.1.booleanToBoolean"));
   }
 }

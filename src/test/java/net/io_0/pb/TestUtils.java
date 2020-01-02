@@ -4,17 +4,31 @@ import org.apache.commons.collections.CollectionUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestUtils {
-  public static Reader loadJsonResource(String path) {
+  public static Reader resourceAsReader(String path) {
     try {
       return new InputStreamReader(TestUtils.class.getClassLoader().getResource(path).openStream(), StandardCharsets.UTF_8);
     } catch (NullPointerException | IOException e) {
       throw new IllegalArgumentException("Can't load resource '" + path + "'");
+    }
+  }
+
+  public static String resourceAsString(String name) {
+    try {
+      URI uri = net.io_0.pb.experiments.TestUtils.class.getClassLoader().getResource(name).toURI();
+      return Files.readString(Paths.get(uri));
+    } catch (NullPointerException | URISyntaxException | IOException e) {
+      throw new IllegalArgumentException("Can't load resource '" + name + "'");
     }
   }
 

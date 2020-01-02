@@ -1,55 +1,91 @@
 package net.io_0.pb.mapping;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pivovarit.function.ThrowingFunction;
 import net.io_0.pb.PropertyIssue;
 import net.io_0.pb.PropertyIssues;
+import net.io_0.pb.mapping.jackson.JsonNameAnnotationIntrospector;
 import net.io_0.pb.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import net.io_0.pb.mapping.jackson.SetPropertiesAwareBeanSerializerModifier;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-import static net.io_0.pb.mapping.JacksonMapper.*;
-
-public interface Mapper {
-  static <T> T readJson(Reader reader, Class<T> type) {
-    PropertyIssues propertyIssues = PropertyIssues.of();
-    T t = readJson(reader, type, propertyIssues::add);
-    if (!propertyIssues.isEmpty())
-      throw new MappingException(new IllegalStateException(propertyIssues.toString()));
-    return t;
+public class Mapper {
+  public static <T> T fromJson(String json, Class<T> type) {
+    return throwMappingExceptionIfIssues(pIC -> fromJson(json, type, pIC));
   }
 
-  static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    ObjectMapper objectMapper = getPreConfiguredObjectMapper();
-    objectMapper.addHandler(new PropertyIssueCollectingDeserializationProblemHandler(propertyIssueConsumer));
-
-    try {
-      return objectMapper
-        .reader()
-        .forType(type)
-        .readValue(reader);
-    } catch (Exception e) {
-      throw new MappingException(e);
-    }
+  public static <T> T fromJson(String json, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).readValue(json, type));
   }
 
-  static <T> void writeJson(Writer writer, T obj) {
-    ObjectMapper objectMapper = getPreConfiguredObjectMapper();
-    objectMapper.setSerializerFactory(objectMapper.getSerializerFactory().withSerializerModifier(
-      new SetPropertiesAwareBeanSerializerModifier()
-    ));
-
-    try {
-      objectMapper.writeValue(writer, obj);
-    } catch (Exception e) {
-      throw new MappingException(e);
-    }
+  public static <T> T readJson(Reader reader, Class<T> type) {
+    return throwMappingExceptionIfIssues(pIC -> readJson(reader, type, pIC));
   }
 
-  class MappingException extends RuntimeException {
+  public static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).readValue(reader, type));
+  }
+
+  public static <T> String toJson(T obj) {
+    return mapWithObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
+  }
+
+  public static <T> void writeJson(Writer writer, T obj) {
+    mapWithObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+  }
+
+  public static class MappingException extends RuntimeException {
     public MappingException(Throwable cause) {
       super(cause);
     }
+  }
+
+  private static ObjectMapper prepForJsonMapping(ObjectMapper oM, Consumer<PropertyIssue> pIC) {
+    return oM
+      .disable(
+        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
+        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
+      )
+      .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(pIC));
+  }
+
+  private static ObjectMapper prepForPojoMapping(ObjectMapper oM) {
+    return oM
+      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
+        new SetPropertiesAwareBeanSerializerModifier()
+      ));
+  }
+
+  private static <T> T mapWithObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    try {
+      return cb.apply(getPreConfiguredObjectMapper());
+    } catch (Exception e) {
+      throw new MappingException(e);
+    }
+  }
+
+  private static ObjectMapper getPreConfiguredObjectMapper() {
+    return new ObjectMapper()
+      .registerModules(
+        new JavaTimeModule()
+      )
+      .setAnnotationIntrospector(new JsonNameAnnotationIntrospector())
+      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+  }
+
+  private static <T> T throwMappingExceptionIfIssues(Function<Consumer<PropertyIssue>, T> cb) {
+    PropertyIssues propertyIssues = PropertyIssues.of();
+    T t = cb.apply(propertyIssues::add);
+    if (!propertyIssues.isEmpty())
+      throw new MappingException(new IllegalStateException(propertyIssues.toString()));
+    return t;
   }
 }

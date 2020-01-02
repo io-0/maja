@@ -9,7 +9,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.io.*;
 import java.util.stream.Collectors;
 
-import static net.io_0.pb.TestUtils.loadJsonResource;
+import static net.io_0.pb.TestUtils.resourceAsReader;
 import static net.io_0.pb.mapping.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,7 +42,7 @@ public class MapToJsonTests {
   @Test
   public void mapToFlatJson() throws JSONException {
     // Given a flat JSON object
-    Reader jsonReader = loadJsonResource("SimplifiedFlat.json");
+    Reader jsonReader = resourceAsReader("SimplifiedFlat.json");
 
     // When it is mapped
     Flat pojo = Mapper.readJson(jsonReader, Flat.class);
@@ -51,11 +51,13 @@ public class MapToJsonTests {
     assertFlatDataPresent(pojo);
 
     // And mapping back should not loose information
-    String reference = new BufferedReader(loadJsonResource("SimplifiedFlat.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    String reference = new BufferedReader(resourceAsReader("SimplifiedFlat.json")).lines().collect(Collectors.joining(System.lineSeparator()));
     Writer jsonWriter = new StringWriter();
     Mapper.writeJson(jsonWriter, pojo);
+    String json = Mapper.toJson(pojo);
 
     JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
   }
 
   /**
@@ -64,7 +66,7 @@ public class MapToJsonTests {
   @Test
   public void mapToDeepJson() throws JSONException {
     // Given a deep JSON object
-    Reader jsonReader = loadJsonResource("SimplifiedDeep.json");
+    Reader jsonReader = resourceAsReader("SimplifiedDeep.json");
 
     // When it is mapped
     Deep pojo = Mapper.readJson(jsonReader, Deep.class);
@@ -73,11 +75,13 @@ public class MapToJsonTests {
     assertDeepDataPresent(pojo);
 
     // And mapping back should not loose information
-    String reference = new BufferedReader(loadJsonResource("SimplifiedDeep.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    String reference = new BufferedReader(resourceAsReader("SimplifiedDeep.json")).lines().collect(Collectors.joining(System.lineSeparator()));
     Writer jsonWriter = new StringWriter();
     Mapper.writeJson(jsonWriter, pojo);
+    String json = Mapper.toJson(pojo);
 
     JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
   }
 
   /**
@@ -86,7 +90,7 @@ public class MapToJsonTests {
   @Test
   public void mapToJsonWithNullAndAbsentProperties() throws JSONException {
     // Given a JSON object with nulls and absent properties
-    Reader jsonReader = loadJsonResource("SimplifiedPartial.json");
+    Reader jsonReader = resourceAsReader("SimplifiedPartial.json");
 
     // When it is mapped
     Nested pojo = Mapper.readJson(jsonReader, Nested.class);
@@ -98,11 +102,13 @@ public class MapToJsonTests {
     assertNestedDataMarkedCorrectly(pojo);
 
     // And mapping back should not loose information
-    String reference = new BufferedReader(loadJsonResource("SimplifiedPartial.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    String reference = new BufferedReader(resourceAsReader("SimplifiedPartial.json")).lines().collect(Collectors.joining(System.lineSeparator()));
     Writer jsonWriter = new StringWriter();
     Mapper.writeJson(jsonWriter, pojo);
+    String json = Mapper.toJson(pojo);
 
     JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
   }
 
   /**
@@ -111,19 +117,21 @@ public class MapToJsonTests {
   @Test
   public void mapToDeepNamedJson() throws JSONException {
     // Given a deep JSON object with java special names
-    Reader json = loadJsonResource("SimplifiedDeepNamed.json");
+    Reader jsonReader = resourceAsReader("SimplifiedDeepNamed.json");
 
     // When it is mapped
-    DeepNamed pojo = Mapper.readJson(json, DeepNamed.class);
+    DeepNamed pojo = Mapper.readJson(jsonReader, DeepNamed.class);
 
     // Then the data should be present in the POJO
     assertDeepNamedDataPresent(pojo);
 
     // And mapping back should not loose information
-    String reference = new BufferedReader(loadJsonResource("SimplifiedDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    String reference = new BufferedReader(resourceAsReader("SimplifiedDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
     Writer jsonWriter = new StringWriter();
     Mapper.writeJson(jsonWriter, pojo);
+    String json = Mapper.toJson(pojo);
 
     JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
   }
 }
