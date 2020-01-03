@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *   As an POJO to JSON mapper API consumer
  *
  *   I want to convert a POJO to a JSON object
- *   so that I can interact with API's that require JSON
+ *   so that I can interact with APIs that require JSON
  *
  *   and I want to be able to distinguish between absent and null JSON values
- *   so that I can call API's that implement e.g. RFC 7386 - JSON Merge Patch
+ *   so that I can call APIs that implement e.g. RFC 7386 - JSON Merge Patch
  *
  *   and I want to be able to deal with JSON names
  *   so that I don't get problems with Java naming conventions or enums

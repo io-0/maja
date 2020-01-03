@@ -1,6 +1,7 @@
 package net.io_0.pb.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
@@ -47,6 +48,10 @@ public class Mapper {
 
   public static <T> void writeJson(Writer writer, T obj) {
     mapWithObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+  }
+
+  public static <T> Map<String, Object> toMap(T obj) {
+    return mapWithObjectMapper(oM -> prepForPojoMapping(oM).convertValue(obj, new TypeReference<>() {}));
   }
 
   public static class MappingException extends RuntimeException {

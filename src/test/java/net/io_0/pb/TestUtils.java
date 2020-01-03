@@ -6,11 +6,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,4 +38,12 @@ public class TestUtils {
     assertTrue(CollectionUtils.isEqualCollection(expected, actual));
   }
 
+  public static Map<String, String> toStringMap(Map<String, Object> map, String... withoutKeys) {
+    return map
+      .entrySet()
+      .stream()
+      .filter(entry -> !Arrays.asList(withoutKeys).contains(entry.getKey()))
+      .map(entry -> Map.entry(entry.getKey(), entry.getValue().toString()))
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
 }
