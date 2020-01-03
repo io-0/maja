@@ -1,7 +1,7 @@
 package net.io_0.pb.models;
 
 import lombok.*;
-import net.io_0.pb.mapping.JsonName;
+import net.io_0.pb.mapping.PropertyName;
 import net.io_0.pb.SetPropertiesAware;
 
 import java.math.BigDecimal;
@@ -22,7 +22,7 @@ public class Nested extends SetPropertiesAware {
   private BigDecimal numberToBigDecimal;
   private List<String> stringArrayToStringList;
   private Set<Integer> numberArrayToIntegerSet;
-  @JsonName("bool")  private Boolean booleanToBoolean;
+  @PropertyName("bool")  private Boolean booleanToBoolean;
 
   public Nested setStringToUUID(UUID stringToUUID) {
     this.stringToUUID = stringToUUID;

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import net.io_0.pb.mapping.JsonName;
+import net.io_0.pb.mapping.PropertyName;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class DeepFlawed {
   private PrivateInner stringToObject;
   private PublicInner numberToObject;
   private StringEnum numberToEnum;
-  @JsonName("obj") private Nested objectToPojo;
+  @PropertyName("obj") private Nested objectToPojo;
   private Map<String, Object> objectToMap;
   private Map<Integer, Integer> objectToIntMap;
   private List<Nested> objectArrayToObjectList;

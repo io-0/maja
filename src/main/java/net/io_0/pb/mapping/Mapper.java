@@ -6,12 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
 import net.io_0.pb.PropertyIssue;
 import net.io_0.pb.PropertyIssues;
-import net.io_0.pb.mapping.jackson.JsonNameAnnotationIntrospector;
+import net.io_0.pb.mapping.jackson.PropertyNameAnnotationIntrospector;
 import net.io_0.pb.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import net.io_0.pb.mapping.jackson.SetPropertiesAwareBeanSerializerModifier;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -30,6 +31,14 @@ public class Mapper {
 
   public static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
     return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).readValue(reader, type));
+  }
+
+  public static <T> T fromMap(Map<String, ?> map, Class<T> type) {
+    return throwMappingExceptionIfIssues(pIC -> fromMap(map, type, pIC));
+  }
+
+  public static <T> T fromMap(Map<String, ?> map, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).convertValue(map, type));
   }
 
   public static <T> String toJson(T obj) {
@@ -77,7 +86,7 @@ public class Mapper {
       .registerModules(
         new JavaTimeModule()
       )
-      .setAnnotationIntrospector(new JsonNameAnnotationIntrospector())
+      .setAnnotationIntrospector(new PropertyNameAnnotationIntrospector())
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
   }
 
