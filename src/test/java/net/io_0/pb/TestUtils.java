@@ -27,7 +27,7 @@ public class TestUtils {
 
   public static String resourceAsString(String name) {
     try {
-      URI uri = net.io_0.pb.experiments.TestUtils.class.getClassLoader().getResource(name).toURI();
+      URI uri = TestUtils.class.getClassLoader().getResource(name).toURI();
       return Files.readString(Paths.get(uri));
     } catch (NullPointerException | URISyntaxException | IOException e) {
       throw new IllegalArgumentException("Can't load resource '" + name + "'");
