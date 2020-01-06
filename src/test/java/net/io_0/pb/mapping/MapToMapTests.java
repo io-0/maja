@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.io_0.pb.models.DeepNamed;
 import net.io_0.pb.models.Flat;
 import org.junit.jupiter.api.Test;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static net.io_0.pb.TestUtils.assertCollectionEquals;
@@ -76,7 +73,7 @@ public class MapToMapTests {
   /**
    * Scenario: It should be possible to have different names in Map and POJOs (and Enums)
    */
-  @Test
+  @Test @SuppressWarnings({"unchecked", "rawtypes"})
   public void mapToDeepNamedMap() {
     // Given a deep Map with java special names
     Map<String, Object> referenceMap = simplifiedDeepNamedMap;
@@ -91,8 +88,16 @@ public class MapToMapTests {
     Map<String, Object> map = Mapper.toMap(pojo);
 
     assertCollectionEquals(
-      toStringMap(referenceMap).entrySet(),
-      toStringMap(map).entrySet()
+      toStringMap(referenceMap, "obj", "objectArrayToObjectSet").entrySet(),
+      toStringMap(map, "obj", "objectArrayToObjectSet").entrySet()
+    );
+    assertCollectionEquals(
+      toStringMap((Map) referenceMap.get("obj")).entrySet(),
+      toStringMap((Map) map.get("obj")).entrySet()
+    );
+    assertCollectionEquals(
+      toStringMap((Map) ((Set) referenceMap.get("objectArrayToObjectSet")).toArray()[0]).entrySet(),
+      toStringMap((Map) ((List) map.get("objectArrayToObjectSet")).get(0)).entrySet()
     );
   }
 

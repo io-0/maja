@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
 import net.io_0.pb.PropertyIssue;
 import net.io_0.pb.PropertyIssues;
-import net.io_0.pb.mapping.jackson.PropertyNameAnnotationIntrospector;
+import net.io_0.pb.mapping.jackson.WithUnconventionalNameAnnotationIntrospector;
 import net.io_0.pb.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import net.io_0.pb.mapping.jackson.SetPropertiesAwareBeanSerializerModifier;
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class Mapper {
       .registerModules(
         new JavaTimeModule()
       )
-      .setAnnotationIntrospector(new PropertyNameAnnotationIntrospector())
+      .setAnnotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
   }
 

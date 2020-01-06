@@ -1,11 +1,11 @@
 package net.io_0.pb.models;
 
 import lombok.Getter;
-import net.io_0.pb.mapping.PropertyName;
+import net.io_0.pb.WithUnconventionalName;
 
 public enum StringEnumNamed {
-  @PropertyName("str 1") STR1(1),
-  @PropertyName("str-2") STR2(2),
+  @WithUnconventionalName("str 1") STR1(1),
+  @WithUnconventionalName("str-2") STR2(2),
   STR3(3);
 
   @Getter

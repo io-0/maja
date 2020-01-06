@@ -1,9 +1,6 @@
 package net.io_0.pb.models;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -16,6 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter @Setter
 @ToString
+@Builder
+@AllArgsConstructor
 public class Flat {
   private String stringToString;
   private StringEnum stringToEnum;

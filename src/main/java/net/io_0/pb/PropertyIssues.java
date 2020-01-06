@@ -2,6 +2,7 @@ package net.io_0.pb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PropertyIssues extends ArrayList<PropertyIssue> {
@@ -17,6 +18,10 @@ public class PropertyIssues extends ArrayList<PropertyIssue> {
 
   public boolean containsPropertyName(String propertyName) {
     return stream().anyMatch(pI -> pI.getPropertyName().equals(propertyName));
+  }
+
+  public Optional<String> getPropertyIssue(String propertyName) {
+    return stream().filter(pI -> pI.getPropertyName().equals(propertyName)).findFirst().map(PropertyIssue::getIssue);
   }
 
   @Override
