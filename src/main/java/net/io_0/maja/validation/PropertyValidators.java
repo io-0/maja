@@ -1,5 +1,6 @@
 package net.io_0.maja.validation;
 
+import net.io_0.maja.PojoProperty;
 import net.io_0.maja.Property;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssues;
@@ -85,7 +86,7 @@ public interface PropertyValidators {
       }
 
       Property<?> propertyToTest = (property.getValue() instanceof Map) ?
-        new Property<>(property.getName(), ((Map) property.getValue()).entrySet(), true) :
+        new PojoProperty<>(property.getName(), ((Map) property.getValue()).entrySet()) :
         property;
 
       return predicate.test((Property) propertyToTest) ?
@@ -105,7 +106,7 @@ public interface PropertyValidators {
         Map<String, T> values = ((Map<String, T>) property.getValue());
 
         return values.entrySet().stream()
-          .map(entry -> new Property<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue(), true))
+          .map(entry -> new PojoProperty<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue()))
           .map(validator::validate)
           .filter(Validation::isInvalid)
           .reduce(Validation::and)
@@ -115,7 +116,7 @@ public interface PropertyValidators {
         List<T> values = new ArrayList<>((Collection<T>) property.getValue());
 
         return IntStream.range(0, values.size())
-          .mapToObj(i -> new Property<>(String.format("%s.%d", property.getName(), i), values.get(i), true))
+          .mapToObj(i -> new PojoProperty<>(String.format("%s.%d", property.getName(), i), values.get(i)))
           .map(validator::validate)
           .filter(Validation::isInvalid)
           .reduce(Validation::and)

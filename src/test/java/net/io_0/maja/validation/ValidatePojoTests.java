@@ -1,9 +1,7 @@
 package net.io_0.maja.validation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.io_0.maja.Property;
-import net.io_0.maja.PropertyIssue;
-import net.io_0.maja.PropertyIssues;
+import net.io_0.maja.*;
 import net.io_0.maja.models.*;
 import net.io_0.maja.validation.Validation.Valid;
 import org.junit.jupiter.api.Test;
@@ -188,13 +186,19 @@ public class ValidatePojoTests {
     assertFalse(markedProperties.isPropertySet(BOOLEAN_TO_BOOLEAN));
 
     // If one tries to access a non existing property a explanatory exception is thrown
-    IllegalArgumentException iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Nested(), "property1"));
+    IllegalArgumentException iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Object(), "property1"));
+    assertEquals("Property with name 'property1' not found on Object", iAEx.getMessage());
+    iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Nested(), "property1"));
     assertEquals("Property with name 'property1' not found on Nested", iAEx.getMessage());
 
     // Same goes for other problems
-    iAEx = assertThrows(IllegalArgumentException.class, () -> Property.<String> from(new Nested() {
-      @Override public Boolean getBooleanToBoolean() { throw new IllegalStateException(); }
+    iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Object() {
+      public Boolean getBooleanToBoolean() { throw new IllegalStateException(); }
     }, BOOLEAN_TO_BOOLEAN));
+    assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
+    iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Nested() {
+      @Override public Boolean getBooleanToBoolean() { throw new IllegalStateException(); }
+    }, BOOLEAN_TO_BOOLEAN).isEmpty());
     assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
 
     // PropertyIssue is easy to work with
