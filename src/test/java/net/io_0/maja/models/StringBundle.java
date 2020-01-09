@@ -3,11 +3,11 @@ package net.io_0.maja.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.io_0.maja.SetPropertiesAware;
+import net.io_0.maja.PropertyBundle;
 
 @NoArgsConstructor
 @Getter @ToString
-public class StringBundle extends SetPropertiesAware {
+public class StringBundle extends PropertyBundle {
   public static final String ONE = "one";
   public static final String TWO = "two";
   public static final String THREE = "three";

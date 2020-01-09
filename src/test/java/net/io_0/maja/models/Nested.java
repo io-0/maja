@@ -1,8 +1,8 @@
 package net.io_0.maja.models;
 
 import lombok.*;
+import net.io_0.maja.PropertyBundle;
 import net.io_0.maja.WithUnconventionalName;
-import net.io_0.maja.SetPropertiesAware;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @NoArgsConstructor @Getter
 @ToString @EqualsAndHashCode(callSuper = false)
-public class Nested extends SetPropertiesAware {
+public class Nested extends PropertyBundle {
   public static final String STRING_TO_UUID = "stringToUUID";
   public static final String NUMBER_TO_BIG_DECIMAL = "numberToBigDecimal";
   public static final String STRING_ARRAY_TO_STRING_LIST = "stringArrayToStringList";

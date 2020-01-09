@@ -68,6 +68,6 @@ public class Property<T> {
   }
 
   private static boolean isPropertySet(Object pojo, String propertyName) {
-    return !(pojo instanceof SetPropertiesAware) || ((SetPropertiesAware) pojo).isPropertySet(propertyName);
+    return !(pojo instanceof PropertyBundle) || ((PropertyBundle) pojo).isPropertySet(propertyName);
   }
 }

@@ -3,12 +3,12 @@ package net.io_0.maja.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.io_0.maja.SetPropertiesAware;
+import net.io_0.maja.PropertyBundle;
 import java.math.BigDecimal;
 
 @NoArgsConstructor
 @Getter @ToString
-public class BigDecimalBundle extends SetPropertiesAware {
+public class BigDecimalBundle extends PropertyBundle {
   public static final String ONE = "one";
   public static final String TWO = "two";
   public static final String THREE = "three";

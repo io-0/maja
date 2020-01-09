@@ -9,7 +9,7 @@ import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssues;
 import net.io_0.maja.mapping.jackson.WithUnconventionalNameAnnotationIntrospector;
 import net.io_0.maja.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
-import net.io_0.maja.mapping.jackson.SetPropertiesAwareBeanSerializerModifier;
+import net.io_0.maja.mapping.jackson.PropertyBundleBeanSerializerModifier;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -74,7 +74,7 @@ public class Mapper {
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
       .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
-        new SetPropertiesAwareBeanSerializerModifier()
+        new PropertyBundleBeanSerializerModifier()
       ));
   }
 

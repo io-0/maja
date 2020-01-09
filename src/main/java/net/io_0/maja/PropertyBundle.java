@@ -8,7 +8,7 @@ import java.util.Set;
  * Can only work if all properties are set via setter and each setter calls markPropertySet.
  * This means one can't use e.g. lombok @Setter, @AllArgsConstructor, or @Builder
  */
-public abstract class SetPropertiesAware {
+public abstract class PropertyBundle {
   private Set<String> setProperties = new HashSet<>();
 
   /**

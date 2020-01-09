@@ -1,14 +1,14 @@
 package net.io_0.maja.models;
 
 import lombok.*;
-import net.io_0.maja.SetPropertiesAware;
+import net.io_0.maja.PropertyBundle;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @NoArgsConstructor
 @Getter @ToString
-public class Validatable extends SetPropertiesAware {
+public class Validatable extends PropertyBundle {
   public static final String NOT_NULL = "notNull";
   public static final String REQUIRED = "required";
   public static final String PATTERN_STRINGS = "patternStrings";

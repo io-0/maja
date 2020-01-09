@@ -205,11 +205,11 @@ public class ValidatePojoTests {
 
   /**
    * Scenario: A validator (property constraints based) should be able to distinguish between absent and null values
-   *           given a POJO that implements SetPropertiesAware correctly
+   *           given a POJO that implements PropertyBundle correctly
    */
   @Test
   public void validateAbsentAndNull() {
-    // Given a POJO (that implements SetPropertiesAware correctly) with absent and null values
+    // Given a POJO (that implements PropertyBundle correctly) with absent and null values
     Nested pojo = new Nested().setStringToUUID(null).setBooleanToBoolean(false);
 
     // When a validator is built
@@ -234,7 +234,7 @@ public class ValidatePojoTests {
    */
   @Test
   public void validateDeepAndNested() {
-    // Given a POJO (that implements SetPropertiesAware correctly) witch is deep and nested
+    // Given a POJO (that implements PropertyBundle correctly) witch is deep and nested
     Validatable pojo = deepAndNested;
 
     // When a validator is built
@@ -250,7 +250,7 @@ public class ValidatePojoTests {
    */
   @Test
   public void rAV() {
-    // Given a POJO (that implements SetPropertiesAware correctly) witch is flawed
+    // Given a POJO (that implements PropertyBundle correctly) witch is flawed
     Validatable pojo = deepAndNestedAndFlawed;
 
     // When a validator is built
