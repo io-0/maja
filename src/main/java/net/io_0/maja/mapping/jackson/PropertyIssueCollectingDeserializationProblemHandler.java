@@ -25,43 +25,44 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
 
   @Override
   public Object handleWeirdStringValue(DeserializationContext ctx, Class<?> targetType, String valueToConvert, String failureMsg) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", valueToConvert, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird String Value", String.format("%s, %s", valueToConvert, failureMsg));
   }
 
   @Override
   public Object handleInstantiationProblem(DeserializationContext ctx, Class<?> instClass, Object argument, Throwable t) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", argument, t.getMessage()));
+    return addErrorAndReturnNull(ctx, "Instantiation Problem", String.format("%s, %s", argument, t.getMessage()));
   }
 
   @Override
   public Object handleWeirdKey(DeserializationContext ctx, Class<?> rawKeyType, String keyValue, String failureMsg) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", keyValue, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird Key", String.format("%s, %s", keyValue, failureMsg));
   }
 
   @Override
   public Object handleWeirdNumberValue(DeserializationContext ctx, Class<?> targetType, Number valueToConvert, String failureMsg) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", valueToConvert, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird Number Value", String.format("%s, %s", valueToConvert, failureMsg));
   }
 
   @Override
   public Object handleUnexpectedToken(DeserializationContext ctx, JavaType targetType, JsonToken t, JsonParser p, String failureMsg) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", t, failureMsg));
+    return addErrorAndReturnNull(ctx, "Unexpected Token", String.format("%s, %s", t, failureMsg));
   }
 
   @Override
   public Object handleMissingInstantiator(DeserializationContext ctx, Class<?> instClass, ValueInstantiator instantiator, JsonParser p, String msg) {
-    return addErrorAndReturnNull(ctx, String.format("%s, %s", instantiator, msg));
+    return addErrorAndReturnNull(ctx, "Missing Instantiator", String.format("%s, %s", instantiator, msg));
   }
 
   /**
    * Add error to map in context and return null as value substitute
    *
    * @param ctx context to get error map from and field name
-   * @param msg message to add as error
+   * @param code code to add as error code
+   * @param message message to add as error message
    * @return null, as value substitute
    */
-  private Object addErrorAndReturnNull(DeserializationContext ctx, String msg) {
-    propertyIssueConsumer.accept(PropertyIssue.of(extractAttributeName(ctx.getParser()), removeLineBreaks(msg)));
+  private Object addErrorAndReturnNull(DeserializationContext ctx, String code, String message) {
+    propertyIssueConsumer.accept(PropertyIssue.of(extractAttributeName(ctx.getParser()), code, removeLineBreaks(message)));
 
     return null;
   }

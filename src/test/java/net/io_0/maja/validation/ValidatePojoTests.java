@@ -2,6 +2,7 @@ package net.io_0.maja.validation;
 
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.*;
+import net.io_0.maja.PropertyIssue.Issue;
 import net.io_0.maja.models.*;
 import net.io_0.maja.validation.Validation.Valid;
 import org.junit.jupiter.api.Test;
@@ -45,31 +46,32 @@ public class ValidatePojoTests {
    */
   @Test
   public void buildBusinessLogicValidatorAndRunIt() {
-    // Given a business rule and error message
+    // Given a business rule and error message and code
     Predicate<Flat> intAndLongNumberMustBePresentAndMatch = item ->
       item.getNumberToInteger() != null && item.getNumberToLong() != null &&
       item.getNumberToInteger().equals(item.getNumberToLong().intValue());
+    String errorCode = "Business Rule Violation";
     String errorMessage = "numberToInteger value must match numberToLong";
 
     // When a validator is built compact and with ease
     Validator<Flat> intAndLongNumberValidator = item ->
-      intAndLongNumberMustBePresentAndMatch.test(item) ? valid(item) : invalid(PropertyIssue.of("numberToInteger, numberToLong", errorMessage));
+      intAndLongNumberMustBePresentAndMatch.test(item) ? valid(item) : invalid(PropertyIssue.of("numberToInteger, numberToLong", errorCode, errorMessage));
 
     // Then it should validate correctly
     Validation<Flat> invalidBecauseMissing = intAndLongNumberValidator.validate(Flat.builder().build());
     assertTrue(invalidBecauseMissing.isInvalid());
     assertTrue(invalidBecauseMissing.getPropertyIssues().containsPropertyName("numberToInteger, numberToLong"));
     assertEquals(
-      Optional.of("numberToInteger value must match numberToLong"),
-      invalidBecauseMissing.getPropertyIssues().getPropertyIssue("numberToInteger, numberToLong")
+      Optional.of("Business Rule Violation"),
+      invalidBecauseMissing.getPropertyIssues().getPropertyIssue("numberToInteger, numberToLong").map(Issue::getCode)
     );
 
     Validation<Flat> invalidBecauseMismatch = intAndLongNumberValidator.validate(Flat.builder().numberToInteger(2).numberToLong(4L).build());
     assertTrue(invalidBecauseMismatch.isInvalid());
     assertTrue(invalidBecauseMismatch.getPropertyIssues().containsPropertyName("numberToInteger, numberToLong"));
     assertEquals(
-      Optional.of("numberToInteger value must match numberToLong"),
-      invalidBecauseMismatch.getPropertyIssues().getPropertyIssue("numberToInteger, numberToLong")
+      Optional.of("Business Rule Violation"),
+      invalidBecauseMismatch.getPropertyIssues().getPropertyIssue("numberToInteger, numberToLong").map(Issue::getCode)
     );
 
     Validation<Flat> valid = intAndLongNumberValidator.validate(Flat.builder().numberToInteger(2).numberToLong(2L).build());
@@ -83,7 +85,7 @@ public class ValidatePojoTests {
   public void buildPropertyConstraintsValidatorAndRunIt() {
     // Given property constraints
     //   flat.stringToString must be present and at least 4 chars long
-    //   flat.stringToInteger can be null or must be greater than 18
+    //   flat.stringToInteger can be null or Exclusive Minimum Violation, 18
     //   flat.stringArrayToStringList must be present and has at least 2 items and each is at least 4 chars long
 
     // When a validator is built compact and with ease
@@ -98,8 +100,10 @@ public class ValidatePojoTests {
     assertTrue(invalidBecauseEmpty.isInvalid());
     assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("stringToString"));
     assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("stringArrayToStringList"));
-    assertEquals(Optional.of("Can't be literally null"), invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringToString"));
-    assertEquals(Optional.of("Can't be literally null"), invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringArrayToStringList"));
+    assertEquals(Optional.of("Not Null Violation"),
+      invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringToString").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringArrayToStringList").map(Issue::getCode));
 
     Validation<Flat> invalid = flatValidator.validate(
       Flat.builder().stringToString("two").stringToInteger(7).stringArrayToStringList(List.of("one")).build()
@@ -108,9 +112,12 @@ public class ValidatePojoTests {
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringToString"));
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringToInteger"));
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringArrayToStringList"));
-    assertEquals(Optional.of("Must be longer than 4 characters"), invalid.getPropertyIssues().getPropertyIssue("stringToString"));
-    assertEquals(Optional.of("Must be 18 or greater"), invalid.getPropertyIssues().getPropertyIssue("stringToInteger"));
-    assertEquals(Optional.of("Must contain 2 items or more"), invalid.getPropertyIssues().getPropertyIssue("stringArrayToStringList"));
+    assertEquals(Optional.of("Min Length Violation, 4"),
+      invalid.getPropertyIssues().getPropertyIssue("stringToString").map(Issue::getCode));
+    assertEquals(Optional.of("Minimum Violation, 18"),
+      invalid.getPropertyIssues().getPropertyIssue("stringToInteger").map(Issue::getCode));
+    assertEquals(Optional.of("Min Items Violation, 2"),
+      invalid.getPropertyIssues().getPropertyIssue("stringArrayToStringList").map(Issue::getCode));
 
     Validation<Flat> valid = flatValidator.validate(
       Flat.builder().stringToString("four").stringToInteger(21).stringArrayToStringList(List.of("five", "seven")).build());
@@ -161,15 +168,18 @@ public class ValidatePojoTests {
 
     // Validators can be combined
     Validator<Object> validator1 = obj -> invalid(PropertyIssues.of());
-    Validator<Object> validator2 = obj -> invalid(PropertyIssue.of("property1", "issue1"));
-    Validator<Object> validator3 = obj -> invalid(PropertyIssues.of(PropertyIssue.of("property2", "issue2"), PropertyIssue.of("property3", "issue3")));
+    Validator<Object> validator2 = obj -> invalid(PropertyIssue.of("property1", "code1", "issue1"));
+    Validator<Object> validator3 = obj -> invalid(PropertyIssues.of(
+      PropertyIssue.of("property2", "code2", "issue2"),
+      PropertyIssue.of("property3", "code3", "issue3"))
+    );
     Validator<Object> combinedValidator = validator1.and(validator2).and(validator3);
     Validation<Object> combinedValidation = combinedValidator.validate(null);
     assertTrue(combinedValidation.isInvalid());
     assertEquals(3, combinedValidation.getPropertyIssues().size());
-    assertEquals(Optional.of("issue1"), combinedValidation.getPropertyIssues().getPropertyIssue("property1"));
-    assertEquals(Optional.of("issue2"), combinedValidation.getPropertyIssues().getPropertyIssue("property2"));
-    assertEquals(Optional.of("issue3"), combinedValidation.getPropertyIssues().getPropertyIssue("property3"));
+    assertEquals(Optional.of("code1"), combinedValidation.getPropertyIssues().getPropertyIssue("property1").map(Issue::getCode));
+    assertEquals(Optional.of("code2"), combinedValidation.getPropertyIssues().getPropertyIssue("property2").map(Issue::getCode));
+    assertEquals(Optional.of("code3"), combinedValidation.getPropertyIssues().getPropertyIssue("property3").map(Issue::getCode));
 
     // Code can be generalized, even Validation.valid getPropertyIssues exists but is always empty
     assertTrue(Validation.valid(null).getPropertyIssues().isEmpty());
@@ -202,10 +212,11 @@ public class ValidatePojoTests {
     assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
 
     // PropertyIssue is easy to work with
-    PropertyIssue pI = new PropertyIssue("name", "issue");
+    PropertyIssue pI = new PropertyIssue("name", Issue.of("code", "issue"));
     assertEquals("name", pI.getPropertyName());
-    assertEquals("issue", pI.getIssue());
-    assertEquals("PropertyIssue(propertyName=name, issue=issue)", pI.toString());
+    assertEquals("code", pI.getIssue().getCode());
+    assertEquals("issue", pI.getIssue().getMessage());
+    assertEquals("PropertyIssue(propertyName=name, issue=Issue(code=code, message=issue))", pI.toString());
   }
 
   /**
@@ -230,8 +241,8 @@ public class ValidatePojoTests {
     assertTrue(invalid.getPropertyIssues().containsPropertyName(STRING_TO_UUID));
     assertTrue(invalid.getPropertyIssues().containsPropertyName(NUMBER_TO_BIG_DECIMAL));
     assertFalse(invalid.getPropertyIssues().containsPropertyName(BOOLEAN_TO_BOOLEAN));
-    assertEquals(Optional.of("Can't be literally null"), invalid.getPropertyIssues().getPropertyIssue(STRING_TO_UUID));
-    assertEquals(Optional.of("Is required but missing"), invalid.getPropertyIssues().getPropertyIssue(NUMBER_TO_BIG_DECIMAL));
+    assertEquals(Optional.of("Not Null Violation"), invalid.getPropertyIssues().getPropertyIssue(STRING_TO_UUID).map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"), invalid.getPropertyIssues().getPropertyIssue(NUMBER_TO_BIG_DECIMAL).map(Issue::getCode));
   }
 
   /**
@@ -239,7 +250,7 @@ public class ValidatePojoTests {
    */
   @Test
   public void validateDeepAndNested() {
-    // Given a POJO (that implements PropertyBundle correctly) witch is deep and nested
+    // Given a POJO (that implements PropertyBundle correctly) which is deep and nested
     Validatable pojo = deepAndNested;
 
     // When a validator is built
@@ -255,7 +266,7 @@ public class ValidatePojoTests {
    */
   @Test
   public void rAV() {
-    // Given a POJO (that implements PropertyBundle correctly) witch is flawed
+    // Given a POJO (that implements PropertyBundle correctly) which is flawed
     Validatable pojo = deepAndNestedAndFlawed;
 
     // When a validator is built
@@ -264,53 +275,100 @@ public class ValidatePojoTests {
     // Then it should validate correctly and contain all errors in one report (we count propertyIssues as "report")
     Validation<Validatable> inValid = validator.validate(pojo);
     assertTrue(inValid.isInvalid());
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("notNull"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("required"));
-    assertEquals(Optional.of("Must match '^\\d+$' pattern"), inValid.getPropertyIssues().getPropertyIssue("patternStrings.one"));
-    assertEquals(Optional.of("Must at least contain 1 number, 1 lower case letter, 1 upper case letter and 1 special character"), inValid.getPropertyIssues().getPropertyIssue("patternStrings.two"));
-    assertEquals(Optional.of("Must be a sequence of octets"), inValid.getPropertyIssues().getPropertyIssue("patternStrings.three"));
-    assertEquals(Optional.of("Must be base64 format"), inValid.getPropertyIssues().getPropertyIssue("patternStrings.four"));
-    assertEquals(Optional.of("Must fit email format"), inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.one"));
-    assertEquals(Optional.of("Must fit hostname format"), inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.two"));
-    assertEquals(Optional.of("Must fit IP v4 format"), inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.three"));
-    assertEquals(Optional.of("Must fit IP v6 format"), inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.four"));
-    assertEquals(Optional.of("Must be shorter than 4 characters"), inValid.getPropertyIssues().getPropertyIssue("lengthRestrictedStrings.one"));
-    assertEquals(Optional.of("Must be longer than 4 characters"), inValid.getPropertyIssues().getPropertyIssue("lengthRestrictedStrings.two"));
-    assertEquals(Optional.of("Must be lessen than 5"), inValid.getPropertyIssues().getPropertyIssue("numbers.one"));
-    assertEquals(Optional.of("Must be greater than 3"), inValid.getPropertyIssues().getPropertyIssue("numbers.two"));
-    assertEquals(Optional.of("Must be 4 or lesser"), inValid.getPropertyIssues().getPropertyIssue("numbers.three"));
-    assertEquals(Optional.of("Must be 4 or greater"), inValid.getPropertyIssues().getPropertyIssue("numbers.four"));
-    assertEquals(Optional.of("Must be lessen than 4.5"), inValid.getPropertyIssues().getPropertyIssue("moreNumbers.one"));
-    assertEquals(Optional.of("Must be greater than 4.3"), inValid.getPropertyIssues().getPropertyIssue("moreNumbers.two"));
-    assertEquals(Optional.of("Must be 4.4 or greater"), inValid.getPropertyIssues().getPropertyIssue("moreNumbers.four"));
-    assertEquals(Optional.of("Must be 4.5 or lesser"), inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.one"));
-    assertEquals(Optional.of("Must be 4.3 or greater"), inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.two"));
-    assertEquals(Optional.of("Must be a multiple of 2.2"), inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.three"));
-    assertEquals(Optional.of("Must be a multiple of 1.1"), inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.four"));
-    assertEquals(Optional.of("Must contain 4 items or less"), inValid.getPropertyIssues().getPropertyIssue("numberList"));
-    assertEquals(Optional.of("Must contain 4 items or more"), inValid.getPropertyIssues().getPropertyIssue("numberSet"));
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("samePojo.notNull"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("samePojo.required"));
-    assertEquals(Optional.of("Must contain 5 items or less"), inValid.getPropertyIssues().getPropertyIssue("pojos"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.0.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.0.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.1.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.1.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.2.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.2.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.3.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.3.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.4.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.4.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.5.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.5.booleanToBoolean"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.6.stringToUUID"));
-    assertEquals(Optional.of("Is required but missing"), inValid.getPropertyIssues().getPropertyIssue("pojos.6.booleanToBoolean"));
-    assertEquals(Optional.of("Must contain 3 items or more"), inValid.getPropertyIssues().getPropertyIssue("pojoMap"));
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("pojoMap.one.stringToUUID"));
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("pojoMap.one.booleanToBoolean"));
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("pojoMap.two.stringToUUID"));
-    assertEquals(Optional.of("Can't be literally null"), inValid.getPropertyIssues().getPropertyIssue("pojoMap.two.booleanToBoolean"));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("notNull").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("required").map(Issue::getCode));
+    assertEquals(Optional.of("Pattern Violation, '^\\d+$'"),
+      inValid.getPropertyIssues().getPropertyIssue("patternStrings.one").map(Issue::getCode));
+    assertEquals(Optional.of("Password Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("patternStrings.two").map(Issue::getCode));
+    assertEquals(Optional.of("Binary Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("patternStrings.three").map(Issue::getCode));
+    assertEquals(Optional.of("Byte Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("patternStrings.four").map(Issue::getCode));
+    assertEquals(Optional.of("Email Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.one").map(Issue::getCode));
+    assertEquals(Optional.of("Hostname Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.two").map(Issue::getCode));
+    assertEquals(Optional.of("IP V4 Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.three").map(Issue::getCode));
+    assertEquals(Optional.of("IP V6 Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.four").map(Issue::getCode));
+    assertEquals(Optional.of("Max Length Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("lengthRestrictedStrings.one").map(Issue::getCode));
+    assertEquals(Optional.of("Min Length Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("lengthRestrictedStrings.two").map(Issue::getCode));
+    assertEquals(Optional.of("Exclusive Maximum Violation, 5"),
+      inValid.getPropertyIssues().getPropertyIssue("numbers.one").map(Issue::getCode));
+    assertEquals(Optional.of("Exclusive Minimum Violation, 3"),
+      inValid.getPropertyIssues().getPropertyIssue("numbers.two").map(Issue::getCode));
+    assertEquals(Optional.of("Maximum Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("numbers.three").map(Issue::getCode));
+    assertEquals(Optional.of("Minimum Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("numbers.four").map(Issue::getCode));
+    assertEquals(Optional.of("Exclusive Maximum Violation, 4.5"),
+      inValid.getPropertyIssues().getPropertyIssue("moreNumbers.one").map(Issue::getCode));
+    assertEquals(Optional.of("Exclusive Minimum Violation, 4.3"),
+      inValid.getPropertyIssues().getPropertyIssue("moreNumbers.two").map(Issue::getCode));
+    assertEquals(Optional.of("Minimum Violation, 4.4"),
+      inValid.getPropertyIssues().getPropertyIssue("moreNumbers.four").map(Issue::getCode));
+    assertEquals(Optional.of("Maximum Violation, 4.5"),
+      inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.one").map(Issue::getCode));
+    assertEquals(Optional.of("Minimum Violation, 4.3"),
+      inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.two").map(Issue::getCode));
+    assertEquals(Optional.of("Multiple Of Violation, 2.2"),
+      inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.three").map(Issue::getCode));
+    assertEquals(Optional.of("Multiple Of Violation, 1.1"),
+      inValid.getPropertyIssues().getPropertyIssue("evenMoreNumbers.four").map(Issue::getCode));
+    assertEquals(Optional.of("Max Items Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("numberList").map(Issue::getCode));
+    assertEquals(Optional.of("Min Items Violation, 4"),
+      inValid.getPropertyIssues().getPropertyIssue("numberSet").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("samePojo.notNull").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("samePojo.required").map(Issue::getCode));
+    assertEquals(Optional.of("Max Items Violation, 5"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.0.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.0.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.1.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.1.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.2.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.2.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.3.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.3.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.4.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.4.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.5.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.5.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.6.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Required Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojos.6.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Min Items Violation, 3"),
+      inValid.getPropertyIssues().getPropertyIssue("pojoMap").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojoMap.one.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojoMap.one.booleanToBoolean").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojoMap.two.stringToUUID").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("pojoMap.two.booleanToBoolean").map(Issue::getCode));
   }
 
   /**
@@ -333,7 +391,7 @@ public class ValidatePojoTests {
     Validation<DeepNamed> invalid = deepNamedValidator.validate(invalidPojo);
     assertTrue(invalid.isInvalid());
     assertTrue(invalid.getPropertyIssues().containsPropertyName("obj.bool"));
-    assertEquals(Optional.of("Is required but missing"), invalid.getPropertyIssues().getPropertyIssue("obj.bool"));
+    assertEquals(Optional.of("Required Violation"), invalid.getPropertyIssues().getPropertyIssue("obj.bool").map(Issue::getCode));
   }
 
   private static Validator<Validatable> deepAndNestedValidator = of(

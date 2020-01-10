@@ -1,5 +1,7 @@
 package net.io_0.maja;
 
+import net.io_0.maja.PropertyIssue.Issue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -20,7 +22,7 @@ public class PropertyIssues extends ArrayList<PropertyIssue> {
     return stream().anyMatch(pI -> pI.getPropertyName().equals(propertyName));
   }
 
-  public Optional<String> getPropertyIssue(String propertyName) {
+  public Optional<Issue> getPropertyIssue(String propertyName) {
     return stream().filter(pI -> pI.getPropertyName().equals(propertyName)).findFirst().map(PropertyIssue::getIssue);
   }
 
