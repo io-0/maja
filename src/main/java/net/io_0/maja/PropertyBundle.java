@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static net.io_0.maja.PropertyBuildingUtils.annotatedNameToJavaName;
 import static net.io_0.maja.PropertyBuildingUtils.extractProperty;
 
@@ -42,9 +43,11 @@ public abstract class PropertyBundle {
    */
   public <T> Property<T> getProperty(String name) {
     return extractProperty(this, name, this.<T> constructWith(name, name))
-      .or(() -> annotatedNameToJavaName(this, name).flatMap(javaName -> extractProperty(this, javaName, constructWith(name, javaName))))
+      .or(() -> annotatedNameToJavaName(this, name).flatMap(javaName ->
+        extractProperty(this, javaName, constructWith(name, javaName))
+      ))
       .orElseThrow(() -> new IllegalArgumentException(
-        String.format("Property with name '%s' not found on %s", name, this.getClass().getSimpleName())
+        format("Property with name '%s' not found on %s", name, this.getClass().getSimpleName())
       ));
   }
 
@@ -57,7 +60,7 @@ public abstract class PropertyBundle {
           return (T) propertyDescriptor.getReadMethod().invoke(this);
         } catch (IllegalAccessException | InvocationTargetException e) {
           throw new IllegalArgumentException(
-            String.format("Couldn't access property with name '%s' on %s", javaName, this.getClass().getSimpleName()), e
+            format("Couldn't access property with name '%s' on %s", javaName, this.getClass().getSimpleName()), e
           );
         }
       };

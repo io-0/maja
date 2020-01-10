@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -42,7 +43,7 @@ public class PropertyTest {
     Property<Boolean> property = new Nested().setBooleanToBoolean(false).getProperty(Nested.BOOLEAN_TO_BOOLEAN);
 
     // When a callback for values is supplied
-    Consumer<Boolean> cb = b -> cbCalled.set(String.format("%s, %s", cbCalled.get(), b));
+    Consumer<Boolean> cb = b -> cbCalled.set(format("%s, %s", cbCalled.get(), b));
     property.ifPresent(cb);
     property.ifPresent(cb, () -> cb.accept(true));
 
@@ -60,7 +61,7 @@ public class PropertyTest {
     Property<Boolean> property = new Nested().setBooleanToBoolean(null).getProperty(Nested.BOOLEAN_TO_BOOLEAN);
 
     // When a callback for values is supplied
-    Consumer<Boolean> cb = b -> cbCalled.set(String.format("%s, %s", cbCalled.get(), b));
+    Consumer<Boolean> cb = b -> cbCalled.set(format("%s, %s", cbCalled.get(), b));
     property.ifPresent(cb);
     property.ifPresent(cb, () -> cb.accept(true));
 

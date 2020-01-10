@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static java.lang.String.format;
+
 @RequiredArgsConstructor
 @Getter @ToString
 public class PropertyIssue {
@@ -34,7 +36,7 @@ public class PropertyIssue {
 
     @Override
     public String toString() {
-      return String.format("Issue(code=%s, message=%s)", code, message);
+      return format("Issue(code=%s, message=%s)", code, message);
     }
   }
 }

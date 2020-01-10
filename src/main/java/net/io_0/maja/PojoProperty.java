@@ -19,7 +19,9 @@ public class PojoProperty<T> implements Property<T> {
 
   public static <T> Property<T> from(Object pojo, String propertyName) {
     return PropertyBuildingUtils.<T> extractProperty(pojo, propertyName, constructWith(pojo, propertyName, propertyName))
-      .or(() -> annotatedNameToJavaName(pojo, propertyName).flatMap(javaName -> extractProperty(pojo, javaName, constructWith(pojo, propertyName, javaName))))
+      .or(() -> annotatedNameToJavaName(pojo, propertyName).flatMap(javaName ->
+        extractProperty(pojo, javaName, constructWith(pojo, propertyName, javaName))
+      ))
       .orElseThrow(() -> new IllegalArgumentException(
         String.format("Property with name '%s' not found on %s", propertyName, pojo.getClass().getSimpleName())
       ));

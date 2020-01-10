@@ -7,6 +7,8 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.lang.String.format;
+
 public interface PropertyBuildingUtils {
   static <T> Optional<Property<T>> extractProperty(Object model, String propertyName, Function<PropertyDescriptor, Property<T>> constructor) {
     try {
@@ -17,7 +19,7 @@ public interface PropertyBuildingUtils {
       }
     } catch (IntrospectionException e) {
       throw new IllegalArgumentException(
-        String.format("Couldn't access property with name '%s' on %s", propertyName, model.getClass().getSimpleName()), e
+        format("Couldn't access property with name '%s' on %s", propertyName, model.getClass().getSimpleName()), e
       );
     }
     return Optional.empty();

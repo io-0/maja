@@ -11,14 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static net.io_0.maja.validation.Validation.invalid;
 
 public interface PropertyValidators {
   static PropertyValidator<String> pattern(String parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.regexMatch(parameter)),
-      Issue.of(String.format("Pattern Violation, '%s'", parameter), String.format("Must match '%s' pattern", parameter))
+      Issue.of(format("Pattern Violation, '%s'", parameter), format("Must match '%s' pattern", parameter))
     );
   }
 
@@ -63,49 +65,49 @@ public interface PropertyValidators {
   static PropertyValidator<String> maxLength(Integer parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lengthLte(parameter)),
-      Issue.of(String.format("Max Length Violation, %s", parameter), String.format("Must be shorter than %s characters", parameter))
+      Issue.of(format("Max Length Violation, %s", parameter), format("Must be shorter than %s characters", parameter))
     );
   }
 
   static PropertyValidator<String> minLength(Integer parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lengthGte(parameter)),
-      Issue.of(String.format("Min Length Violation, %s", parameter), String.format("Must be longer than %s characters", parameter))
+      Issue.of(format("Min Length Violation, %s", parameter), format("Must be longer than %s characters", parameter))
     );
   }
 
   static PropertyValidator<? extends Number> exclusiveMaximum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gt(parameter)),
-      Issue.of(String.format("Exclusive Maximum Violation, %s", parameter), String.format("Must be lessen than %s", parameter))
+      Issue.of(format("Exclusive Maximum Violation, %s", parameter), format("Must be lessen than %s", parameter))
     );
   }
 
   static PropertyValidator<? extends Number> exclusiveMinimum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lt(parameter)),
-      Issue.of(String.format("Exclusive Minimum Violation, %s", parameter), String.format("Must be greater than %s", parameter))
+      Issue.of(format("Exclusive Minimum Violation, %s", parameter), format("Must be greater than %s", parameter))
     );
   }
 
   static PropertyValidator<? extends Number> maximum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gte(parameter)),
-      Issue.of(String.format("Maximum Violation, %s", parameter), String.format("Must be %s or lesser", parameter))
+      Issue.of(format("Maximum Violation, %s", parameter), format("Must be %s or lesser", parameter))
     );
   }
 
   static PropertyValidator<? extends Number> minimum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lte(parameter)),
-      Issue.of(String.format("Minimum Violation, %s", parameter), String.format("Must be %s or greater", parameter))
+      Issue.of(format("Minimum Violation, %s", parameter), format("Must be %s or greater", parameter))
     );
   }
 
   static PropertyValidator<? extends Number> multipleOf(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)),
-      Issue.of(String.format("Multiple Of Violation, %s", parameter), String.format("Must be a multiple of %s", parameter))
+      Issue.of(format("Multiple Of Violation, %s", parameter), format("Must be a multiple of %s", parameter))
     );
   }
 
@@ -122,14 +124,14 @@ public interface PropertyValidators {
   static PropertyValidator<?> maxItems(Integer parameter) {
     return mapOrCollection(
       PropertyPredicates.sizeLte(parameter),
-      Issue.of(String.format("Max Items Violation, %s", parameter), String.format("Must contain %s items or less", parameter))
+      Issue.of(format("Max Items Violation, %s", parameter), format("Must contain %s items or less", parameter))
     );
   }
 
   static PropertyValidator<?> minItems(Integer parameter) {
     return mapOrCollection(
       PropertyPredicates.sizeGte(parameter),
-      Issue.of(String.format("Min Items Violation, %s", parameter), String.format("Must contain %s items or more", parameter))
+      Issue.of(format("Min Items Violation, %s", parameter), format("Must contain %s items or more", parameter))
     );
   }
 
@@ -157,27 +159,25 @@ public interface PropertyValidators {
         return Validation.valid(property);
       }
 
+      Stream<PojoProperty<T>> propertyStream;
       if (property.getValue() instanceof Map) {
         Map<String, T> values = ((Map<String, T>) property.getValue());
 
-        return values.entrySet().stream()
-          .map(entry -> new PojoProperty<>(String.format("%s.%s", property.getName(), entry.getKey()), entry.getValue()))
-          .map(validator::validate)
-          .filter(Validation::isInvalid)
-          .reduce(Validation::and)
-          .map(validation -> Validation.of(property, validation.getPropertyIssues()))
-          .orElse(Validation.valid(property));
+        propertyStream = values.entrySet().stream()
+          .map(entry -> new PojoProperty<>(format("%s.%s", property.getName(), entry.getKey()), entry.getValue()));
       } else {
         List<T> values = new ArrayList<>((Collection<T>) property.getValue());
 
-        return IntStream.range(0, values.size())
-          .mapToObj(i -> new PojoProperty<>(String.format("%s.%d", property.getName(), i), values.get(i)))
-          .map(validator::validate)
-          .filter(Validation::isInvalid)
-          .reduce(Validation::and)
-          .map(validation -> Validation.of(property, validation.getPropertyIssues()))
-          .orElse(Validation.valid(property));
+        propertyStream = IntStream.range(0, values.size())
+          .mapToObj(i -> new PojoProperty<>(format("%s.%d", property.getName(), i), values.get(i)));
       }
+
+      return propertyStream
+        .map(validator::validate)
+        .filter(Validation::isInvalid)
+        .reduce(Validation::and)
+        .map(validation -> Validation.of(property, validation.getPropertyIssues()))
+        .orElse(Validation.valid(property));
     };
   }
 
@@ -194,7 +194,7 @@ public interface PropertyValidators {
       }
 
       return invalid(PropertyIssues.of(validation.getPropertyIssues().stream()
-        .map(propertyIssue -> PropertyIssue.of(String.format("%s.%s", property.getName(), propertyIssue.getPropertyName()), propertyIssue.getIssue()))
+        .map(propertyIssue -> PropertyIssue.of(format("%s.%s", property.getName(), propertyIssue.getPropertyName()), propertyIssue.getIssue()))
         .toArray(PropertyIssue[]::new))
       );
     };

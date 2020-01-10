@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 @FunctionalInterface
 public interface Validator<T> {
   Validation<T> validate(T t);
@@ -40,7 +42,7 @@ public interface Validator<T> {
 
     public ValidationException(Invalid validation) {
       super(toFullMessage(validation.getPropertyIssues().stream()
-        .map(propertyIssue -> String.format("%s -> %s", propertyIssue.getPropertyName(), propertyIssue.getIssue()))
+        .map(propertyIssue -> format("%s -> %s", propertyIssue.getPropertyName(), propertyIssue.getIssue()))
         .collect(Collectors.joining(", "))
       ));
 

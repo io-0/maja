@@ -18,7 +18,10 @@ public class PropertyConstraint<T> {
   public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<? extends T>... validators) {
     return model -> new PropertyConstraint<T>(
         Property.from(model, propertyName),
-        Arrays.stream(validators).map(v -> (PropertyValidator<T>) v).reduce(PropertyValidator::and).orElseThrow(IllegalArgumentException::new)
+        Arrays.stream(validators)
+          .map(v -> (PropertyValidator<T>) v)
+          .reduce(PropertyValidator::and)
+          .orElseThrow(IllegalArgumentException::new)
       );
   }
 

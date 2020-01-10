@@ -1,11 +1,12 @@
 package net.io_0.maja;
 
 import net.io_0.maja.PropertyIssue.Issue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class PropertyIssues extends ArrayList<PropertyIssue> {
   public static PropertyIssues of() {
@@ -29,7 +30,7 @@ public class PropertyIssues extends ArrayList<PropertyIssue> {
   @Override
   public String toString() {
     return stream()
-      .map(propertyIssue -> String.format("%s -> %s", propertyIssue.getPropertyName(), propertyIssue.getIssue()))
+      .map(propertyIssue -> format("%s -> %s", propertyIssue.getPropertyName(), propertyIssue.getIssue()))
       .collect(Collectors.joining("; "));
   }
 }
