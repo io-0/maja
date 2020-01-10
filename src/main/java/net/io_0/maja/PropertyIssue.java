@@ -1,12 +1,13 @@
 package net.io_0.maja;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static java.lang.String.format;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter @ToString
 public class PropertyIssue {
   private final String propertyName;
@@ -20,7 +21,15 @@ public class PropertyIssue {
     return new PropertyIssue(propertyName, Issue.of(code, message));
   }
 
-  @RequiredArgsConstructor
+  public PropertyIssue withMessage(String message) {
+    return new PropertyIssue(propertyName, issue.withMessage(message));
+  }
+
+  public PropertyIssue withPropertyNamePrefix(String prefix) {
+    return new PropertyIssue(prefix + propertyName, issue);
+  }
+
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static class Issue {
     private final String code;

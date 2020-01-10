@@ -210,13 +210,6 @@ public class ValidatePojoTests {
       @Override public Boolean getBooleanToBoolean() { throw new IllegalStateException(); }
     }, BOOLEAN_TO_BOOLEAN).isEmpty());
     assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
-
-    // PropertyIssue is easy to work with
-    PropertyIssue pI = new PropertyIssue("name", Issue.of("code", "issue"));
-    assertEquals("name", pI.getPropertyName());
-    assertEquals("code", pI.getIssue().getCode());
-    assertEquals("issue", pI.getIssue().getMessage());
-    assertEquals("PropertyIssue(propertyName=name, issue=Issue(code=code, message=issue))", pI.toString());
   }
 
   /**
