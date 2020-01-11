@@ -1,6 +1,7 @@
 package net.io_0.maja.validation;
 
 import lombok.Getter;
+import net.io_0.maja.PropertyIssues;
 import net.io_0.maja.validation.Validation.Invalid;
 import net.io_0.maja.validation.Validation.Valid;
 import java.util.Arrays;
@@ -12,6 +13,10 @@ import static java.lang.String.format;
 @FunctionalInterface
 public interface Validator<T> {
   Validation<T> validate(T t);
+
+  static <T> Validator<T> of(PropertyIssues propertyIssues) {
+    return model -> Validation.of(model, propertyIssues);
+  }
 
   static <T> Validator<T> of(NameBoundPropertyConstraint<?>... nameBoundPropertyConstraints) {
     return model -> Arrays.stream(nameBoundPropertyConstraints)
