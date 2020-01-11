@@ -167,14 +167,14 @@ public class ValidatePojoTests {
     assertTrue(ex2.getValidation().getPropertyIssues().containsPropertyName(BOOLEAN_TO_BOOLEAN));
 
     // Validators can be combined and created from issues e.g. from mapping
-    Validator<Object> validator1 = obj -> invalid(PropertyIssues.of());
-    Validator<Object> validator2 = obj -> invalid(PropertyIssue.of("property1", "code1", "issue1"));
-    Validator<Object> validator3 = of(PropertyIssues.of(
+    Validator<Object> validator1 = obj -> valid(null);
+    Validator<String> validator2 = obj -> invalid(PropertyIssue.of("property1", "code1", "issue1"));
+    Validator<String> validator3 = of(PropertyIssues.of(
       PropertyIssue.of("property2", "code2", "issue2"),
       PropertyIssue.of("property3", "code3", "issue3"))
     );
-    Validator<Object> combinedValidator = validator1.and(validator2).and(validator3);
-    Validation<Object> combinedValidation = combinedValidator.validate(null);
+    Validator<String> combinedValidator = validator1.and(validator2).and(validator3);
+    Validation<String> combinedValidation = combinedValidator.validate(null);
     assertTrue(combinedValidation.isInvalid());
     assertEquals(3, combinedValidation.getPropertyIssues().size());
     assertEquals(Optional.of("code1"), combinedValidation.getPropertyIssues().getPropertyIssue("property1").map(Issue::getCode));

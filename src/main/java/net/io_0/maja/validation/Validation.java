@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public interface Validation<T> {
   boolean isValid();
   PropertyIssues getPropertyIssues();
-  Validation<T> and(Validation<T> other);
+  <U extends T> Validation<U> and(Validation<U> other);
   Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow);
 
   default boolean isInvalid() {
@@ -53,8 +53,8 @@ public interface Validation<T> {
     }
 
     @Override
-    public Validation<T> and(Validation<T> other) {
-      return other.isValid() ? this : other;
+    public <U extends T> Validation<U> and(Validation<U> other) {
+      return other;
     }
 
     @Override
@@ -74,8 +74,8 @@ public interface Validation<T> {
     }
 
     @Override
-    public Validation<T> and(Validation<T> other) {
-      return other.isValid() ? this : Validation.invalid(PropertyIssues.of(
+    public <U extends T> Validation<U> and(Validation<U> other) {
+      return Validation.invalid(other.isValid() ? this.propertyIssues : PropertyIssues.of(
         Stream.concat(this.propertyIssues.stream(), other.getPropertyIssues().stream())
           .toArray(PropertyIssue[]::new)
       ));

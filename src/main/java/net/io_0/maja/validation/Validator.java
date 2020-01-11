@@ -36,8 +36,8 @@ public interface Validator<T> {
     return validate(t).proceedIfValid(orThrow);
   }
 
-  default Validator<T> and(Validator<T> other) {
-    return t -> this.validate(t).and(other.validate(t));
+  default <U extends T> Validator<U> and(Validator<U> other) {
+    return u -> this.validate(u).and(other.validate(u));
   }
 
   @Getter
