@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.*;
 import net.io_0.maja.PropertyIssue.Issue;
 import net.io_0.maja.models.*;
-import net.io_0.maja.validation.Validation.Valid;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *   I want an easy and compact way to build a POJO validator based on business logic or property constraints
  *   so that I can use it and further data processing can consume validated data
  *
- *   and I want to be able to express that data is valid after validation and convenience
+ *   and I want some convenience
  *   so that code that uses it is easy to read and write
  *
  *   and I want a property constraints based validator to be able to distinguish between absent and null values
@@ -76,6 +75,10 @@ public class ValidatePojoTests {
 
     Validation<Flat> valid = intAndLongNumberValidator.validate(Flat.builder().numberToInteger(2).numberToLong(2L).build());
     assertTrue(valid.isValid());
+
+    // And it should be easy to run
+    Flat model = Flat.builder().numberToInteger(4).numberToLong(4L).build();
+    assertEquals(model, intAndLongNumberValidator.ensureValidity(model));
   }
 
   /**
@@ -125,45 +128,25 @@ public class ValidatePojoTests {
   }
 
   /**
-   * Scenario: It should be possible to express validity
-   */
-  @Test
-  public void expressValid() {
-    // Given a validator
-    Validator<Nested> validator = of(on(BOOLEAN_TO_BOOLEAN, required));
-
-    // When validation was done
-    Validation<Nested> valid = validator.validate(new Nested().setBooleanToBoolean(true));
-
-    // Then it should be possible to express certain validity (or exception)
-    Valid<Nested> validForSure = valid.proceedIfValid();
-    assertTrue(validForSure.isValid());
-
-    // And same should be doable when validating
-    Valid<Nested> soValid = validator.proceedIfValid(new Nested().setBooleanToBoolean(true));
-    assertTrue(soValid.isValid());
-  }
-
-  /**
    * Scenario: It should be convenient to work with validators and their components
    */
   @Test
   public void testConvenienceAndUsabilityFurther() {
     Validator<Nested> validator = of(on(BOOLEAN_TO_BOOLEAN, required));
 
-    // Process validation exception on validator when we went the "express validity" route
-    // (if no exception is desired, use .validate instead of .proceedIfValid)
-    Validator.ValidationException ex = assertThrows(Validator.ValidationException.class, () -> validator.proceedIfValid(new Nested()));
+    // Process validation exception on validator when we went the assure route
+    // (if no exception is desired, use .validate instead of .ensureValidity)
+    Validator.ValidationException ex = assertThrows(Validator.ValidationException.class, () -> validator.ensureValidity(new Nested()));
     assertTrue(ex.getValidation().getPropertyIssues().containsPropertyName(BOOLEAN_TO_BOOLEAN));
 
     // Same with custom exception
     class MyEx extends IllegalStateException { public MyEx(String s) { super(s); } }
-    MyEx ex1 = assertThrows(MyEx.class, () -> validator.proceedIfValid(new Nested(), invalid -> new MyEx(invalid.getPropertyIssues().toString())));
+    MyEx ex1 = assertThrows(MyEx.class, () -> validator.ensureValidity(new Nested(), invalid -> new MyEx(invalid.getPropertyIssues().toString())));
     assertTrue(ex1.getMessage().contains(BOOLEAN_TO_BOOLEAN) && ex1.getMessage().contains("required"));
 
     // Process validation exception on validation
     Validation<Nested> inValid = validator.validate(new Nested());
-    Validator.ValidationException ex2 = assertThrows(Validator.ValidationException.class, inValid::proceedIfValid);
+    Validator.ValidationException ex2 = assertThrows(Validator.ValidationException.class, inValid::getValue);
     assertTrue(ex2.getValidation().getPropertyIssues().containsPropertyName(BOOLEAN_TO_BOOLEAN));
 
     // Validators can be combined and created from issues e.g. from mapping

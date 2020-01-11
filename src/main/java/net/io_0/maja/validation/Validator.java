@@ -3,7 +3,6 @@ package net.io_0.maja.validation;
 import lombok.Getter;
 import net.io_0.maja.PropertyIssues;
 import net.io_0.maja.validation.Validation.Invalid;
-import net.io_0.maja.validation.Validation.Valid;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,12 +27,12 @@ public interface Validator<T> {
       .orElse(Validation.valid(model));
   }
 
-  default Valid<T> proceedIfValid(T t) {
-    return proceedIfValid(t, ValidationException::new);
+  default T ensureValidity(T t) {
+    return ensureValidity(t, ValidationException::new);
   }
 
-  default Valid<T> proceedIfValid(T t, Function<Invalid<T>, ? extends RuntimeException> orThrow) {
-    return validate(t).proceedIfValid(orThrow);
+  default T ensureValidity(T t, Function<Invalid<T>, ? extends RuntimeException> orThrow) {
+    return validate(t).getValue(orThrow);
   }
 
   default <U extends T> Validator<U> and(Validator<U> other) {

@@ -9,16 +9,16 @@ import java.util.stream.Stream;
 
 public interface Validation<T> {
   boolean isValid();
+  T getValue(Function<Invalid<T>, ? extends RuntimeException> orThrow);
   PropertyIssues getPropertyIssues();
   <U extends T> Validation<U> and(Validation<U> other);
-  Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow);
 
   default boolean isInvalid() {
     return !isValid();
   }
 
-  default Valid<T> proceedIfValid() {
-    return proceedIfValid(Validator.ValidationException::new);
+  default T getValue() {
+    return getValue(Validator.ValidationException::new);
   }
 
   static <T> Valid<T> valid(T value) {
@@ -38,13 +38,17 @@ public interface Validation<T> {
   }
 
   @RequiredArgsConstructor
-  @Getter
   final class Valid<T> implements Validation<T> {
     private final T value;
 
     @Override
     public boolean isValid() {
       return true;
+    }
+
+    @Override
+    public T getValue(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
+      return value;
     }
 
     @Override
@@ -55,11 +59,6 @@ public interface Validation<T> {
     @Override
     public <U extends T> Validation<U> and(Validation<U> other) {
       return other;
-    }
-
-    @Override
-    public Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
-      return this;
     }
   }
 
@@ -74,16 +73,16 @@ public interface Validation<T> {
     }
 
     @Override
+    public T getValue(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
+      throw orThrow.apply(this);
+    }
+
+    @Override
     public <U extends T> Validation<U> and(Validation<U> other) {
       return Validation.invalid(other.isValid() ? this.propertyIssues : PropertyIssues.of(
         Stream.concat(this.propertyIssues.stream(), other.getPropertyIssues().stream())
           .toArray(PropertyIssue[]::new)
       ));
-    }
-
-    @Override
-    public Valid<T> proceedIfValid(Function<Invalid<T>, ? extends RuntimeException> orThrow) {
-      throw orThrow.apply(this);
     }
   }
 }
