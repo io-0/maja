@@ -25,19 +25,19 @@ public interface Property<T> {
       ((PropertyBundle) model).getProperty(propertyName) : PojoProperty.from(model, propertyName);
   }
 
-  default void ifAbsent(Runnable onAbsent) {
+  default void ifUnassigned(Runnable onAbsent) {
     if (!isAssigned()) {
       onAbsent.run();
     }
   }
 
-  default void ifPresent(Consumer<T> onValueOrNull) {
+  default void ifAssigned(Consumer<T> onValueOrNull) {
     if (isAssigned()) {
       onValueOrNull.accept(isEmpty()? null : getValue());
     }
   }
 
-  default void ifPresent(Consumer<T> onValue, Runnable onNull) {
+  default void ifAssigned(Consumer<T> onValue, Runnable onNull) {
     if (!isAssigned()) {
       return;
     }

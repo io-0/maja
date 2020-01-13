@@ -26,8 +26,8 @@ public class PropertyTest {
 
     // When a callback for absent values is supplied
     Runnable cb = () -> cbCalled.set("called");
-    property.ifAbsent(cb);
-    property.ifPresent(b -> cbCalled.set("fail"), () -> cbCalled.set("fail"));
+    property.ifUnassigned(cb);
+    property.ifAssigned(b -> cbCalled.set("fail"), () -> cbCalled.set("fail"));
 
     // Then it should be called if value is absent
     assertEquals("called", cbCalled.get());
@@ -44,10 +44,10 @@ public class PropertyTest {
 
     // When a callback for values is supplied
     Consumer<Boolean> cb = b -> cbCalled.set(format("%s, %s", cbCalled.get(), b));
-    property.ifPresent(cb);
-    property.ifPresent(cb, () -> cb.accept(true));
+    property.ifAssigned(cb);
+    property.ifAssigned(cb, () -> cb.accept(true));
 
-    // Then it should be called if value is present
+    // Then it should be called if value is assigned
     assertEquals("init, false, false", cbCalled.get());
   }
 
@@ -62,10 +62,10 @@ public class PropertyTest {
 
     // When a callback for values is supplied
     Consumer<Boolean> cb = b -> cbCalled.set(format("%s, %s", cbCalled.get(), b));
-    property.ifPresent(cb);
-    property.ifPresent(cb, () -> cb.accept(true));
+    property.ifAssigned(cb);
+    property.ifAssigned(cb, () -> cb.accept(true));
 
-    // Then it should be called if value is present
+    // Then it should be called if value is assigned
     assertEquals("init, null, true", cbCalled.get());
   }
 }
