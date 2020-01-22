@@ -68,14 +68,18 @@ public class MapFromMapTests {
    * Scenario: It should be possible to have different names in the Map and the mapped POJO (and Enums)
    */
   @Test
-  public void mapFromDeepNamedMap() {
-    // Given a deep Map with java special names
-    Map<String, Object> map = deepNamedMap;
+  public void mapFromNamedMap() {
+    // Given a Map with java special names
+    Map<String, Object> mapA = deepNamedMap;
+    Map<String, Object> mapB = Map.of("aSpecialName", 4);
+
     // When it is mapped
-    DeepNamed pojo = Mapper.fromMap(map, DeepNamed.class);
+    DeepNamed pojoA = Mapper.fromMap(mapA, DeepNamed.class);
+    Named pojoB = Mapper.fromMap(mapB, Named.class);
 
     // Then the data should be present in the POJO
-    assertDeepNamedDataPresent(pojo);
+    assertDeepNamedDataPresent(pojoA);
+    assertEquals(4, pojoB.getASpecialName());
   }
 
   /**

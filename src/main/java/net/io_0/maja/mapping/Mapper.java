@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssues;
+import net.io_0.maja.mapping.jackson.FirstCharToLowerPropertyNamingStrategy;
 import net.io_0.maja.mapping.jackson.WithUnconventionalNameAnnotationIntrospector;
 import net.io_0.maja.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import net.io_0.maja.mapping.jackson.PropertyBundleBeanSerializerModifier;
@@ -87,12 +88,19 @@ public class Mapper {
   }
 
   private static ObjectMapper getPreConfiguredObjectMapper() {
-    return new ObjectMapper()
+    ObjectMapper mapper = new ObjectMapper()
       .registerModules(
         new JavaTimeModule()
       )
       .setAnnotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+    return circumventJacksonBeanNamingConventionProblems(mapper);
+  }
+
+  private static ObjectMapper circumventJacksonBeanNamingConventionProblems(ObjectMapper mapper) {
+    return mapper
+      .enable(MapperFeature.USE_STD_BEAN_NAMING)
+      .setPropertyNamingStrategy(new FirstCharToLowerPropertyNamingStrategy());
   }
 
   private static <T> T throwMappingExceptionIfIssues(Function<Consumer<PropertyIssue>, T> cb) {
