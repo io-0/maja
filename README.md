@@ -1,84 +1,90 @@
 # Maja
 
 ## About
-**Ma**ps **Ja**va to JSON Objects and back without information loss regarding the difference between absent and null values.
-Includes validation to tighten mapping.
+**Ma**ps **Ja**va to JSON Objects and back without information loss.
+Provides validators to tighten mapping.
 
-### Properties
-I often implement APIs that use JSON. A property in JSON can have a value (null or otherwise) or be absent/undefined. There are multiple ways to deal with that in Java. A lot of designs just ignore the difference between the value null and absent/undefined which is fine in most cases. Since Java 8 one could utilize java.util.Optional for properties where this difference matters and a lot of designs do this successfully. I however strive for simplicity and in my opinion it is simpler to store a boolean if a property was (re) assigned. This project aims to test how far I can push this concept and if it's viable.
+Combining those features enables one to implement e.g. [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification).
+
+### Information loss?
+A property in JSON can have a value (null or otherwise) or be absent/undefined. A property in Java can't be absent/undefined at runtime. There are multiple ways to deal with that in Java. Since Java 8 one could e.g. utilize `Optional` for properties where this difference matters. Maja's approach is to store in a `Set` if a property was set.
+
+Furthermore JSON naming conventions are not as strict as in Java. Maja's approach to deal with this are `@WithUnconventionalName` Annotations.
 
 ## Usage
-### Define Mapping via Java Class
-We can work with POJOs if the difference between null and absent should be ignored. Otherwise `PropertyBundle` should be implemented and it's marker method should be used in Setters. The following example uses fluent Setters and Lombok annotations (constants for property names are useful for later):
+### Import
+Use Maven or Gradle, e.g. add repository and dependency to `build.gradle`:
+```Gradle
+repositories {
+  ...
+  maven { url "https://jitpack.io" }
+  ...
+}
 ```
+```Gradle
+dependencies {
+  ...
+  implementation "com.github.io-0:maja:develop-SNAPSHOT"
+  ...
+}
+```
+### Define Mapping via Java Classes
+We can work with POJOs if the difference between null and absent should be ignored. Otherwise `PropertyBundle` should be implemented and it's marker method should be used in Setters. The following example uses fluent Setters and Lombok Annotations (constants for property names are useful for Validators):
+```Java
 @NoArgsConstructor
-@Getter @ToString
-public class BigDecimalBundle extends PropertyBundle {
-  public static final String ONE = "one";
-  public static final String TWO = "two";
-  public static final String THREE = "three";
-  public static final String FOUR = "four";
+@Getter
+@ToString
+public class Person extends PropertyBundle {
+  public static final String FIRST_NAME = "firstName";
+  public static final String LAST_NAME = "lastName";
 
-  private BigDecimal one;
-  private BigDecimal two;
-  private BigDecimal three;
-  private BigDecimal four;
+  @WithUnconventionalName("first name")
+  private String firstName;
+  private String lastName;
 
-  public BigDecimalBundle setOne(BigDecimal one) {
-    this.one = one;
-    markPropertySet(ONE);
+  public Person setFirstName(String value) {
+    this.firstName = value;
+    markPropertySet(FIRST_NAME);
     return this;
   }
 
-  public BigDecimalBundle setTwo(BigDecimal two) {
-    this.two = two;
-    markPropertySet(TWO);
-    return this;
-  }
-
-  public BigDecimalBundle setThree(BigDecimal three) {
-    this.three = three;
-    markPropertySet(THREE);
-    return this;
-  }
-
-  public BigDecimalBundle setFour(BigDecimal four) {
-    this.four = four;
-    markPropertySet(FOUR);
+  public Person setLastName(String value) {
+    this.lastName = value;
+    markPropertySet(LAST_NAME);
     return this;
   }
 }
 ```
 ### Validation
 To further tighten the mapping validators can be defined:
-```
-static Validator<Validatable> bundleValidator = Validator.of(
-  PropertyConstraint.on(ONE, required, notNull, exclusiveMaximum(4.5f)),
-  PropertyConstraint.on(TWO, exclusiveMinimum(4.3f)),
-  PropertyConstraint.on(THREE, notNull, maximum(4.4f)),
-  PropertyConstraint.on(FOUR, minimum(4.4f))
-);
+```Java
+public interface PersonValidator {
+  Validator<Person> instance = Validator.of(
+    PropertyConstraint.on(FIRST_NAME, required, notNull, minLength(2)),
+    PropertyConstraint.on(LAST_NAME, notNull)
+  );
+}
 ```
 For a list of all available validators, see **Built In Property Validators**.
 For further information check the Tests.
 
 ### Bringing it all together
-Mapping can be done from POJO or PropertyBundle to JSON string or a Map and back. An issue collector needs to be supplied. 
-The collected issues can then be fed into validation, which will throw one Exception on problems containing them all.
+Mapping can be done from POJO or `PropertyBundle` to JSON `String` or a `Map` and back. An issue collector needs to be supplied.
+The collected issues can then be fed into validation, which will throw an Exception on problems (containing them all).
 Example:
-```
-String json = "{ \"one\": 1 }";
+```Java
+String json = "{ \"first name\": \"Maja\" }";
 PropertyIssues mappingIssues = PropertyIssues.of();
 
-BigDecimalBundle bundle = Mapper.fromJson(json, BigDecimalBundle.class, mappingIssues::add);
+Person person = Mapper.fromJson(json, Person.class, mappingIssues::add);
 
-BigDecimalBundle validBundle = Validator.of(mappingIssues).and(bundleValidator).ensureValidity(bundle)
+Person validPerson = Validator.of(mappingIssues).and(PersonValidator.instance).ensureValidity(person);
 
-Property<Boolean> one = validBundle.getProperty(BigDecimalBundle.ONE);
-Property<Boolean> two = validBundle.getProperty(BigDecimalBundle.TWO);
+Property<String> firstName = validPerson.getProperty(Person.FIRST_NAME);
+Property<String> lastName = validPerson.getProperty(Person.LAST_NAME);
 
-one.ifAssigned(valueOrNull -> System.out.println(valueOrNull)); // will print '1'
-two.ifUnassigned(() -> System.out.println("two was absent")); // will print 'two was absent'
+firstName.ifAssigned(valueOrNull -> System.out.println(valueOrNull)); // prints 'Maja'
+lastName.ifUnassigned(() -> System.out.println("lastName was absent")); // prints 'lastName was absent'
 ```
 For further information check the Tests.
 
