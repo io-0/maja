@@ -125,16 +125,28 @@ public class MapFromJsonTests {
   @Test
   public void mapFromDeepNamedJson() {
     // Given a deep JSON object with java special names
-    Reader jsonReader = resourceAsReader("DeepNamed.json");
-    String json = resourceAsString("DeepNamed.json");
+    Reader jsonReaderA = resourceAsReader("DeepNamed.json");
+    String jsonA = resourceAsString("DeepNamed.json");
+    Reader jsonReaderB = resourceAsReader("Named.json");
+    String jsonB = resourceAsString("Named.json");
+    Reader jsonReaderC = resourceAsReader("SpecialNamed.json");
+    String jsonC = resourceAsString("SpecialNamed.json");
 
     // When it is mapped
-    DeepNamed pojoR = Mapper.readJson(jsonReader, DeepNamed.class);
-    DeepNamed pojoF = Mapper.fromJson(json, DeepNamed.class);
+    DeepNamed pojoRA = Mapper.readJson(jsonReaderA, DeepNamed.class);
+    DeepNamed pojoFA = Mapper.fromJson(jsonA, DeepNamed.class);
+    Named pojoRB = Mapper.readJson(jsonReaderB, Named.class);
+    Named pojoFB = Mapper.fromJson(jsonB, Named.class);
+    SpecialNamed pojoRC = Mapper.readJson(jsonReaderC, SpecialNamed.class);
+    SpecialNamed pojoFC = Mapper.fromJson(jsonC, SpecialNamed.class);
 
     // Then the data should be present in the POJO
-    assertDeepNamedDataPresent(pojoR);
-    assertDeepNamedDataPresent(pojoF);
+    assertDeepNamedDataPresent(pojoRA);
+    assertDeepNamedDataPresent(pojoFA);
+    assertEquals(4, pojoRB.getASpecialName());
+    assertEquals(4, pojoFB.getASpecialName());
+    assertEquals(3, pojoRC.getXObj());
+    assertEquals(3, pojoFC.getXObj());
   }
 
   /**

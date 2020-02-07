@@ -3,6 +3,8 @@ package net.io_0.maja.mapping;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.models.DeepNamed;
 import net.io_0.maja.models.Flat;
+import net.io_0.maja.models.Named;
+import net.io_0.maja.models.SpecialNamed;
 import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.function.Supplier;
@@ -10,6 +12,7 @@ import java.util.function.Supplier;
 import static net.io_0.maja.TestUtils.assertCollectionEquals;
 import static net.io_0.maja.TestUtils.toStringMap;
 import static net.io_0.maja.mapping.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -76,29 +79,39 @@ public class MapToMapTests {
   @Test @SuppressWarnings({"unchecked", "rawtypes"})
   public void mapToDeepNamedMap() {
     // Given a deep Map with java special names
-    Map<String, Object> referenceMap = simplifiedDeepNamedMap;
+    Map<String, Object> referenceMapA = simplifiedDeepNamedMap;
+    Map<String, Object> referenceMapB = Map.of("aSpecialName", 4);
+    Map<String, Object> referenceMapC = Map.of("x-obj", 3);
 
     // When it is mapped
-    DeepNamed pojo = Mapper.fromMap(referenceMap, DeepNamed.class);
+    DeepNamed pojoA = Mapper.fromMap(referenceMapA, DeepNamed.class);
+    Named pojoB = Mapper.fromMap(referenceMapB, Named.class);
+    SpecialNamed pojoC = Mapper.fromMap(referenceMapC, SpecialNamed.class);
 
     // Then the data should be present in the POJO
-    assertDeepNamedDataPresent(pojo);
+    assertDeepNamedDataPresent(pojoA);
+    assertEquals(4, pojoB.getASpecialName());
+    assertEquals(3, pojoC.getXObj());
 
     // And mapping back should not loose information
-    Map<String, Object> map = Mapper.toMap(pojo);
+    Map<String, Object> mapA = Mapper.toMap(pojoA);
+    Map<String, Object> mapB = Mapper.toMap(pojoB);
+    Map<String, Object> mapC = Mapper.toMap(pojoC);
 
     assertCollectionEquals(
-      toStringMap(referenceMap, "obj", "objectArrayToObjectSet").entrySet(),
-      toStringMap(map, "obj", "objectArrayToObjectSet").entrySet()
+      toStringMap(referenceMapA, "x-obj", "objectArrayToObjectSet").entrySet(),
+      toStringMap(mapA, "x-obj", "objectArrayToObjectSet").entrySet()
     );
     assertCollectionEquals(
-      toStringMap((Map) referenceMap.get("obj")).entrySet(),
-      toStringMap((Map) map.get("obj")).entrySet()
+      toStringMap((Map) referenceMapA.get("x-obj")).entrySet(),
+      toStringMap((Map) mapA.get("x-obj")).entrySet()
     );
     assertCollectionEquals(
-      toStringMap((Map) ((Set) referenceMap.get("objectArrayToObjectSet")).toArray()[0]).entrySet(),
-      toStringMap((Map) ((List) map.get("objectArrayToObjectSet")).get(0)).entrySet()
+      toStringMap((Map) ((Set) referenceMapA.get("objectArrayToObjectSet")).toArray()[0]).entrySet(),
+      toStringMap((Map) ((List) mapA.get("objectArrayToObjectSet")).get(0)).entrySet()
     );
+    assertCollectionEquals(referenceMapB.entrySet(), mapB.entrySet());
+    assertCollectionEquals(referenceMapC.entrySet(), mapC.entrySet());
   }
 
   private static Map<String, Object> simplifiedFlatMap = ((Supplier<Map<String, Object>>)() -> {
@@ -138,7 +151,7 @@ public class MapToMapTests {
   }).get();
 
   private static Map<String, Object> simplifiedDeepNamedMap = Map.of(
-    "obj", Map.of(
+    "x-obj", Map.of(
       "stringToUUID", "3fa85f64-5717-4562-b3fc-2c963f66afa1",
       "numberToBigDecimal", 1,
       "stringArrayToStringList", List.of("a", "a", "a", "a"),

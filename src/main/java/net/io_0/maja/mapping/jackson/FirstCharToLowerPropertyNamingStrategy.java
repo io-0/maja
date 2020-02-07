@@ -3,6 +3,7 @@ package net.io_0.maja.mapping.jackson;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import static java.lang.Character.isUpperCase;
+import static java.lang.Character.toLowerCase;
 import static java.util.Objects.nonNull;
 
 /**
@@ -14,9 +15,8 @@ public class FirstCharToLowerPropertyNamingStrategy extends PropertyNamingStrate
   @Override
   public String translate(String input) {
     if (nonNull(input) && !input.isEmpty() && isUpperCase(input.charAt(0))) {
-      input = input.substring(0, 1).toLowerCase() + input.substring(1);
+      input = toLowerCase(input.charAt(0)) + input.substring(1);
     }
-
     return input;
   }
 }

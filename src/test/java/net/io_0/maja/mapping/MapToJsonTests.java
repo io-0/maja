@@ -117,21 +117,39 @@ public class MapToJsonTests {
   @Test
   public void mapToDeepNamedJson() throws JSONException {
     // Given a deep JSON object with java special names
-    Reader jsonReader = resourceAsReader("SimplifiedDeepNamed.json");
+    Reader jsonReaderA = resourceAsReader("SimplifiedDeepNamed.json");
+    Reader jsonReaderB = resourceAsReader("Named.json");
+    Reader jsonReaderC = resourceAsReader("SpecialNamed.json");
 
     // When it is mapped
-    DeepNamed pojo = Mapper.readJson(jsonReader, DeepNamed.class);
+    DeepNamed pojoA = Mapper.readJson(jsonReaderA, DeepNamed.class);
+    Named pojoB = Mapper.readJson(jsonReaderB, Named.class);
+    SpecialNamed pojoC = Mapper.readJson(jsonReaderC, SpecialNamed.class);
 
     // Then the data should be present in the POJO
-    assertDeepNamedDataPresent(pojo);
+    assertDeepNamedDataPresent(pojoA);
+    assertEquals(4, pojoB.getASpecialName());
+    assertEquals(3, pojoC.getXObj());
 
     // And mapping back should not loose information
-    String reference = new BufferedReader(resourceAsReader("SimplifiedDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
-    Writer jsonWriter = new StringWriter();
-    Mapper.writeJson(jsonWriter, pojo);
-    String json = Mapper.toJson(pojo);
+    String referenceA = new BufferedReader(resourceAsReader("SimplifiedDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriterA = new StringWriter();
+    Mapper.writeJson(jsonWriterA, pojoA);
+    String jsonA = Mapper.toJson(pojoA);
+    String referenceB = new BufferedReader(resourceAsReader("Named.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriterB = new StringWriter();
+    Mapper.writeJson(jsonWriterB, pojoB);
+    String jsonB = Mapper.toJson(pojoB);
+    String referenceC = new BufferedReader(resourceAsReader("SpecialNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));
+    Writer jsonWriterC = new StringWriter();
+    Mapper.writeJson(jsonWriterC, pojoC);
+    String jsonC = Mapper.toJson(pojoC);
 
-    JSONAssert.assertEquals(reference, jsonWriter.toString(), JSONCompareMode.NON_EXTENSIBLE);
-    JSONAssert.assertEquals(reference, json, JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceA, jsonWriterA.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceA, jsonA, JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceB, jsonWriterB.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceB, jsonB, JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceC, jsonWriterC.toString(), JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceC, jsonC, JSONCompareMode.NON_EXTENSIBLE);
   }
 }
