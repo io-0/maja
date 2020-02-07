@@ -358,7 +358,7 @@ public class ValidatePojoTests {
 
     // When a validator is built with the annotated names
     Validator<Nested> nestedValidator = of(on("bool", required, notNull));
-    Validator<DeepNamed> deepNamedValidator = of(on("obj", notNull, PropertyValidators.valid(nestedValidator)));
+    Validator<DeepNamed> deepNamedValidator = of(on("x-obj", notNull, PropertyValidators.valid(nestedValidator)));
 
     // Then it should validate correctly
     Validation<DeepNamed> valid = deepNamedValidator.validate(validPojo);
@@ -366,8 +366,8 @@ public class ValidatePojoTests {
 
     Validation<DeepNamed> invalid = deepNamedValidator.validate(invalidPojo);
     assertTrue(invalid.isInvalid());
-    assertTrue(invalid.getPropertyIssues().containsPropertyName("obj.bool"));
-    assertEquals(Optional.of("Required Violation"), invalid.getPropertyIssues().getPropertyIssue("obj.bool").map(Issue::getCode));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("x-obj.bool"));
+    assertEquals(Optional.of("Required Violation"), invalid.getPropertyIssues().getPropertyIssue("x-obj.bool").map(Issue::getCode));
   }
 
   private static Validator<Validatable> deepAndNestedValidator = of(

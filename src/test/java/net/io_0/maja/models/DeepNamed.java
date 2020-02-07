@@ -10,7 +10,7 @@ import java.util.Set;
 @ToString
 @Builder @AllArgsConstructor
 public class DeepNamed {
-  @WithUnconventionalName("obj") private Nested objectToPojo;
+  @WithUnconventionalName("x-obj") private Nested objectToPojo;
   private Set<Nested> objectArrayToObjectSet;
   private List<StringEnumNamed> stringArrayToEnumList;
 }

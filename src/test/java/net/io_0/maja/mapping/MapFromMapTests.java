@@ -72,14 +72,17 @@ public class MapFromMapTests {
     // Given a Map with java special names
     Map<String, Object> mapA = deepNamedMap;
     Map<String, Object> mapB = Map.of("aSpecialName", 4);
+    Map<String, Object> mapC = Map.of("x-obj", 3);
 
     // When it is mapped
     DeepNamed pojoA = Mapper.fromMap(mapA, DeepNamed.class);
     Named pojoB = Mapper.fromMap(mapB, Named.class);
+    SpecialNamed pojoC = Mapper.fromMap(mapC, SpecialNamed.class);
 
     // Then the data should be present in the POJO
     assertDeepNamedDataPresent(pojoA);
     assertEquals(4, pojoB.getASpecialName());
+    assertEquals(3, pojoC.getXObj());
   }
 
   /**
@@ -256,7 +259,7 @@ public class MapFromMapTests {
   );
 
   private static Map<String, Object> deepNamedMap = Map.of(
-    "obj", Map.of(
+    "x-obj", Map.of(
       "stringToUUID", "3fa85f64-5717-4562-b3fc-2c963f66afa1",
       "numberToBigDecimal", 1,
       "stringArrayToStringList", List.of("a", "a", "a", "a"),
