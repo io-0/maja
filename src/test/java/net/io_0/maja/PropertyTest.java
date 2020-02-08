@@ -1,5 +1,6 @@
 package net.io_0.maja;
 
+import net.io_0.maja.models.NamedBundle;
 import net.io_0.maja.models.Nested;
 import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,5 +68,20 @@ public class PropertyTest {
 
     // Then it should be called if value is assigned
     assertEquals("init, null, true", cbCalled.get());
+  }
+
+  /**
+   * Scenario: It should be possible to extract a property even when it breaks bean naming convention
+   */
+  @Test
+  public void extractNamedTest() {
+    // Given a propertyBundle
+    NamedBundle propertyBundle = new NamedBundle().setASpecialName(21);
+
+    // When a property is extracted that breaks bean naming conventions
+    Property<Integer> property = propertyBundle.getProperty(NamedBundle.A_SPECIAL_NAME);
+
+    // Then it should still work
+    assertEquals(21, property.getValue());
   }
 }
