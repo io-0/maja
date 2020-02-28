@@ -129,7 +129,11 @@ public class MapToJsonTests {
     // Then the data should be present in the POJO
     assertDeepNamedDataPresent(pojoA);
     assertEquals(4, pojoB.getASpecialName());
+    assertEquals(5, pojoB.getBSpecialName());
+    assertEquals(6, pojoB.getMaJa());
+    assertEquals(7, pojoB.getCaJa());
     assertEquals(3, pojoC.getXObj());
+    assertEquals(4, pojoC.getYObj());
 
     // And mapping back should not loose information
     String referenceA = new BufferedReader(resourceAsReader("SimplifiedDeepNamed.json")).lines().collect(Collectors.joining(System.lineSeparator()));

@@ -7,15 +7,14 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static java.lang.Character.toLowerCase;
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
+import static net.io_0.maja.StringUtils.*;
 
 public interface PropertyBuildingUtils {
   static <T> Optional<Property<T>> extractProperty(Object model, String propertyName, Function<PropertyDescriptor, Property<T>> constructor) {
     try {
       for (PropertyDescriptor pd : Introspector.getBeanInfo(model.getClass()).getPropertyDescriptors()) {
-        if (pd.getReadMethod() != null && propertyName.equals(firstCharToLowerCase(pd.getName()))) {
+        if (pd.getReadMethod() != null && ignoreFirstCharCaseEquals(propertyName, pd.getName())) {
           return Optional.of(constructor.apply(pd));
         }
       }
@@ -25,13 +24,6 @@ public interface PropertyBuildingUtils {
       );
     }
     return Optional.empty();
-  }
-
-  static String firstCharToLowerCase(String input) {
-    if (isNull(input) || input.isEmpty()) {
-      return input;
-    }
-    return toLowerCase(input.charAt(0)) + input.substring(1);
   }
 
   static Optional<String> annotatedNameToJavaName(Object model, String annotatedName) {

@@ -76,12 +76,20 @@ public class PropertyTest {
   @Test
   public void extractNamedTest() {
     // Given a propertyBundle
-    NamedBundle propertyBundle = new NamedBundle().setASpecialName(21);
+    NamedBundle propertyBundle = new NamedBundle().setASpecialName(21).setBSpecialName(9).setMaJa(100).setCaJa(73);
 
     // When a property is extracted that breaks bean naming conventions
-    Property<Integer> property = propertyBundle.getProperty(NamedBundle.A_SPECIAL_NAME);
+    Property<Integer> propertyA = propertyBundle.getProperty(NamedBundle.A_SPECIAL_NAME);
+    Property<Integer> propertyM = propertyBundle.getProperty(NamedBundle.MA_JA);
+
+    // And a property is extracted that doesn't break them
+    Property<Integer> propertyB = propertyBundle.getProperty(NamedBundle.B_SPECIAL_NAME);
+    Property<Integer> propertyC = propertyBundle.getProperty(NamedBundle.CA_JA);
 
     // Then it should still work
-    assertEquals(21, property.getValue());
+    assertEquals(21, propertyA.getValue());
+    assertEquals(100, propertyM.getValue());
+    assertEquals(9, propertyB.getValue());
+    assertEquals(73, propertyC.getValue());
   }
 }
