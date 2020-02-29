@@ -25,19 +25,19 @@ public interface PropertyPredicates {
     return not(Property<T>::isAssigned).or(not(Property<T>::isEmpty).and(predicate));
   }
 
-  static PropertyPredicate<? extends Number> lte(Number number) {
+  static PropertyPredicate<Number> lte(Number number) {
     return property -> compare(number, property.getValue()) <= 0;
   }
 
-  static PropertyPredicate<? extends Number> lt(Number number) {
+  static PropertyPredicate<Number> lt(Number number) {
     return property -> compare(number, property.getValue()) < 0;
   }
 
-  static PropertyPredicate<? extends Number> gte(Number number) {
+  static PropertyPredicate<Number> gte(Number number) {
     return property -> compare(number, property.getValue()) >= 0;
   }
 
-  static PropertyPredicate<? extends Number> gt(Number number) {
+  static PropertyPredicate<Number> gt(Number number) {
     return property -> compare(number, property.getValue()) > 0;
   }
 
@@ -69,7 +69,7 @@ public interface PropertyPredicates {
 
   PropertyPredicate<String> inet6Address = property -> InetAddressValidator.getInstance().isValidInet6Address(property.getValue());
 
-  static PropertyPredicate<? extends Number> multipleOf(Number number) {
+  static PropertyPredicate<Number> multipleOf(Number number) {
     return property -> new BigDecimal(property.getValue().toString()).remainder(new BigDecimal(number.toString())).abs().floatValue() < 0.0000001;
   }
 

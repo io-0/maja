@@ -144,9 +144,17 @@ public class MapFromJsonTests {
     assertDeepNamedDataPresent(pojoRA);
     assertDeepNamedDataPresent(pojoFA);
     assertEquals(4, pojoRB.getASpecialName());
+    assertEquals(5, pojoRB.getBSpecialName());
+    assertEquals(6, pojoRB.getMaJa());
+    assertEquals(7, pojoRB.getCaJa());
     assertEquals(4, pojoFB.getASpecialName());
+    assertEquals(5, pojoFB.getBSpecialName());
+    assertEquals(6, pojoFB.getMaJa());
+    assertEquals(7, pojoFB.getCaJa());
     assertEquals(3, pojoRC.getXObj());
+    assertEquals(4, pojoRC.getYObj());
     assertEquals(3, pojoFC.getXObj());
+    assertEquals(4, pojoFC.getYObj());
   }
 
   /**

@@ -35,8 +35,9 @@ public interface Validator<T> {
     return validate(t).getValue(orThrow);
   }
 
-  default <U extends T> Validator<U> and(Validator<U> other) {
-    return u -> this.validate(u).and(other.validate(u));
+  @SuppressWarnings("unchecked")
+  default <U extends T> Validator<U> and(Validator<? extends U> other) {
+    return u -> this.validate(u).and(((Validator<U>) other).validate(u));
   }
 
   @Getter

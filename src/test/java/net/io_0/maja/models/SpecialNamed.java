@@ -10,4 +10,6 @@ import net.io_0.maja.WithUnconventionalName;
 public class SpecialNamed {
   @WithUnconventionalName("x-obj")
   private Integer xObj;
+  @WithUnconventionalName("y-obj")
+  private Integer YObj;
 }

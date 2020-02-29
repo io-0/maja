@@ -8,4 +8,7 @@ import lombok.*;
 @Builder @AllArgsConstructor
 public class Named {
   private Integer aSpecialName;
+  private Integer BSpecialName;
+  private Integer MaJa;
+  private Integer caJa;
 }

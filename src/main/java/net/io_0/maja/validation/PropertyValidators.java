@@ -5,15 +5,13 @@ import net.io_0.maja.Property;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssue.Issue;
 import net.io_0.maja.PropertyIssues;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static net.io_0.maja.validation.PropertyValidator.andAll;
 import static net.io_0.maja.validation.Validation.invalid;
 
 public interface PropertyValidators {
@@ -76,35 +74,35 @@ public interface PropertyValidators {
     );
   }
 
-  static PropertyValidator<? extends Number> exclusiveMaximum(Number parameter) {
+  static PropertyValidator<Number> exclusiveMaximum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gt(parameter)),
       Issue.of(format("Exclusive Maximum Violation, %s", parameter), format("Must be lessen than %s", parameter))
     );
   }
 
-  static PropertyValidator<? extends Number> exclusiveMinimum(Number parameter) {
+  static PropertyValidator<Number> exclusiveMinimum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lt(parameter)),
       Issue.of(format("Exclusive Minimum Violation, %s", parameter), format("Must be greater than %s", parameter))
     );
   }
 
-  static PropertyValidator<? extends Number> maximum(Number parameter) {
+  static PropertyValidator<Number> maximum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gte(parameter)),
       Issue.of(format("Maximum Violation, %s", parameter), format("Must be %s or lesser", parameter))
     );
   }
 
-  static PropertyValidator<? extends Number> minimum(Number parameter) {
+  static PropertyValidator<Number> minimum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lte(parameter)),
       Issue.of(format("Minimum Violation, %s", parameter), format("Must be %s or greater", parameter))
     );
   }
 
-  static PropertyValidator<? extends Number> multipleOf(Number parameter) {
+  static PropertyValidator<Number> multipleOf(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)),
       Issue.of(format("Multiple Of Violation, %s", parameter), format("Must be a multiple of %s", parameter))
@@ -153,7 +151,7 @@ public interface PropertyValidators {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  static <T> PropertyValidator<?> each(PropertyValidator<T> validator) {
+  static <T> PropertyValidator<?> each(PropertyValidator<? extends T>... validators) {
     return property -> {
       if (PropertyPredicates.unassignedOrEmpty.test((Property) property)) {
         return Validation.valid(property);
@@ -171,6 +169,8 @@ public interface PropertyValidators {
         propertyStream = IntStream.range(0, values.size())
           .mapToObj(i -> new PojoProperty<>(format("%s.%d", property.getName(), i), values.get(i)));
       }
+
+      PropertyValidator<T> validator = andAll(validators);
 
       return propertyStream
         .map(validator::validate)
