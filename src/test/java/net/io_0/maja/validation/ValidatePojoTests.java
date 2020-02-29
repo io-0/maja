@@ -6,6 +6,7 @@ import net.io_0.maja.PropertyIssue.Issue;
 import net.io_0.maja.models.*;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -89,13 +90,17 @@ public class ValidatePojoTests {
     // Given property constraints
     //   flat.stringToString must be present and at least 4 chars long
     //   flat.stringToInteger can be null or Exclusive Minimum Violation, 18
-    //   flat.stringArrayToStringList must be present and has at least 2 items and each is at least 4 chars long
+    //   flat.stringArrayToStringList must be present and has at least 3 items and each can't be null and has between 4 and 10 chars
+    //   flat.numberArrayToFloatList must be present and has exactly 4 items and each can't be null and is between 2 and 2.5
+    //   flat.stringArrayToOffsetDateTimeSet must be present and each can't be null
 
     // When a validator is built compact and with ease
     Validator<Flat> flatValidator = of(
       on("stringToString", notNull, minLength(4)),
       on("stringToInteger", minimum(18)),
-      on("stringArrayToStringList", notNull, minItems(2), each(minLength(4)))
+      on("stringArrayToStringList", notNull, minItems(3), each(notNull, minLength(4), maxLength(10))),
+      on("numberArrayToFloatList", notNull, minItems(4), maxItems(4), each(notNull, minimum(2F), maximum(2.5F))),
+      on("stringArrayToOffsetDateTimeSet", notNull, each(notNull))
     );
 
     // Then it should validate correctly
@@ -107,23 +112,61 @@ public class ValidatePojoTests {
       invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringToString").map(Issue::getCode));
     assertEquals(Optional.of("Not Null Violation"),
       invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringArrayToStringList").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("numberArrayToFloatList").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringArrayToOffsetDateTimeSet").map(Issue::getCode));
 
     Validation<Flat> invalid = flatValidator.validate(
-      Flat.builder().stringToString("two").stringToInteger(7).stringArrayToStringList(List.of("one")).build()
+      Flat.builder()
+        .stringToString("two")
+        .stringToInteger(7)
+        .stringArrayToStringList(List.of("one", "five hundred ten"))
+        .numberArrayToFloatList(List.of(1F, 2F, 2.5F, 2.6F, 3F))
+        .stringArrayToOffsetDateTimeSet(new HashSet<>(Arrays.asList(null, OffsetDateTime.now())))
+        .build()
     );
     assertTrue(invalid.isInvalid());
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringToString"));
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringToInteger"));
     assertTrue(invalid.getPropertyIssues().containsPropertyName("stringArrayToStringList"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("stringArrayToStringList.0"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("stringArrayToStringList.1"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("numberArrayToFloatList"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("numberArrayToFloatList.0"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("numberArrayToFloatList.3"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("numberArrayToFloatList.4"));
+    assertTrue(invalid.getPropertyIssues().containsPropertyName("stringArrayToOffsetDateTimeSet.0"));
     assertEquals(Optional.of("Min Length Violation, 4"),
       invalid.getPropertyIssues().getPropertyIssue("stringToString").map(Issue::getCode));
     assertEquals(Optional.of("Minimum Violation, 18"),
       invalid.getPropertyIssues().getPropertyIssue("stringToInteger").map(Issue::getCode));
-    assertEquals(Optional.of("Min Items Violation, 2"),
+    assertEquals(Optional.of("Min Items Violation, 3"),
       invalid.getPropertyIssues().getPropertyIssue("stringArrayToStringList").map(Issue::getCode));
+    assertEquals(Optional.of("Min Length Violation, 4"),
+      invalid.getPropertyIssues().getPropertyIssue("stringArrayToStringList.0").map(Issue::getCode));
+    assertEquals(Optional.of("Max Length Violation, 10"),
+      invalid.getPropertyIssues().getPropertyIssue("stringArrayToStringList.1").map(Issue::getCode));
+    assertEquals(Optional.of("Max Items Violation, 4"),
+      invalid.getPropertyIssues().getPropertyIssue("numberArrayToFloatList").map(Issue::getCode));
+    assertEquals(Optional.of("Minimum Violation, 2.0"),
+      invalid.getPropertyIssues().getPropertyIssue("numberArrayToFloatList.0").map(Issue::getCode));
+    assertEquals(Optional.of("Maximum Violation, 2.5"),
+      invalid.getPropertyIssues().getPropertyIssue("numberArrayToFloatList.3").map(Issue::getCode));
+    assertEquals(Optional.of("Maximum Violation, 2.5"),
+      invalid.getPropertyIssues().getPropertyIssue("numberArrayToFloatList.4").map(Issue::getCode));
+    assertEquals(Optional.of("Not Null Violation"),
+      invalid.getPropertyIssues().getPropertyIssue("stringArrayToOffsetDateTimeSet.0").map(Issue::getCode));
 
     Validation<Flat> valid = flatValidator.validate(
-      Flat.builder().stringToString("four").stringToInteger(21).stringArrayToStringList(List.of("five", "seven")).build());
+      Flat.builder()
+        .stringToString("four")
+        .stringToInteger(21)
+        .stringArrayToStringList(List.of("five", "seven", "twelve"))
+        .numberArrayToFloatList(List.of(2.1F, 2.2F, 2.3F, 2.4F))
+        .stringArrayToOffsetDateTimeSet(Set.of())
+        .build()
+    );
     assertTrue(valid.isValid());
   }
 

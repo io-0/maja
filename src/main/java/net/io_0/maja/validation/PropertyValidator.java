@@ -3,6 +3,7 @@ package net.io_0.maja.validation;
 import net.io_0.maja.Property;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssue.Issue;
+import java.util.Arrays;
 
 import static java.lang.String.*;
 import static net.io_0.maja.validation.Validation.invalid;
@@ -18,7 +19,12 @@ public interface PropertyValidator<T> extends Validator<Property<T>> {
       ));
   }
 
-  default PropertyValidator<T> and(PropertyValidator<T> other) {
-    return t -> this.validate(t).and(other.validate(t));
+  @SafeVarargs
+  @SuppressWarnings("unchecked")
+  static <T> PropertyValidator<T> andAll(PropertyValidator<? extends T>... validators) {
+    return Arrays.stream(validators)
+      .map(v -> (PropertyValidator<T>) v)
+      .reduce((a, b) -> t -> a.validate(t).and(b.validate(t)))
+      .orElseThrow(IllegalArgumentException::new);
   }
 }

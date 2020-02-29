@@ -2,7 +2,8 @@ package net.io_0.maja.validation;
 
 import lombok.RequiredArgsConstructor;
 import net.io_0.maja.Property;
-import java.util.Arrays;
+
+import static net.io_0.maja.validation.PropertyValidator.andAll;
 
 @RequiredArgsConstructor
 public class PropertyConstraint<T> {
@@ -14,15 +15,8 @@ public class PropertyConstraint<T> {
   }
 
   @SafeVarargs
-  @SuppressWarnings("unchecked")
   public static <T> NameBoundPropertyConstraint<T> on(String propertyName, PropertyValidator<? extends T>... validators) {
-    return model -> new PropertyConstraint<T>(
-        Property.from(model, propertyName),
-        Arrays.stream(validators)
-          .map(v -> (PropertyValidator<T>) v)
-          .reduce(PropertyValidator::and)
-          .orElseThrow(IllegalArgumentException::new)
-      );
+    return model -> new PropertyConstraint<T>(Property.from(model, propertyName), andAll(validators));
   }
 
   public Validation<Property<T>> check() {
