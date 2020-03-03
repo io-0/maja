@@ -9,12 +9,14 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import net.io_0.maja.PropertyBundle;
 import java.util.List;
 
+import static net.io_0.maja.PropertyBuildingUtils.annotatedNameToJavaName;
+
 /**
  * We want to be able to explicitly set null as value for a property but we don't want all properties serialized that were initialised with null.
  * It enables us to work with null e.g. RFC 7386 - JSON Merge Patch.
  * This modifier only works if PropertyBundle.class is extended, setters use it and the serialization skips properties with null values.
  * The first condition defines us that we serialize null if a property was actively set to null via setter.
- * The second one can be archived for instance with the serializationInclusion(JsonInclude.Include.NON_EMPTY) configuration.
+ * The second one can be archived for instance with the serializationInclusion(JsonInclude.Include.NON_ABSENT) configuration.
  */
 public class PropertyBundleBeanSerializerModifier extends BeanSerializerModifier {
   @Override
@@ -46,13 +48,17 @@ public class PropertyBundleBeanSerializerModifier extends BeanSerializerModifier
       if (extendsPropertyBundle(bean.getClass())) {
         PropertyBundle model = (PropertyBundle) bean;
 
-        if (model.isPropertySet(getName())) {
+        if (model.isPropertySet(getName()) || annotatedNameToJavaName(model, getName()).map(model::isPropertySet).orElse(false)) {
           final Object value = (_accessorMethod == null) ? _field.get(bean) : _accessorMethod.invoke(bean, (Object[]) null);
 
           // write null despite any settings if property was set to null via setter
           if (value == null) {
             gen.writeNullField(getName());
+            return;
           }
+        } else {
+          // never write unset properties
+          return;
         }
       }
 

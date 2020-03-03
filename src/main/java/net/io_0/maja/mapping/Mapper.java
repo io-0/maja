@@ -73,7 +73,7 @@ public class Mapper {
   private static ObjectMapper prepForPojoMapping(ObjectMapper oM) {
     return oM
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+      .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
       .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
         new PropertyBundleBeanSerializerModifier()
       ));

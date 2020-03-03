@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.io.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.io_0.maja.TestUtils.resourceAsReader;
@@ -155,5 +159,46 @@ public class MapToJsonTests {
     JSONAssert.assertEquals(referenceB, jsonB, JSONCompareMode.NON_EXTENSIBLE);
     JSONAssert.assertEquals(referenceC, jsonWriterC.toString(), JSONCompareMode.NON_EXTENSIBLE);
     JSONAssert.assertEquals(referenceC, jsonC, JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  /**
+   * Scenario: It should be possible to serialize empty collections
+   */
+  @Test
+  public void serializeEmptyCollections() {
+    // Given a model with set empty collections
+    Flat model0 = new Flat();
+    Flat model1 = new Flat();
+    model1.setNumberArrayToFloatList(Collections.emptyList());
+    model1.setNumberArrayToIntegerSet(Set.of());
+    CollectionBundle model2 = new CollectionBundle();
+    CollectionBundle model3 = new CollectionBundle().setOne(null).setTwo(null).setThree(null);
+    CollectionBundle model4 = new CollectionBundle().setOne(List.of()).setTwo(Set.of()).setThree(Map.of());
+
+    // When serialized
+    String json0 = Mapper.toJson(model0);
+    String json1 = Mapper.toJson(model1);
+    String json2 = Mapper.toJson(model2);
+    String json3 = Mapper.toJson(model3);
+    String json4 = Mapper.toJson(model4);
+
+    // Then empty collections should be serialized, null and not set should not
+    assertFalse(json0.contains("\"numberArrayToFloatList\""));
+    assertFalse(json0.contains("\"numberArrayToIntegerSet\""));
+
+    assertTrue(json1.contains("\"numberArrayToFloatList\":[]"));
+    assertTrue(json1.contains("\"numberArrayToIntegerSet\":[]"));
+
+    assertFalse(json2.contains("\"one\""));
+    assertFalse(json2.contains("\"two\""));
+    assertFalse(json2.contains("\"three\""));
+
+    assertTrue(json3.contains("\"one\":null"));
+    assertTrue(json3.contains("\"two\":null"));
+    assertTrue(json3.contains("\"three\":null"));
+
+    assertTrue(json4.contains("\"one\":[]"));
+    assertTrue(json4.contains("\"two\":[]"));
+    assertTrue(json4.contains("\"three\":{}"));
   }
 }
