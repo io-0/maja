@@ -19,28 +19,55 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Mapper {
-  public static <T> T fromJson(String json, Class<T> type) {
-    return throwMappingExceptionIfIssues(pIC -> fromJson(json, type, pIC));
+  public static <T> T fromJson(String json, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> fromJson(json, pIC, type, subTypes));
   }
 
+  /**
+   * @deprecated Use {@link #fromJson(String, Consumer, Class, Class...)} instead
+   */
+  @Deprecated(forRemoval = true)
   public static <T> T fromJson(String json, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).readValue(json, type));
+    return fromJson(json, propertyIssueConsumer, type);
   }
 
-  public static <T> T readJson(Reader reader, Class<T> type) {
-    return throwMappingExceptionIfIssues(pIC -> readJson(reader, type, pIC));
+  public static <T> T fromJson(String json, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
+      .readValue(json, oM.getTypeFactory().constructParametricType(type, subTypes)));
   }
 
+  public static <T> T readJson(Reader reader, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> readJson(reader, pIC, type, subTypes));
+  }
+
+  /**
+   * @deprecated Use {@link #readJson(Reader, Consumer, Class, Class...)} instead
+   */
+  @Deprecated(forRemoval = true)
   public static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).readValue(reader, type));
+    return readJson(reader, propertyIssueConsumer, type);
   }
 
-  public static <T> T fromMap(Map<String, ?> map, Class<T> type) {
-    return throwMappingExceptionIfIssues(pIC -> fromMap(map, type, pIC));
+  public static <T> T readJson(Reader reader, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
+      .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes)));
   }
 
+  public static <T> T fromMap(Map<String, ?> map, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> fromMap(map, pIC, type, subTypes));
+  }
+
+  /**
+   * @deprecated Use {@link #fromMap(Map, Consumer, Class, Class...)} instead
+   */
+  @Deprecated(forRemoval = true)
   public static <T> T fromMap(Map<String, ?> map, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer).convertValue(map, type));
+    return fromMap(map, propertyIssueConsumer, type);
+  }
+
+  public static <T> T fromMap(Map<String, ?> map, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
+      .convertValue(map, oM.getTypeFactory().constructParametricType(type, subTypes)));
   }
 
   public static <T> String toJson(T obj) {

@@ -93,6 +93,37 @@ public class MapFromJsonTests {
   }
 
   /**
+   * Scenario: A JSON array of objects with nested objects should be mapped to a List of POJOs
+   */
+  @Test
+  @SuppressWarnings("unchecked")
+  public void mapFromJsonArray() {
+    // Given a JSON array with objects
+    Reader jsonReader = resourceAsReader("DeepArray.json");
+    String json = resourceAsString("DeepArray.json");
+
+    // When it is mapped
+    List<Deep> listR = Mapper.readJson(jsonReader, ArrayList.class, Deep.class);
+    Set<Deep> setF = Mapper.fromJson(json, LinkedHashSet.class, Deep.class);
+
+    // Then the data should be present in the list elements
+    assertDeepDataPresent(listR.get(0));
+    assertDeepDataModifiedPresent(listR.get(1));
+    List<Deep> listF = new ArrayList<>(setF);
+    assertDeepDataPresent(listF.get(0));
+    assertDeepDataModifiedPresent(listF.get(1));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void mapFromMultiTypeParam() {
+    String json = "{ \"1\":1.1, \"2\":2.2 }";
+    Map<Integer, Float> m = Mapper.fromJson(json, HashMap.class, Integer.class, Float.class);
+    assertEquals(1.1F, m.get(1));
+    assertEquals(2.2F, m.get(2));
+  }
+
+  /**
    * Scenario: It should be possible to differentiate JSON undefined and null with the conversion result
    *
    * JSON -> POJO
@@ -169,8 +200,8 @@ public class MapFromJsonTests {
     // When it is mapped
     PropertyIssues propertyIssuesR = PropertyIssues.of();
     PropertyIssues propertyIssuesF = PropertyIssues.of();
-    DeepFlawed pojoR = Mapper.readJson(jsonReader, DeepFlawed.class, propertyIssuesR::add);
-    DeepFlawed pojoF = Mapper.fromJson(json, DeepFlawed.class, propertyIssuesF::add);
+    DeepFlawed pojoR = Mapper.readJson(jsonReader, propertyIssuesR::add, DeepFlawed.class);
+    DeepFlawed pojoF = Mapper.fromJson(json, propertyIssuesF::add, DeepFlawed.class);
 
     // Then the convertible data should be present in the POJO
     assertDeepFlawedDataPresent(pojoR);

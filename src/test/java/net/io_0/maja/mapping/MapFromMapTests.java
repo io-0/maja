@@ -99,7 +99,7 @@ public class MapFromMapTests {
 
     // When it is mapped
     PropertyIssues propertyIssues = PropertyIssues.of();
-    DeepFlawed pojo = Mapper.fromMap(map, DeepFlawed.class, propertyIssues::add);
+    DeepFlawed pojo = Mapper.fromMap(map, propertyIssues::add, DeepFlawed.class);
 
     // Then the convertible data should be present in the POJO
     assertDeepFlawedDataPresent(pojo);
