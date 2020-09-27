@@ -79,6 +79,39 @@ public interface Assertions {
       pojo.getObjectArrayToObjectSet().toArray()[0].toString());
   }
 
+    static void assertDeepDataModifiedPresent(Deep pojo) {
+    assertNotNull(pojo);
+
+    assertNotNull(pojo.getObjectToPojo());
+    assertEquals(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afb1"), pojo.getObjectToPojo().getStringToUUID());
+    assertEquals(BigDecimal.TEN, pojo.getObjectToPojo().getNumberToBigDecimal());
+    assertCollectionEquals(List.of("a", "a", "a", "a"), pojo.getObjectToPojo().getStringArrayToStringList());
+    assertCollectionEquals(Set.of(0, 1, 2, 3), pojo.getObjectToPojo().getNumberArrayToIntegerSet());
+    assertEquals(true, pojo.getObjectToPojo().getBooleanToBoolean());
+
+    assertNotNull(pojo.getObjectToMap());
+    assertTrue(pojo.getObjectToMap().containsKey("stringToUUID"));
+    assertTrue(pojo.getObjectToMap().containsKey("numberToBigDecimal"));
+    assertTrue(pojo.getObjectToMap().containsKey("stringArrayToStringList"));
+    assertTrue(pojo.getObjectToMap().containsKey("numberArrayToIntegerSet"));
+    assertTrue(pojo.getObjectToMap().containsKey("booleanToBoolean") || pojo.getObjectToMap().containsKey("bool"));
+
+    assertNotNull(pojo.getObjectArrayToObjectList());
+    assertEquals(2, pojo.getObjectArrayToObjectList().size());
+    assertEquals("Nested(stringToUUID=3fa85f64-5717-4562-b3fc-2c963f66afb3, numberToBigDecimal=30, " +
+      "stringArrayToStringList=[a, a, b, b], numberArrayToIntegerSet=[0, 1, 2, 3], booleanToBoolean=false)",
+      pojo.getObjectArrayToObjectList().get(0).toString());
+    assertEquals("Nested(stringToUUID=3fa85f64-5717-4562-b3fc-2c963f66afb4, numberToBigDecimal=40, " +
+      "stringArrayToStringList=[a, b, b, b], numberArrayToIntegerSet=[0, 1, 2, 3], booleanToBoolean=true)",
+      pojo.getObjectArrayToObjectList().get(1).toString());
+
+    assertNotNull(pojo.getObjectArrayToObjectSet());
+    assertEquals(1, pojo.getObjectArrayToObjectSet().size());
+    assertEquals("Nested(stringToUUID=3fa85f64-5717-4562-b3fc-2c963f66afb6, numberToBigDecimal=430, " +
+      "stringArrayToStringList=[a, b, b, a], numberArrayToIntegerSet=[0, 1, 2, 3], booleanToBoolean=true)",
+      pojo.getObjectArrayToObjectSet().toArray()[0].toString());
+  }
+
   static void assertNestedDataPresent(Nested pojo) {
     assertNotNull(pojo);
     assertNull(pojo.getStringToUUID());
