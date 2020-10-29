@@ -26,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *   so that I don't get problems with Java naming conventions or enums
  */
 @Slf4j
-public class MapToMapTests {
+class MapToMapTests {
   /**
    * Scenario: A flat Map object should be mapped to a POJO and back
    */
   @Test
-  public void mapToFlatMap() {
+  void mapToFlatMap() {
     // Given a flat Map
     Map<String, Object> referenceMap = simplifiedFlatMap;
 
@@ -54,7 +54,7 @@ public class MapToMapTests {
    * Scenario: It should be possible to map a Map with absent properties and null to POJO and back
    */
   @Test
-  public void mapToMapWithNullAndAbsentProperties() {
+  void mapToMapWithNullAndAbsentProperties() {
     // Given a map with null and absent properties
     Map<String, Object> referenceMap = new HashMap<>(){};
     referenceMap.put("obj", null);
@@ -77,7 +77,7 @@ public class MapToMapTests {
    * Scenario: It should be possible to have different names in Map and POJOs (and Enums)
    */
   @Test @SuppressWarnings({"unchecked", "rawtypes"})
-  public void mapToDeepNamedMap() {
+  void mapToDeepNamedMap() {
     // Given a deep Map with java special names
     Map<String, Object> referenceMapA = simplifiedDeepNamedMap;
     Map<String, Object> referenceMapB = Map.of("aSpecialName", 4, "BSpecialName", 5, "MaJa", 6, "caJa", 7);

@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  *   I want convenient ways to deal with present and absent values
  */
-public class PropertyTest {
+class PropertyTest {
   /**
    * Scenario: It should be convenient to work if absent values
    */
   @Test
-  public void absentConvenience() {
+  void absentConvenience() {
     AtomicReference<String> cbCalled = new AtomicReference<>("");
     // Given a property
     Property<Boolean> property = new Nested().getProperty(Nested.BOOLEAN_TO_BOOLEAN);
@@ -38,7 +38,7 @@ public class PropertyTest {
    * Scenario: It should be convenient to work if present values
    */
   @Test
-  public void presentConvenience() {
+  void presentConvenience() {
     AtomicReference<String> cbCalled = new AtomicReference<>("init");
     // Given a property
     Property<Boolean> property = new Nested().setBooleanToBoolean(false).getProperty(Nested.BOOLEAN_TO_BOOLEAN);
@@ -56,7 +56,7 @@ public class PropertyTest {
    * Scenario: It should be convenient to work if present null values
    */
   @Test
-  public void presentNullConvenience() {
+  void presentNullConvenience() {
     AtomicReference<String> cbCalled = new AtomicReference<>("init");
     // Given a property
     Property<Boolean> property = new Nested().setBooleanToBoolean(null).getProperty(Nested.BOOLEAN_TO_BOOLEAN);
@@ -74,7 +74,7 @@ public class PropertyTest {
    * Scenario: It should be possible to extract a property even when it breaks bean naming convention
    */
   @Test
-  public void extractNamedTest() {
+  void extractNamedTest() {
     // Given a propertyBundle
     NamedBundle propertyBundle = new NamedBundle().setASpecialName(21).setBSpecialName(9).setMaJa(100).setCaJa(73);
 

@@ -24,7 +24,7 @@ repositories {
 ```Gradle
 dependencies {
   ...
-  implementation "com.github.io-0:maja:1.3.3"
+  implementation "com.github.io-0:maja:develop-SNAPSHOT"
   ...
 }
 ```
@@ -52,6 +52,17 @@ public class Person extends PropertyBundle {
     this.lastName = value;
     markPropertySet(LAST_NAME);
     return this;
+  }
+}
+```
+This example also demonstrates the use of `@WithUnconventionalName` Annotations.
+
+If a property type is an `Interface` Maja tries to instantiate it if a default method exists that returns the interface type and takes Map<String, Object> as parameter.
+The following example assumes that ImplementationA implements InterfaceA:
+```Java
+public interface InterfaceA {
+  default InterfaceA getInstance(Map<String, Object> jsonAsMap) {
+    return Mapper.fromMap(jsonAsMap, ImplementationA.class);
   }
 }
 ```

@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  *   I want convenient ways to create and manipulate them
  */
-public class PropertyIssueTest {
+class PropertyIssueTest {
   /**
    * Scenario: It should be convenient to create issues
    */
   @Test
-  public void creationConvenience() {
+  void creationConvenience() {
     // Given an error code, an error message and a property name they relate to
     String errorCode = "code";
     String errorMessage = "issue";
@@ -36,7 +36,7 @@ public class PropertyIssueTest {
    * Scenario: It should be convenient to adapt a issue message
    */
   @Test
-  public void messageAdaptionConvenience() {
+  void messageAdaptionConvenience() {
     // Given a property issue
     PropertyIssue pI = PropertyIssue.of(propertyName, Issue.of(errorCode, errorMessage));
 
@@ -55,7 +55,7 @@ public class PropertyIssueTest {
    * Scenario: It should be convenient to prefix an issue property name
    */
   @Test
-  public void propertyNameAdaptionConvenience() {
+  void propertyNameAdaptionConvenience() {
     // Given a property issue
     PropertyIssue pI = PropertyIssue.of(propertyName, Issue.of(errorCode, errorMessage));
 

@@ -40,12 +40,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *   so that I don't get problems with Java naming conventions
  */
 @Slf4j
-public class ValidatePojoTests {
+class ValidatePojoTests {
   /**
    * Scenario: It should be easy to build a POJO validator based on business logic and run it
    */
   @Test
-  public void buildBusinessLogicValidatorAndRunIt() {
+  void buildBusinessLogicValidatorAndRunIt() {
     // Given a business rule and error message and code
     Predicate<Flat> intAndLongNumberMustBePresentAndMatch = item ->
       item.getNumberToInteger() != null && item.getNumberToLong() != null &&
@@ -86,7 +86,7 @@ public class ValidatePojoTests {
    * Scenario: It should be easy to build a POJO validator based on property constraints and run it
    */
   @Test
-  public void buildPropertyConstraintsValidatorAndRunIt() {
+  void buildPropertyConstraintsValidatorAndRunIt() {
     // Given property constraints
     //   flat.stringToString must be present and at least 4 chars long
     //   flat.stringToInteger can be null or Exclusive Minimum Violation, 18
@@ -174,7 +174,7 @@ public class ValidatePojoTests {
    * Scenario: It should be convenient to work with validators and their components
    */
   @Test
-  public void testConvenienceAndUsabilityFurther() {
+  void testConvenienceAndUsabilityFurther() {
     Validator<Nested> validator = of(on(BOOLEAN_TO_BOOLEAN, required));
 
     // Process validation exception on validator when we went the assure route
@@ -243,7 +243,7 @@ public class ValidatePojoTests {
    *           given a POJO that implements PropertyBundle correctly
    */
   @Test
-  public void validateAbsentAndNull() {
+  void validateAbsentAndNull() {
     // Given a POJO (that implements PropertyBundle correctly) with absent and null values
     Nested pojo = new Nested().setStringToUUID(null).setBooleanToBoolean(false);
 
@@ -268,7 +268,7 @@ public class ValidatePojoTests {
    * Scenario: It should be possible to validate deep and nested POJOs
    */
   @Test
-  public void validateDeepAndNested() {
+  void validateDeepAndNested() {
     // Given a POJO (that implements PropertyBundle correctly) which is deep and nested
     Validatable pojo = deepAndNested;
 
@@ -284,7 +284,7 @@ public class ValidatePojoTests {
    * Scenario: A single report should contain all that went wrong during validation
    */
   @Test
-  public void rAV() {
+  void rAV() {
     // Given a POJO (that implements PropertyBundle correctly) which is flawed
     Validatable pojo = deepAndNestedAndFlawed;
 
@@ -394,7 +394,7 @@ public class ValidatePojoTests {
    * Scenario: It should be possible to validate POJOs with annotated (possibly java incompatible) real names
    */
   @Test
-  public void validateDeepNamed() {
+  void validateDeepNamed() {
     // Given a POJO with annotated names
     DeepNamed validPojo = DeepNamed.builder().objectToPojo(new Nested().setBooleanToBoolean(true)).build();
     DeepNamed invalidPojo = DeepNamed.builder().objectToPojo(new Nested()).build();
