@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.io_0.maja.TestUtils.resourceAsReader;
+import static net.io_0.maja.TestUtils.resourceAsString;
 import static net.io_0.maja.mapping.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,12 +32,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *   so that I don't get problems with Java naming conventions or enums
  */
 @Slf4j
-public class MapToJsonTests {
+class MapToJsonTests {
   /**
    * Scenario: Passing problematic data should end in an exception
    */
   @Test
-  public void mapToNothing() {
+  void mapToNothing() {
     assertThrows(Mapper.MappingException.class, () -> Mapper.writeJson(null, null));
   }
 
@@ -44,7 +45,7 @@ public class MapToJsonTests {
    * Scenario: A flat JSON object should be mapped to a POJO and back
    */
   @Test
-  public void mapToFlatJson() throws JSONException {
+  void mapToFlatJson() throws JSONException {
     // Given a flat JSON object
     Reader jsonReader = resourceAsReader("SimplifiedFlat.json");
 
@@ -68,7 +69,7 @@ public class MapToJsonTests {
    * Scenario: A JSON object with nested objects should be mapped to a POJO and back
    */
   @Test
-  public void mapToDeepJson() throws JSONException {
+  void mapToDeepJson() throws JSONException {
     // Given a deep JSON object
     Reader jsonReader = resourceAsReader("SimplifiedDeep.json");
 
@@ -92,7 +93,7 @@ public class MapToJsonTests {
    * Scenario: It should be possible to map JSON with absent properties and null to POJO and back
    */
   @Test
-  public void mapToJsonWithNullAndAbsentProperties() throws JSONException {
+  void mapToJsonWithNullAndAbsentProperties() throws JSONException {
     // Given a JSON object with nulls and absent properties
     Reader jsonReader = resourceAsReader("SimplifiedPartial.json");
 
@@ -119,7 +120,7 @@ public class MapToJsonTests {
    * Scenario: It should be possible to have different names in JSON and POJOs (and Enums)
    */
   @Test
-  public void mapToDeepNamedJson() throws JSONException {
+  void mapToDeepNamedJson() throws JSONException {
     // Given a deep JSON object with java special names
     Reader jsonReaderA = resourceAsReader("SimplifiedDeepNamed.json");
     Reader jsonReaderB = resourceAsReader("Named.json");
@@ -165,7 +166,7 @@ public class MapToJsonTests {
    * Scenario: It should be possible to serialize empty collections
    */
   @Test
-  public void serializeEmptyCollections() {
+  void serializeEmptyCollections() {
     // Given a model with set empty collections
     Flat model0 = new Flat();
     Flat model1 = new Flat();
@@ -200,5 +201,25 @@ public class MapToJsonTests {
     assertTrue(json4.contains("\"one\":[]"));
     assertTrue(json4.contains("\"two\":[]"));
     assertTrue(json4.contains("\"three\":{}"));
+  }
+
+  /**
+   * Scenario: It should be possible to serialize Java interfaces (with instantiate functions)
+   */
+  @Test
+  void serializeWithPolymorphism() throws JSONException {
+    // Given a json reference and a model
+    String referenceP = resourceAsString("Polymorph.json");
+    String referenceA = resourceAsString("Attribute.json");
+    Polymorph p = new Polymorph(18, new Polymorph.Instance("hello", 2));
+    Polymorph.Attribute a = new Polymorph.Instance("hello", 2);
+
+    // When serialized
+    String jsonP = Mapper.toJson(p);
+    String jsonA = Mapper.toJson(a);
+
+    // Result should match reference
+    JSONAssert.assertEquals(referenceP, jsonP, JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceA, jsonA, JSONCompareMode.NON_EXTENSIBLE);
   }
 }

@@ -26,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   so that I don't get problems with Java naming conventions
  */
 @Slf4j
-public class MapAndValidateTests {
+class MapAndValidateTests {
   @Test
-  public void readmeExampleTest() {
+  void readmeExampleTest() {
     // Given desired results
     Predicate<AtomicReference<String>> check1 = print -> print.get().equals("Maja");
     Predicate<AtomicReference<String>> check2 = print -> print.get().equals("lastName was absent");

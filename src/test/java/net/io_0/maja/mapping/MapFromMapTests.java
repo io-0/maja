@@ -25,12 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *   so that I don't get problems with Java naming conventions or enums
  */
 @Slf4j
-public class MapFromMapTests {
+class MapFromMapTests {
   /**
    * Scenario: Passing problematic data should end in an exception
    */
   @Test
-  public void mapFromNothing() {
+  void mapFromNothing() {
     assertThrows(Mapper.MappingException.class, () -> Mapper.fromMap(null, null));
   }
 
@@ -38,7 +38,7 @@ public class MapFromMapTests {
    * Scenario: A flat Map should be mapped to a POJO
    */
   @Test
-  public void mapFromFlatMap() {
+  void mapFromFlatMap() {
     // Given a flat Map
     Map<String, Object> map = flatMap;
 
@@ -53,7 +53,7 @@ public class MapFromMapTests {
    * Scenario: A Map with nested objects should be mapped to a POJO
    */
   @Test
-  public void mapFromDeepMap() {
+  void mapFromDeepMap() {
     // Given a deep Map
     Map<String, Object> map = deepMap;
 
@@ -68,7 +68,7 @@ public class MapFromMapTests {
    * Scenario: It should be possible to have different names in the Map and the mapped POJO (and Enums)
    */
   @Test
-  public void mapFromNamedMap() {
+  void mapFromNamedMap() {
     // Given a Map with java special names
     Map<String, Object> mapA = deepNamedMap;
     Map<String, Object> mapB = Map.of("aSpecialName", 4, "BSpecialName", 5, "MaJa", 6, "caJa", 7);
@@ -93,7 +93,7 @@ public class MapFromMapTests {
    * Scenario: All Map to POJO conversion errors and problems should be in one report
    */
   @Test
-  public void mapFromDeepFlawedMapManaged() {
+  void mapFromDeepFlawedMapManaged() {
     // Given a deep Map with flawed data
     Map<String, Object> map = deepFlawedMap;
 
@@ -112,7 +112,7 @@ public class MapFromMapTests {
    * Scenario: If no report is requested but conversion errors happen, an exception should contain the report
    */
   @Test
-  public void mapFromDeepFlawedMap() {
+  void mapFromDeepFlawedMap() {
     Map<String, Object> map = deepFlawedMap;
 
     Mapper.MappingException t = assertThrows(Mapper.MappingException.class, () -> Mapper.fromMap(map, DeepFlawed.class));

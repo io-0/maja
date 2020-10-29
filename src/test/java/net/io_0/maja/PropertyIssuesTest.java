@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  *   I want convenient ways to create them
  */
-public class PropertyIssuesTest {
+class PropertyIssuesTest {
   /**
    * Scenario: It should be convenient to create issues
    */
   @Test
-  public void creationConvenience() {
+  void creationConvenience() {
     // Given property issues
     PropertyIssue pI1 = PropertyIssue.of(propertyName + "1", errorCode + "1", errorMessage + "1");
     PropertyIssue pI2 = PropertyIssue.of(propertyName + "2", errorCode + "2", errorMessage + "2");
@@ -41,7 +41,7 @@ public class PropertyIssuesTest {
    * Scenario: It should be convenient to add issues with a property name prefix
    */
   @Test
-  public void addWithPropertyNamePrefixConvenience() {
+  void addWithPropertyNamePrefixConvenience() {
     // Given property issues
     PropertyIssue pI1 = PropertyIssue.of(propertyName + "1", errorCode + "1", errorMessage + "1");
     PropertyIssue pI2 = PropertyIssue.of(propertyName + "2", errorCode + "2", errorMessage + "2");

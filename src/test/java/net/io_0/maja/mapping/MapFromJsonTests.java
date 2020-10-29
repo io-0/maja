@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *   so that I don't get problems with Java naming conventions or enums
  */
 @Slf4j
-public class MapFromJsonTests {
+class MapFromJsonTests {
   /**
    * Scenario: Passing problematic data should end in an exception
    */
   @Test
-  public void mapFromNothing() {
+  void mapFromNothing() {
     assertThrows(Mapper.MappingException.class, () -> Mapper.readJson(null, null));
     assertThrows(Mapper.MappingException.class, () -> Mapper.fromJson(null, null));
   }
@@ -56,7 +56,7 @@ public class MapFromJsonTests {
    *              String
    */
   @Test
-  public void mapFromFlatJson() {
+  void mapFromFlatJson() {
     // Given a flat JSON object
     Reader jsonReader = resourceAsReader("Flat.json");
     String json = resourceAsString("Flat.json");
@@ -78,7 +78,7 @@ public class MapFromJsonTests {
    *   Array -> List or Set
    */
   @Test
-  public void mapFromDeepJson() {
+  void mapFromDeepJson() {
     // Given a deep JSON object
     Reader jsonReader = resourceAsReader("Deep.json");
     String json = resourceAsString("Deep.json");
@@ -97,7 +97,7 @@ public class MapFromJsonTests {
    */
   @Test
   @SuppressWarnings("unchecked")
-  public void mapFromJsonArray() {
+  void mapFromJsonArray() {
     // Given a JSON array with objects
     Reader jsonReader = resourceAsReader("DeepArray.json");
     String json = resourceAsString("DeepArray.json");
@@ -114,13 +114,37 @@ public class MapFromJsonTests {
     assertDeepDataModifiedPresent(listF.get(1));
   }
 
+  /**
+   * Scenario: It should be possible to specify subtypes for mapping
+   */
   @Test
   @SuppressWarnings("unchecked")
-  public void mapFromMultiTypeParam() {
+  void mapFromJsonWithDetailedTyping() {
     String json = "{ \"1\":1.1, \"2\":2.2 }";
+
     Map<Integer, Float> m = Mapper.fromJson(json, HashMap.class, Integer.class, Float.class);
+
     assertEquals(1.1F, m.get(1));
     assertEquals(2.2F, m.get(2));
+  }
+
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should search for an function to instantiate
+   */
+  @Test
+  void mapFromJsonWithPolymorphism() {
+    String jsonP = resourceAsString("Polymorph.json");
+    String jsonA = resourceAsString("Attribute.json");
+
+    Polymorph p = Mapper.fromJson(jsonP, Polymorph.class);
+    Polymorph.Attribute a = Mapper.fromJson(jsonA, Polymorph.Attribute.class);
+
+    assertEquals(18, p.getNumber());
+    assertEquals("hello", ((Polymorph.Instance) p.getAttr()).getText());
+    assertEquals(2, ((Polymorph.Instance) p.getAttr()).getVersion());
+
+    assertEquals("hello", ((Polymorph.Instance) a).getText());
+    assertEquals(2, ((Polymorph.Instance) a).getVersion());
   }
 
   /**
@@ -132,7 +156,7 @@ public class MapFromJsonTests {
    *   (we don't check the undefined token, it is valid js but not allowed in JSON)
    */
   @Test
-  public void mapFromJsonWithNullAndAbsentProperties() {
+  void mapFromJsonWithNullAndAbsentProperties() {
     // Given a JSON object with nulls and absent properties
     Reader jsonReader = resourceAsReader("Partial.json");
     String json = resourceAsString("Partial.json");
@@ -154,7 +178,7 @@ public class MapFromJsonTests {
    * Scenario: It should be possible to have different names in JSON and the mapped POJO (and Enums)
    */
   @Test
-  public void mapFromDeepNamedJson() {
+  void mapFromDeepNamedJson() {
     // Given a deep JSON object with java special names
     Reader jsonReaderA = resourceAsReader("DeepNamed.json");
     String jsonA = resourceAsString("DeepNamed.json");
@@ -192,7 +216,7 @@ public class MapFromJsonTests {
    * Scenario: All JSON to POJO conversion errors and problems should be in one report
    */
   @Test
-  public void mapFromDeepFlawedJsonManaged() {
+  void mapFromDeepFlawedJsonManaged() {
     // Given a deep JSON object with flawed data
     Reader jsonReader = resourceAsReader("DeepFlawed.json");
     String json = resourceAsString("DeepFlawed.json");
@@ -216,7 +240,7 @@ public class MapFromJsonTests {
    * Scenario: If no report is requested but conversion errors happen, an exception should contain the report
    */
   @Test
-  public void mapFromDeepFlawedJson() {
+  void mapFromDeepFlawedJson() {
     Reader jsonReader = resourceAsReader("DeepFlawed.json");
     String json = resourceAsString("DeepFlawed.json");
 

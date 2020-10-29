@@ -22,6 +22,7 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
   implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.2'
   implementation 'com.pivovarit:throwing-function:1.5.0'
+  implementation 'org.jooq:joor:0.9.13'
   testImplementation 'org.skyscreamer:jsonassert:1.5.0'
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'

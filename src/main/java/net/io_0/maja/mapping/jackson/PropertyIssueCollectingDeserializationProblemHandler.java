@@ -2,13 +2,18 @@ package net.io_0.maja.mapping.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssue;
+import org.joor.Reflect;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
@@ -18,6 +23,7 @@ import static java.lang.String.format;
  */
 @Slf4j
 public class PropertyIssueCollectingDeserializationProblemHandler extends DeserializationProblemHandler {
+  private static final TypeReference<Map<String, Object>> jsonAsMapType = new TypeReference<>() {};
   private final Consumer<PropertyIssue> propertyIssueConsumer;
 
   public PropertyIssueCollectingDeserializationProblemHandler(Consumer<PropertyIssue> propertyIssueConsumer) {
@@ -51,7 +57,53 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
 
   @Override
   public Object handleMissingInstantiator(DeserializationContext ctx, Class<?> instClass, ValueInstantiator instantiator, JsonParser p, String msg) {
+    if (instClass.isInterface()) {
+      Optional<?> instance = getInstance(instClass, p);
+      if (instance.isPresent()) {
+        return instance.get();
+      }
+    }
     return addErrorAndReturnNull(ctx, "Missing Instantiator", format("%s, %s", instantiator, msg));
+  }
+
+  /**
+   * Instantiate interface if it contains a default method that accepts Map&lt;String, Object&gt; and returns the interface type.
+   * @param interfaceClass interface to instantiate
+   * @param p json parser
+   * @return instantiation if possible
+   */
+  @SuppressWarnings("unchecked")
+  private static <T> Optional<T> getInstance(Class<T> interfaceClass, JsonParser p) {
+    return Stream.of(interfaceClass.getMethods())
+      .filter(method ->
+        method.isDefault() &&
+        method.getReturnType().equals(interfaceClass) &&
+        method.getParameters().length == 1 &&
+        jsonAsMapType.getType().equals(method.getParameters()[0].getParameterizedType())
+      )
+      .findAny()
+      .map(method -> {
+        try {
+          Map<String, Object> data = p.readValueAs(jsonAsMapType);
+          return (T) method.invoke(Reflect.on(new Object()).as(interfaceClass), data);
+        } catch (Exception e) {
+          return null;
+        }
+      });
+  }
+
+  /**
+   * Json path e.g. "/zoo/1/colorEnum" to simple attribute name e.g. "zoo.1.colorEnum"
+   *
+   * @param parser parser to extract json path from
+   * @return simplified path
+   */
+  private static String extractAttributeName(JsonParser parser) {
+    return parser.getParsingContext().pathAsPointer().toString().substring(1).replace("/", ".");
+  }
+
+  private static String removeLineBreaks(String string) {
+    return string.replaceAll("\\R+", "");
   }
 
   /**
@@ -66,19 +118,5 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
     propertyIssueConsumer.accept(PropertyIssue.of(extractAttributeName(ctx.getParser()), code, removeLineBreaks(message)));
 
     return null;
-  }
-
-  /**
-   * Json path e.g. "/zoo/1/colorEnum" to simple attribute name e.g. "zoo.1.colorEnum"
-   *
-   * @param parser parser to extract json path from
-   * @return simplified path
-   */
-  private String extractAttributeName(JsonParser parser) {
-    return parser.getParsingContext().pathAsPointer().toString().substring(1).replace("/", ".");
-  }
-
-  private String removeLineBreaks(String string) {
-    return string.replaceAll("\\R+", "");
   }
 }
