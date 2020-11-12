@@ -85,7 +85,7 @@ public abstract class PropertyBundle {
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isNull() {
           T v = value.get();
           return Objects.isNull(v);
         }

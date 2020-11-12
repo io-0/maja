@@ -17,100 +17,100 @@ import static net.io_0.maja.validation.Validation.invalid;
 public interface PropertyValidators {
   static PropertyValidator<String> pattern(String parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.regexMatch(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.regexMatch(parameter)),
       Issue.of(format("Pattern Violation, '%s'", parameter), format("Must match '%s' pattern", parameter))
     );
   }
 
   String PASSWORD_PATTERN = "^(?=.*?\\p{Lu})(?=.*?\\p{Ll})(?=.*?\\d)" + "(?=.*?[`~!@#$%^&*()\\-_=+\\\\|\\[{\\]};:'\",<.>/?]).*$";
   PropertyValidator<String> passwordFormat = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.regexMatch(PASSWORD_PATTERN)),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.regexMatch(PASSWORD_PATTERN)),
     Issue.of("Password Format Violation", "Must at least contain 1 number, 1 lower case letter, 1 upper case letter and 1 special character")
   );
 
   String BINARY_PATTERN = "^([A-Fa-f0-9]{2})+$";
   PropertyValidator<String> binaryFormat = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.regexMatch(BINARY_PATTERN)),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.regexMatch(BINARY_PATTERN)),
     Issue.of("Binary Format Violation", "Must be a sequence of octets")
   );
 
   String BASE64_PATTERN = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
   PropertyValidator<String> byteFormat = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.regexMatch(BASE64_PATTERN)),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.regexMatch(BASE64_PATTERN)),
     Issue.of("Byte Format Violation", "Must be base64 format")
   );
 
   PropertyValidator<String> emailFormat = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.email),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.email),
     Issue.of("Email Format Violation", "Must fit email format")
   );
 
   PropertyValidator<String> hostnameFormat = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.hostname),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.hostname),
     Issue.of("Hostname Format Violation", "Must fit hostname format")
   );
 
   PropertyValidator<String> ipV4Format = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.inet4Address),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.inet4Address),
     Issue.of("IP V4 Format Violation", "Must fit IP v4 format")
   );
 
   PropertyValidator<String> ipV6Format = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.inet6Address),
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.inet6Address),
     Issue.of("IP V6 Format Violation", "Must fit IP v6 format")
   );
 
   static PropertyValidator<String> maxLength(Integer parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lengthLte(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lengthLte(parameter)),
       Issue.of(format("Max Length Violation, %s", parameter), format("Must be shorter than %s characters", parameter))
     );
   }
 
   static PropertyValidator<String> minLength(Integer parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lengthGte(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lengthGte(parameter)),
       Issue.of(format("Min Length Violation, %s", parameter), format("Must be longer than %s characters", parameter))
     );
   }
 
   static PropertyValidator<Number> exclusiveMaximum(Number parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gt(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.gt(parameter)),
       Issue.of(format("Exclusive Maximum Violation, %s", parameter), format("Must be lessen than %s", parameter))
     );
   }
 
   static PropertyValidator<Number> exclusiveMinimum(Number parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lt(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lt(parameter)),
       Issue.of(format("Exclusive Minimum Violation, %s", parameter), format("Must be greater than %s", parameter))
     );
   }
 
   static PropertyValidator<Number> maximum(Number parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.gte(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.gte(parameter)),
       Issue.of(format("Maximum Violation, %s", parameter), format("Must be %s or lesser", parameter))
     );
   }
 
   static PropertyValidator<Number> minimum(Number parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.lte(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lte(parameter)),
       Issue.of(format("Minimum Violation, %s", parameter), format("Must be %s or greater", parameter))
     );
   }
 
   static PropertyValidator<Number> multipleOf(Number parameter) {
     return PropertyValidator.of(
-      PropertyPredicates.unassignedOrNotEmptyAnd(PropertyPredicates.multipleOf(parameter)),
+      PropertyPredicates.unassignedOrNullOr(PropertyPredicates.multipleOf(parameter)),
       Issue.of(format("Multiple Of Violation, %s", parameter), format("Must be a multiple of %s", parameter))
     );
   }
 
   PropertyValidator<?> notNull = PropertyValidator.of(
-    PropertyPredicates.unassignedOrNotEmpty,
+    PropertyPredicates.unassignedOrNotNull,
     Issue.of("Not Null Violation", "Can't be literally null")
   );
 
@@ -136,7 +136,7 @@ public interface PropertyValidators {
   @SuppressWarnings({"unchecked", "rawtypes"})
   static PropertyValidator<?> mapOrCollection(PropertyPredicate<?> predicate, Issue issue) {
     return property -> {
-      if (PropertyPredicates.unassignedOrEmpty.test((Property) property)) {
+      if (PropertyPredicates.unassignedOrNull.test((Property) property)) {
         return Validation.valid(property);
       }
 
@@ -153,7 +153,7 @@ public interface PropertyValidators {
   @SuppressWarnings({"unchecked", "rawtypes"})
   static <T> PropertyValidator<?> each(PropertyValidator<? extends T>... validators) {
     return property -> {
-      if (PropertyPredicates.unassignedOrEmpty.test((Property) property)) {
+      if (PropertyPredicates.unassignedOrNull.test((Property) property)) {
         return Validation.valid(property);
       }
 
@@ -184,7 +184,7 @@ public interface PropertyValidators {
   @SuppressWarnings({"unchecked", "rawtypes"})
   static <T> PropertyValidator<T> valid(Validator<T> validator) {
     return property -> {
-      if (PropertyPredicates.unassignedOrEmpty.test((Property) property)) {
+      if (PropertyPredicates.unassignedOrNull.test((Property) property)) {
         return Validation.valid(property);
       }
 

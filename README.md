@@ -9,7 +9,7 @@ Combining those features enables one to implement e.g. [OpenAPI Specification](h
 ### Information loss?
 A property in JSON can have a value (null or otherwise) or be absent/undefined. A property in Java can't be absent/undefined at runtime. There are multiple ways to deal with that in Java. Since Java 8 one could e.g. utilize `Optional` for properties where this difference matters. Maja's approach is to store in a `Set` if a property was set.
 
-Furthermore JSON naming conventions are not as strict as in Java. Maja's approach to deal with this are `@WithUnconventionalName` Annotations.
+Furthermore, JSON naming conventions are not as strict as in Java. Maja's approach to deal with this are `@WithUnconventionalName` Annotations.
 
 ## Usage
 ### Import
@@ -24,7 +24,7 @@ repositories {
 ```Gradle
 dependencies {
   ...
-  implementation "com.github.io-0:maja:develop-SNAPSHOT"
+  implementation "com.github.io-0:maja:1.5.0"
   ...
 }
 ```
@@ -100,6 +100,8 @@ lastName.ifUnassigned(() -> System.out.println("lastName was absent")); // print
 For further information check the Tests.
 
 ## Built In Property Validators
+Most validators will only act if a non null value is present. If this is not desired combine the validator with the required validator or the notNull validator or both.
+
 ### All Types
   * notNull
   * required

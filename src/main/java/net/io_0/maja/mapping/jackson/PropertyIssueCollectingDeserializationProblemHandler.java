@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssue;
 import org.joor.Reflect;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -52,6 +53,13 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
 
   @Override
   public Object handleUnexpectedToken(DeserializationContext ctx, JavaType targetType, JsonToken t, JsonParser p, String failureMsg) {
+    if (targetType.isTypeOrSubTypeOf(String.class) && t.isStructStart()) {
+      try {
+        return p.readValueAsTree().toString();
+      } catch (IOException e) {
+        log.debug("Failed to convert json to string", e);
+      }
+    }
     return addErrorAndReturnNull(ctx, "Unexpected Token", format("%s, %s", t, failureMsg));
   }
 
@@ -116,7 +124,6 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
    */
   private Object addErrorAndReturnNull(DeserializationContext ctx, String code, String message) {
     propertyIssueConsumer.accept(PropertyIssue.of(extractAttributeName(ctx.getParser()), code, removeLineBreaks(message)));
-
     return null;
   }
 }

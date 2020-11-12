@@ -251,6 +251,84 @@ class MapFromJsonTests {
     assertDeepFlawedPropertyIssuesCollected(tF.getMessage());
   }
 
+  /**
+   * Scenario: A JSON object property should be mappable to String
+   */
+  @Test
+  void mapFromDeepJsonPartiallyAsString() {
+    // Given a deep JSON object
+    Reader jsonReader = resourceAsReader("Deep.json");
+    String json = resourceAsString("Deep.json");
+
+    // When it is mapped
+    DeepNestedString pojoR = Mapper.readJson(jsonReader, DeepNestedString.class);
+    DeepNestedString pojoF = Mapper.fromJson(json, DeepNestedString.class);
+
+    // Then the data should be present in the POJO
+    assertDeepNestedStringDataPresent(pojoR);
+    assertDeepNestedStringDataPresent(pojoF);
+  }
+
+  /**
+   * Scenario: A JSON array should be mappable to String
+   */
+  @Test
+  void mapFromDeepArrayJsonToString() {
+    // Given a deep JSON object
+    Reader jsonReader = resourceAsReader("DeepArray.json");
+    String json = resourceAsString("DeepArray.json");
+
+    // When it is mapped
+    String stringR = Mapper.readJson(jsonReader, String.class);
+    String stringF = Mapper.fromJson(json, String.class);
+
+    // Then the data should be present in the POJO
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepArray.json"), stringR);
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepArray.json"), stringF);
+  }
+
+  /**
+   * Scenario: A JSON object should be mappable to String
+   */
+  @Test
+  void mapObjectJsonToString() {
+    // Given a deep JSON object
+    Reader jsonReader = resourceAsReader("Deep.json");
+    String json = resourceAsString("DeepNamed.json");
+
+    // When it is mapped
+    String stringR = Mapper.readJson(jsonReader, String.class);
+    String stringF = Mapper.fromJson(json, String.class);
+
+    // Then the data should be present in the POJO
+    assertEqualsIgnoringWhitespaces(resourceAsString("Deep.json"), stringR);
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepNamed.json"), stringF);
+  }
+
+  private void assertDeepNestedStringDataPresent(DeepNestedString pojo) {
+    assertNotNull(pojo);
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepObjectToPojoPart.json"), pojo.getObjectToPojo());
+
+    assertNotNull(pojo.getObjectToMap());
+    assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa2", pojo.getObjectToMap().get("stringToUUID"));
+    assertEquals("2", pojo.getObjectToMap().get("numberToBigDecimal"));
+    assertEquals("[\"a\",\"a\",\"a\",\"b\"]", pojo.getObjectToMap().get("stringArrayToStringList"));
+    assertEquals("[0,1,2,3,2,1,1]", pojo.getObjectToMap().get("numberArrayToIntegerSet"));
+    assertEquals("false", pojo.getObjectToMap().get("booleanToBoolean"));
+
+    assertNotNull(pojo.getObjectArrayToObjectList());
+    assertEquals(2, pojo.getObjectArrayToObjectList().size());
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepObjectArrayToObjectListFirstPart.json"),
+      pojo.getObjectArrayToObjectList().get(0));
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepObjectArrayToObjectListSecondPart.json"),
+      pojo.getObjectArrayToObjectList().get(1));
+
+    assertNotNull(pojo.getObjectArrayToObjectSet());
+    assertEquals(1, pojo.getObjectArrayToObjectSet().size());
+    assertEqualsIgnoringWhitespaces(resourceAsString("DeepObjectArrayToObjectSetFirstPart.json"),
+      pojo.getObjectArrayToObjectSet().toArray()[0].toString());
+  }
+
   private void assertDeepFlawedDataPresent(DeepFlawed pojo) {
     assertNotNull(pojo);
 
