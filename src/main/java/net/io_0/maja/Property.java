@@ -6,7 +6,7 @@ public interface Property<T> {
   String getName();
   
   /**
-   * Get the value. Check if there is one first with #isEmpty().
+   * Get the value. Check if there is one first with #isNull().
    * @throws NullPointerException thrown if there is no value
    * @return non null property value
    */
@@ -18,7 +18,15 @@ public interface Property<T> {
    * Check if value is null.
    * @return true if property was assigned null or if property defaults to null and was not assigned
    */
-  boolean isEmpty();
+  boolean isNull();
+
+  /**
+   * @deprecated use #isNull()
+   */
+  @Deprecated(forRemoval = true)
+  default boolean isEmpty() {
+    return isNull();
+  }
 
   static <T> Property<T> from(Object model, String propertyName) {
     return model instanceof PropertyBundle ?
@@ -33,7 +41,7 @@ public interface Property<T> {
 
   default void ifAssigned(Consumer<T> onValueOrNull) {
     if (isAssigned()) {
-      onValueOrNull.accept(isEmpty()? null : getValue());
+      onValueOrNull.accept(isNull()? null : getValue());
     }
   }
 
@@ -42,7 +50,7 @@ public interface Property<T> {
       return;
     }
 
-    if (isEmpty()) {
+    if (isNull()) {
       onNull.run();
     } else {
       onValue.accept(getValue());

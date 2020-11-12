@@ -13,16 +13,40 @@ import static net.io_0.maja.validation.PropertyPredicate.not;
 public interface PropertyPredicates {
   PropertyPredicate<?> assigned = Property::isAssigned;
 
-  PropertyPredicate<?> empty = Property::isEmpty;
+  PropertyPredicate<?> assignedAndNotNull = assigned.and(not(Property::isNull));
 
-  PropertyPredicate<?> assignedAndNotEmpty = assigned.and(not(Property::isEmpty));
+  /**
+   * @deprecated use assignedAndNotNull
+   */
+  @Deprecated(forRemoval = true)
+  PropertyPredicate<?> assignedAndNotEmpty = assignedAndNotNull;
 
-  PropertyPredicate<?> unassignedOrEmpty = not(assignedAndNotEmpty);
+  PropertyPredicate<?> unassignedOrNull = not(assignedAndNotNull);
 
-  PropertyPredicate<?> unassignedOrNotEmpty = not(assigned).or(not(Property::isEmpty));
+  /**
+   * @deprecated use unassignedOrNull
+   */
+  @Deprecated(forRemoval = true)
+  PropertyPredicate<?> unassignedOrEmpty = unassignedOrNull;
 
-  static <T> PropertyPredicate<T> unassignedOrNotEmptyAnd(PropertyPredicate<T> predicate) {
-    return not(Property<T>::isAssigned).or(not(Property<T>::isEmpty).and(predicate));
+  PropertyPredicate<?> unassignedOrNotNull = not(assigned).or(not(Property::isNull));
+
+  /**
+   * @deprecated use unassignedOrNotNull
+   */
+  @Deprecated(forRemoval = true)
+  PropertyPredicate<?> unassignedOrNotEmpty = unassignedOrNotNull;
+
+  static <T> PropertyPredicate<T> unassignedOrNullOr(PropertyPredicate<T> predicate) {
+    return not(Property<T>::isAssigned).or(Property<T>::isNull).or(predicate);
+  }
+
+  /**
+   * @deprecated use unassignedOrNullOr
+   */
+  @Deprecated(forRemoval = true)
+  static <T> PropertyPredicate<T> unassignedOrEmptyOr(PropertyPredicate<T> predicate) {
+    return unassignedOrNullOr(predicate);
   }
 
   static PropertyPredicate<Number> lte(Number number) {

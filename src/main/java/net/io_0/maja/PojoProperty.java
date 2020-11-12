@@ -28,7 +28,7 @@ public class PojoProperty<T> implements Property<T> {
   }
 
   @Override
-  public boolean isEmpty() {
+  public boolean isNull() {
     return Objects.isNull(value);
   }
 

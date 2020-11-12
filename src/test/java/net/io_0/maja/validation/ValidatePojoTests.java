@@ -108,6 +108,9 @@ class ValidatePojoTests {
     assertTrue(invalidBecauseEmpty.isInvalid());
     assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("stringToString"));
     assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("stringArrayToStringList"));
+    assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("numberArrayToFloatList"));
+    assertTrue(invalidBecauseEmpty.getPropertyIssues().containsPropertyName("stringArrayToOffsetDateTimeSet"));
+    assertEquals(4, invalidBecauseEmpty.getPropertyIssues().size());
     assertEquals(Optional.of("Not Null Violation"),
       invalidBecauseEmpty.getPropertyIssues().getPropertyIssue("stringToString").map(Issue::getCode));
     assertEquals(Optional.of("Not Null Violation"),
@@ -234,7 +237,7 @@ class ValidatePojoTests {
     assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
     iAEx = assertThrows(IllegalArgumentException.class, () -> Property.from(new Nested() {
       @Override public Boolean getBooleanToBoolean() { throw new IllegalStateException(); }
-    }, BOOLEAN_TO_BOOLEAN).isEmpty());
+    }, BOOLEAN_TO_BOOLEAN).isNull());
     assertTrue(iAEx.getMessage().startsWith("Couldn't access property with name 'booleanToBoolean' on"));
   }
 

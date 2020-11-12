@@ -15,7 +15,7 @@ public interface PropertyValidator<T> extends Validator<Property<T>> {
       valid(property) :
       invalid(PropertyIssue.of(
         property.getName(),
-        issue.withMessage(format(issue.getMessage(), property.isEmpty() ? null : property.getValue()))
+        issue.withMessage(format(issue.getMessage(), property.isNull() ? null : property.getValue()))
       ));
   }
 
