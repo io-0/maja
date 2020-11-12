@@ -1,6 +1,8 @@
 package net.io_0.maja.mapping;
 
 import net.io_0.maja.models.*;
+import org.junit.platform.commons.util.StringUtils;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -146,5 +148,12 @@ public interface Assertions {
       pojo.getObjectArrayToObjectSet().toArray()[0].toString());
 
     assertCollectionEquals(List.of(StringEnumNamed.STR1, StringEnumNamed.STR2, StringEnumNamed.STR3), pojo.getStringArrayToEnumList());
+  }
+
+  static void assertEqualsIgnoringWhitespaces(String expected, String actual) {
+    assertEquals(
+      StringUtils.replaceWhitespaceCharacters(expected, ""),
+      StringUtils.replaceWhitespaceCharacters(actual, "")
+    );
   }
 }
