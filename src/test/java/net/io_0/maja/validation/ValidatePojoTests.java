@@ -86,6 +86,7 @@ class ValidatePojoTests {
    * Scenario: It should be easy to build a POJO validator based on property constraints and run it
    */
   @Test
+  @SuppressWarnings("unchecked")
   void buildPropertyConstraintsValidatorAndRunIt() {
     // Given property constraints
     //   flat.stringToString must be present and at least 4 chars long
