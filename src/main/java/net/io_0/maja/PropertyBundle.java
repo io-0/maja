@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,10 +43,9 @@ public abstract class PropertyBundle {
    * @return property
    */
   public <T> Property<T> getProperty(String name) {
-    return extractProperty(this, name, this.<T> constructWith(name, name))
-      .or(() -> annotatedNameToJavaName(this, name).flatMap(javaName ->
-        extractProperty(this, javaName, constructWith(name, javaName))
-      ))
+    return annotatedNameToJavaName(this, name)
+      .flatMap(javaName -> extractProperty(this, javaName, this.<T> constructWith(name, javaName)))
+      .or(() -> extractProperty(this, name, this.constructWith(name, name)))
       .orElseThrow(() -> new IllegalArgumentException(
         format("Property with name '%s' not found on %s", name, this.getClass().getSimpleName())
       ));
@@ -64,7 +64,7 @@ public abstract class PropertyBundle {
           );
         }
       };
-      Supplier<Boolean> assigned = () -> isPropertySet(javaName);
+      BooleanSupplier assigned = () -> isPropertySet(javaName);
 
       return new Property<>() {
         @Override
@@ -81,7 +81,7 @@ public abstract class PropertyBundle {
 
         @Override
         public boolean isAssigned() {
-          return assigned.get();
+          return assigned.getAsBoolean();
         }
 
         @Override
