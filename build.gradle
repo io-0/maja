@@ -2,7 +2,7 @@ plugins {
   id "io.freefair.lombok" version "5.3.0"
   id 'java-library'
   id 'maven-publish'
-  id 'com.github.ben-manes.versions' version '0.33.0'
+  id 'com.github.ben-manes.versions' version '0.36.0'
   id 'se.patrikerdes.use-latest-versions' version '0.2.15'
 }
 
@@ -21,8 +21,9 @@ dependencies {
     exclude group: 'commons-digester', module: 'commons-digester'
     exclude group: 'commons-logging', module: 'commons-logging'
   }
-  implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
-  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.4'
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.4'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.4'
   implementation 'com.pivovarit:throwing-function:1.5.1'
   implementation 'org.jooq:joor:0.9.13'
   testImplementation 'org.skyscreamer:jsonassert:1.5.0'

@@ -1,0 +1,51 @@
+stringToObject: '42'
+numberToObject: 42
+numberToEnum: 9
+objectToPojo:
+  stringToUUID: no uuid
+  numberToBigDecimal: string
+  stringArrayToStringList: 42
+  numberArrayToIntegerSet:
+    - 0
+    - string
+  booleanToBoolean: string
+objectToMap:
+  stringToUUID: no uuid
+  numberToBigDecimal: string
+  stringArrayToStringList: 42
+  numberArrayToIntegerSet:
+    - 0
+    - string
+  booleanToBoolean: string
+objectToIntMap:
+  string: 2
+objectArrayToObjectList:
+  - stringToUUID: no uuid
+    numberToBigDecimal: string
+    stringArrayToStringList: 42
+    numberArrayToIntegerSet:
+      - 0
+      - string
+    booleanToBoolean: string
+  - stringToUUID: no uuid
+    numberToBigDecimal: string
+    stringArrayToStringList: 42
+    numberArrayToIntegerSet:
+      - 0
+      - string
+    booleanToBoolean: string
+objectArrayToObjectSet:
+  - stringToUUID: no uuid
+    numberToBigDecimal: string
+    stringArrayToStringList: 42
+    numberArrayToIntegerSet:
+      - 0
+      - string
+    booleanToBoolean: string
+  - stringToUUID: no uuid
+    numberToBigDecimal: string
+    stringArrayToStringList: 42
+    numberArrayToIntegerSet:
+      - 0
+      - string
+    booleanToBoolean: string

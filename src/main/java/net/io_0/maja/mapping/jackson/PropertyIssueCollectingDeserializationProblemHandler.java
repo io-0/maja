@@ -7,9 +7,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssue;
 import org.joor.Reflect;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +58,11 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
   public Object handleUnexpectedToken(DeserializationContext ctx, JavaType targetType, JsonToken t, JsonParser p, String failureMsg) {
     if (targetType.isTypeOrSubTypeOf(String.class) && t.isStructStart()) {
       try {
-        return p.readValueAsTree().toString();
+        if (p instanceof YAMLParser) {
+          return new Yaml().dump(p.readValueAs(Object.class));
+        } else {
+          return p.readValueAsTree().toString();
+        }
       } catch (IOException e) {
         log.debug("Failed to convert json to string", e);
       }

@@ -1,7 +1,7 @@
 # Maja
 
 ## About
-**Ma**ps **Ja**va to JSON Objects and back without information loss.
+**Ma**ps **Ja**va Objects to JSON (or YAML or Maps) and back without information loss.
 Provides validators to tighten mapping.
 
 Combining those features enables one to implement e.g. [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification).

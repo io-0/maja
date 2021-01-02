@@ -1,10 +1,13 @@
 package net.io_0.maja.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
+import lombok.NoArgsConstructor;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssues;
 import net.io_0.maja.mapping.jackson.FirstCharCaseIgnoredPropertyNamingStrategy;
@@ -18,9 +21,79 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class Mapper {
   public static <T> T fromJson(String json, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssues(pIC -> fromJson(json, pIC, type, subTypes));
+  }
+
+  public static <T> T fromJson(String json, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithJsonObjectMapper(oM -> prepForJsonOrYamlMapping(oM, propertyIssueConsumer)
+      .readValue(json, oM.getTypeFactory().constructParametricType(type, subTypes)));
+  }
+
+  public static <T> T readJson(Reader reader, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> readJson(reader, pIC, type, subTypes));
+  }
+
+  public static <T> T readJson(Reader reader, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithJsonObjectMapper(oM -> prepForJsonOrYamlMapping(oM, propertyIssueConsumer)
+      .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes)));
+  }
+
+  public static <T> T fromYaml(String yaml, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> fromYaml(yaml, pIC, type, subTypes));
+  }
+
+  public static <T> T fromYaml(String yaml, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithYamlObjectMapper(oM -> prepForJsonOrYamlMapping(oM, propertyIssueConsumer)
+      .readValue(yaml, oM.getTypeFactory().constructParametricType(type, subTypes)));
+  }
+
+  public static <T> T readYaml(Reader reader, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> readYaml(reader, pIC, type, subTypes));
+  }
+
+  public static <T> T readYaml(Reader reader, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithYamlObjectMapper(oM -> prepForJsonOrYamlMapping(oM, propertyIssueConsumer)
+      .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes)));
+  }
+
+  public static <T> T fromMap(Map<String, ?> map, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssues(pIC -> fromMap(map, pIC, type, subTypes));
+  }
+
+  public static <T> T fromMap(Map<String, ?> map, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return mapWithJsonObjectMapper(oM -> prepForJsonOrYamlMapping(oM, propertyIssueConsumer)
+      .convertValue(map, oM.getTypeFactory().constructParametricType(type, subTypes)));
+  }
+
+  public static <T> String toJson(T obj) {
+    return mapWithJsonObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
+  }
+
+  public static <T> void writeJson(Writer writer, T obj) {
+    mapWithJsonObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+  }
+
+  public static <T> String toYaml(T obj) {
+    return mapWithYamlObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
+  }
+
+  public static <T> void writeYaml(Writer writer, T obj) {
+    mapWithYamlObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+  }
+
+  public static <T> Map<String, Object> toMap(T obj) {
+    return mapWithJsonObjectMapper(oM -> prepForPojoMapping(oM).convertValue(obj, new TypeReference<>() {}));
+  }
+
+  public static class MappingException extends RuntimeException {
+    public MappingException(Throwable cause) {
+      super(cause);
+    }
   }
 
   /**
@@ -31,30 +104,12 @@ public class Mapper {
     return fromJson(json, propertyIssueConsumer, type);
   }
 
-  public static <T> T fromJson(String json, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
-      .readValue(json, oM.getTypeFactory().constructParametricType(type, subTypes)));
-  }
-
-  public static <T> T readJson(Reader reader, Class<T> type, Class<?>... subTypes) {
-    return throwMappingExceptionIfIssues(pIC -> readJson(reader, pIC, type, subTypes));
-  }
-
   /**
    * @deprecated Use {@link #readJson(Reader, Consumer, Class, Class...)} instead
    */
   @Deprecated(forRemoval = true)
   public static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
     return readJson(reader, propertyIssueConsumer, type);
-  }
-
-  public static <T> T readJson(Reader reader, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
-      .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes)));
-  }
-
-  public static <T> T fromMap(Map<String, ?> map, Class<T> type, Class<?>... subTypes) {
-    return throwMappingExceptionIfIssues(pIC -> fromMap(map, pIC, type, subTypes));
   }
 
   /**
@@ -64,31 +119,8 @@ public class Mapper {
   public static <T> T fromMap(Map<String, ?> map, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
     return fromMap(map, propertyIssueConsumer, type);
   }
-
-  public static <T> T fromMap(Map<String, ?> map, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
-    return mapWithObjectMapper(oM -> prepForJsonMapping(oM, propertyIssueConsumer)
-      .convertValue(map, oM.getTypeFactory().constructParametricType(type, subTypes)));
-  }
-
-  public static <T> String toJson(T obj) {
-    return mapWithObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
-  }
-
-  public static <T> void writeJson(Writer writer, T obj) {
-    mapWithObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
-  }
-
-  public static <T> Map<String, Object> toMap(T obj) {
-    return mapWithObjectMapper(oM -> prepForPojoMapping(oM).convertValue(obj, new TypeReference<>() {}));
-  }
-
-  public static class MappingException extends RuntimeException {
-    public MappingException(Throwable cause) {
-      super(cause);
-    }
-  }
-
-  private static ObjectMapper prepForJsonMapping(ObjectMapper oM, Consumer<PropertyIssue> pIC) {
+  
+  private static ObjectMapper prepForJsonOrYamlMapping(ObjectMapper oM, Consumer<PropertyIssue> pIC) {
     return oM
       .disable(
         DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
@@ -106,16 +138,24 @@ public class Mapper {
       ));
   }
 
-  private static <T> T mapWithObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+  private static <T> T mapWithJsonObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    return mapWithObjectMapper(new JsonFactory(), cb);
+  }
+
+  private static <T> T mapWithYamlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    return mapWithObjectMapper(new YAMLFactory(), cb);
+  }
+
+  private static <T> T mapWithObjectMapper(JsonFactory factory, ThrowingFunction<ObjectMapper, T, IOException> cb) {
     try {
-      return cb.apply(getPreConfiguredObjectMapper());
+      return cb.apply(getPreConfiguredObjectMapper(factory));
     } catch (Exception e) {
       throw new MappingException(e);
     }
   }
 
-  private static ObjectMapper getPreConfiguredObjectMapper() {
-    ObjectMapper mapper = new ObjectMapper()
+  private static ObjectMapper getPreConfiguredObjectMapper(JsonFactory factory) {
+    ObjectMapper mapper = new ObjectMapper(factory)
       .registerModules(
         new JavaTimeModule()
       )

@@ -1,0 +1,43 @@
+stringToString: str
+stringToEnum: STR2
+stringToBigDecimal: '42'
+stringToFloat: '20.1'
+stringToDouble: '220.1'
+stringToInteger: '5'
+stringToLong: '2147483648'
+stringToLocalDate: '2019-07-23'
+stringToOffsetDateTime: '2010-01-01T10:00:10+01:00'
+stringToUUID: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+stringToURI: 'http://www.example.com/eula'
+stringToByteArray: dGVzdA==
+stringToFile: /path/filename.ext
+numberToBigDecimal: 43
+numberToFloat: 21.1
+numberToDouble: 221.1
+numberToInteger: 6
+numberToLong: 2147483649
+numberToString: 9001
+stringArrayToStringList:
+  - a
+  - b
+  - b
+  - a
+stringArrayToOffsetDateTimeSet:
+  - '2010-01-01T10:00:10+02:00'
+  - '2010-01-01T10:00:10+03:00'
+numberArrayToFloatList:
+  - 1
+  - 2.3
+  - 4
+  - 3.2
+  - 1
+numberArrayToIntegerSet:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 2
+  - 1
+  - 0
+booleanToBoolean: true
+booleanToString: false
