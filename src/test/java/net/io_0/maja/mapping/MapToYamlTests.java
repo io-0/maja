@@ -205,15 +205,35 @@ class MapToYamlTests {
   }
 
   /**
-   * Scenario: It should be possible to serialize Java interfaces (with instantiate functions)
+   * Scenario: It should be possible to serialize Java interfaces (with default instantiate functions)
    */
   @Test
-  void serializeWithPolymorphism() {
+  void serializeWithPolymorphismWithDefaultInstantiator() {
     // Given a yaml reference and a model
     String referenceP = resourceAsString("PolymorphRef.yaml");
     String referenceA = resourceAsString("AttributeRef.yaml");
-    Polymorph p = new Polymorph(18, new Polymorph.Instance("hello", 2));
-    Polymorph.Attribute a = new Polymorph.Instance("hello", 2);
+    PolymorphWithDefaultInstantiator p = new PolymorphWithDefaultInstantiator(18, new PolymorphWithDefaultInstantiator.Instance("hello", 2));
+    PolymorphWithDefaultInstantiator.Attribute a = new PolymorphWithDefaultInstantiator.Instance("hello", 2);
+
+    // When serialized
+    String yamlP = Mapper.toYaml(p);
+    String yamlA = Mapper.toYaml(a);
+
+    // Result should match reference
+    assertEquals(referenceP, yamlP);
+    assertEquals(referenceA, yamlA);
+  }
+
+  /**
+   * Scenario: It should be possible to serialize Java interfaces (with static instantiate functions)
+   */
+  @Test
+  void serializeWithPolymorphismWithStaticInstantiator() {
+    // Given a yaml reference and a model
+    String referenceP = resourceAsString("PolymorphRef.yaml");
+    String referenceA = resourceAsString("AttributeRef.yaml");
+    PolymorphWithStaticInstantiator p = new PolymorphWithStaticInstantiator(18, new PolymorphWithStaticInstantiator.Instance("hello", 2));
+    PolymorphWithStaticInstantiator.Attribute a = new PolymorphWithStaticInstantiator.Instance("hello", 2);
 
     // When serialized
     String yamlP = Mapper.toYaml(p);

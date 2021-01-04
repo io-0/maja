@@ -14,12 +14,11 @@ import org.joor.Reflect;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 /**
  * Instead of stopping deserialization on the first problem this handler collects failure messages as issues.
@@ -36,22 +35,22 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
 
   @Override
   public Object handleWeirdStringValue(DeserializationContext ctx, Class<?> targetType, String valueToConvert, String failureMsg) {
-    return addErrorAndReturnNull(ctx, "Weird String Value", format("%s, %s", valueToConvert, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird String Value", stringifyAndJoinWithComma(valueToConvert, failureMsg));
   }
 
   @Override
   public Object handleInstantiationProblem(DeserializationContext ctx, Class<?> instClass, Object argument, Throwable t) {
-    return addErrorAndReturnNull(ctx, "Instantiation Problem", format("%s, %s", argument, t.getMessage()));
+    return addErrorAndReturnNull(ctx, "Instantiation Problem", stringifyAndJoinWithComma(argument, t.getMessage()));
   }
 
   @Override
   public Object handleWeirdKey(DeserializationContext ctx, Class<?> rawKeyType, String keyValue, String failureMsg) {
-    return addErrorAndReturnNull(ctx, "Weird Key", format("%s, %s", keyValue, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird Key", stringifyAndJoinWithComma(keyValue, failureMsg));
   }
 
   @Override
   public Object handleWeirdNumberValue(DeserializationContext ctx, Class<?> targetType, Number valueToConvert, String failureMsg) {
-    return addErrorAndReturnNull(ctx, "Weird Number Value", format("%s, %s", valueToConvert, failureMsg));
+    return addErrorAndReturnNull(ctx, "Weird Number Value", stringifyAndJoinWithComma(valueToConvert, failureMsg));
   }
 
   @Override
@@ -67,7 +66,7 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
         log.debug("Failed to convert json to string", e);
       }
     }
-    return addErrorAndReturnNull(ctx, "Unexpected Token", format("%s, %s", t, failureMsg));
+    return addErrorAndReturnNull(ctx, "Unexpected Token", stringifyAndJoinWithComma(t, failureMsg));
   }
 
   @Override
@@ -78,11 +77,11 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
         return instance.get();
       }
     }
-    return addErrorAndReturnNull(ctx, "Missing Instantiator", format("%s, %s", instantiator, msg));
+    return addErrorAndReturnNull(ctx, "Missing Instantiator", stringifyAndJoinWithComma(instantiator, msg));
   }
 
   /**
-   * Instantiate interface if it contains a default method that accepts Map&lt;String, Object&gt; and returns the interface type.
+   * Instantiate interface if it contains a default or static method that accepts Map&lt;String, Object&gt; and returns the interface type.
    * @param interfaceClass interface to instantiate
    * @param p json parser
    * @return instantiation if possible
@@ -91,7 +90,7 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
   private static <T> Optional<T> getInstance(Class<T> interfaceClass, JsonParser p) {
     return Stream.of(interfaceClass.getMethods())
       .filter(method ->
-        method.isDefault() &&
+        (method.isDefault() || Modifier.isStatic(method.getModifiers())) &&
         method.getReturnType().equals(interfaceClass) &&
         method.getParameters().length == 1 &&
         jsonAsMapType.getType().equals(method.getParameters()[0].getParameterizedType())
@@ -132,5 +131,9 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
   private Object addErrorAndReturnNull(DeserializationContext ctx, String code, String message) {
     propertyIssueConsumer.accept(PropertyIssue.of(extractAttributeName(ctx.getParser()), code, removeLineBreaks(message)));
     return null;
+  }
+
+  private static String stringifyAndJoinWithComma(Object a, Object b) {
+    return String.format("%s, %s", a, b);
   }
 }

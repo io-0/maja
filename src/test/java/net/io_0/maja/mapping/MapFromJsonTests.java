@@ -129,22 +129,41 @@ class MapFromJsonTests {
   }
 
   /**
-   * Scenario: It should be possible to use Java interfaces. Maja should search for an function to instantiate
+   * Scenario: It should be possible to use Java interfaces. Maja should search for a default function to instantiate
    */
   @Test
-  void mapFromJsonWithPolymorphism() {
+  void mapFromJsonWithPolymorphismAndDefaultInstantiator() {
     String jsonP = resourceAsString("Polymorph.json");
     String jsonA = resourceAsString("Attribute.json");
 
-    Polymorph p = Mapper.fromJson(jsonP, Polymorph.class);
-    Polymorph.Attribute a = Mapper.fromJson(jsonA, Polymorph.Attribute.class);
+    PolymorphWithDefaultInstantiator p = Mapper.fromJson(jsonP, PolymorphWithDefaultInstantiator.class);
+    PolymorphWithDefaultInstantiator.Attribute a = Mapper.fromJson(jsonA, PolymorphWithDefaultInstantiator.Attribute.class);
 
     assertEquals(18, p.getNumber());
-    assertEquals("hello", ((Polymorph.Instance) p.getAttr()).getText());
-    assertEquals(2, ((Polymorph.Instance) p.getAttr()).getVersion());
+    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getText());
+    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getVersion());
 
-    assertEquals("hello", ((Polymorph.Instance) a).getText());
-    assertEquals(2, ((Polymorph.Instance) a).getVersion());
+    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) a).getText());
+    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) a).getVersion());
+  }
+
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should search for a static function to instantiate
+   */
+  @Test
+  void mapFromJsonWithPolymorphismAndStaticInstantiator() {
+    String jsonP = resourceAsString("Polymorph.json");
+    String jsonA = resourceAsString("Attribute.json");
+
+    PolymorphWithStaticInstantiator p = Mapper.fromJson(jsonP, PolymorphWithStaticInstantiator.class);
+    PolymorphWithStaticInstantiator.Attribute a = Mapper.fromJson(jsonA, PolymorphWithStaticInstantiator.Attribute.class);
+
+    assertEquals(18, p.getNumber());
+    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getText());
+    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getVersion());
+
+    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) a).getText());
+    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) a).getVersion());
   }
 
   /**
