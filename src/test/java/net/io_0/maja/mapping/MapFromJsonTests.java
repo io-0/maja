@@ -2,6 +2,8 @@ package net.io_0.maja.mapping;
 
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssues;
+import net.io_0.maja.mapping.Mapper.Context;
+import net.io_0.maja.mapping.Mapper.Instantiator;
 import net.io_0.maja.models.*;
 import org.junit.jupiter.api.Test;
 import java.io.*;
@@ -139,12 +141,8 @@ class MapFromJsonTests {
     PolymorphWithDefaultInstantiator p = Mapper.fromJson(jsonP, PolymorphWithDefaultInstantiator.class);
     PolymorphWithDefaultInstantiator.Attribute a = Mapper.fromJson(jsonA, PolymorphWithDefaultInstantiator.Attribute.class);
 
-    assertEquals(18, p.getNumber());
-    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getText());
-    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getVersion());
-
-    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) a).getText());
-    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) a).getVersion());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
   }
 
   /**
@@ -158,12 +156,27 @@ class MapFromJsonTests {
     PolymorphWithStaticInstantiator p = Mapper.fromJson(jsonP, PolymorphWithStaticInstantiator.class);
     PolymorphWithStaticInstantiator.Attribute a = Mapper.fromJson(jsonA, PolymorphWithStaticInstantiator.Attribute.class);
 
-    assertEquals(18, p.getNumber());
-    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getText());
-    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getVersion());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
+  }
 
-    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) a).getText());
-    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) a).getVersion());
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should use context instantiator
+   */
+  @Test
+  void mapFromJsonWithPolymorphismAndContextInstantiator() {
+    String jsonP = resourceAsString("Polymorph.json");
+    String jsonA = resourceAsString("Attribute.json");
+
+    var ctx = Context.ofInstantiators(Instantiator.of(
+      PolymorphWithoutInstantiator.Attribute.class, PolymorphWithoutInstantiator.Instance::instHelper
+    ));
+
+    PolymorphWithoutInstantiator p = Mapper.fromJson(jsonP, ctx, PolymorphWithoutInstantiator.class);
+    PolymorphWithoutInstantiator.Attribute a = Mapper.fromJson(jsonA, ctx, PolymorphWithoutInstantiator.Attribute.class);
+
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
   }
 
   /**

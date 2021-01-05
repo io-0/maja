@@ -242,4 +242,24 @@ class MapToJsonTests {
     JSONAssert.assertEquals(referenceP, jsonP, JSONCompareMode.NON_EXTENSIBLE);
     JSONAssert.assertEquals(referenceA, jsonA, JSONCompareMode.NON_EXTENSIBLE);
   }
+
+  /**
+   * Scenario: It should be possible to serialize Java interfaces (without instantiate functions)
+   */
+  @Test
+  void serializeWithPolymorphismWithoutInstantiator() throws JSONException {
+    // Given a json reference and a model
+    String referenceP = resourceAsString("Polymorph.json");
+    String referenceA = resourceAsString("Attribute.json");
+    PolymorphWithoutInstantiator p = new PolymorphWithoutInstantiator(18, new PolymorphWithoutInstantiator.Instance("hello", 2));
+    PolymorphWithoutInstantiator.Attribute a = new PolymorphWithoutInstantiator.Instance("hello", 2);
+
+    // When serialized
+    String jsonP = Mapper.toJson(p);
+    String jsonA = Mapper.toJson(a);
+
+    // Result should match reference
+    JSONAssert.assertEquals(referenceP, jsonP, JSONCompareMode.NON_EXTENSIBLE);
+    JSONAssert.assertEquals(referenceA, jsonA, JSONCompareMode.NON_EXTENSIBLE);
+  }
 }

@@ -2,6 +2,8 @@ package net.io_0.maja.mapping;
 
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssues;
+import net.io_0.maja.mapping.Mapper.Context;
+import net.io_0.maja.mapping.Mapper.Instantiator;
 import net.io_0.maja.models.*;
 import org.junit.jupiter.api.Test;
 
@@ -139,12 +141,8 @@ class MapFromYamlTests {
     PolymorphWithDefaultInstantiator p = Mapper.fromYaml(yamlP, PolymorphWithDefaultInstantiator.class);
     PolymorphWithDefaultInstantiator.Attribute a = Mapper.fromYaml(yamlA, PolymorphWithDefaultInstantiator.Attribute.class);
 
-    assertEquals(18, p.getNumber());
-    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getText());
-    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) p.getAttr()).getVersion());
-
-    assertEquals("hello", ((PolymorphWithDefaultInstantiator.Instance) a).getText());
-    assertEquals(2, ((PolymorphWithDefaultInstantiator.Instance) a).getVersion());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
   }
 
   /**
@@ -158,14 +156,29 @@ class MapFromYamlTests {
     PolymorphWithStaticInstantiator p = Mapper.fromYaml(yamlP, PolymorphWithStaticInstantiator.class);
     PolymorphWithStaticInstantiator.Attribute a = Mapper.fromYaml(yamlA, PolymorphWithStaticInstantiator.Attribute.class);
 
-    assertEquals(18, p.getNumber());
-    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getText());
-    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) p.getAttr()).getVersion());
-
-    assertEquals("hello", ((PolymorphWithStaticInstantiator.Instance) a).getText());
-    assertEquals(2, ((PolymorphWithStaticInstantiator.Instance) a).getVersion());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
   }
 
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should use context instantiator
+   */
+  @Test
+  void mapFromYamlWithPolymorphismAndContextInstantiator() {
+    String yamlP = resourceAsString("Polymorph.yaml");
+    String yamlA = resourceAsString("Attribute.yaml");
+
+    var ctx = Context.ofInstantiators(Instantiator.of(
+      PolymorphWithoutInstantiator.Attribute.class, PolymorphWithoutInstantiator.Instance::instHelper
+    ));
+
+    PolymorphWithoutInstantiator p = Mapper.fromYaml(yamlP, ctx, PolymorphWithoutInstantiator.class);
+    PolymorphWithoutInstantiator.Attribute a = Mapper.fromYaml(yamlA, ctx, PolymorphWithoutInstantiator.Attribute.class);
+
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
+  }
+  
   /**
    * Scenario: It should be possible to differentiate YAML undefined and null with the conversion result
    *

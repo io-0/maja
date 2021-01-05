@@ -113,7 +113,8 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
    * @return simplified path
    */
   private static String extractAttributeName(JsonParser parser) {
-    return parser.getParsingContext().pathAsPointer().toString().substring(1).replace("/", ".");
+    String path = parser.getParsingContext().pathAsPointer().toString();
+    return path.length() > 0 ? path.substring(1).replace("/", ".") : "*";
   }
 
   private static String removeLineBreaks(String string) {

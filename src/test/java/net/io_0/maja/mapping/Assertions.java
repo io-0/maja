@@ -242,6 +242,46 @@ public interface Assertions {
       pojo.getObjectArrayToObjectSet().toArray()[0].toString());
   }
 
+  static void assertPolymorphDataPresent(Object pojo) {
+    assertNotNull(pojo);
+
+    if (pojo instanceof PolymorphWithDefaultInstantiator) {
+      PolymorphWithDefaultInstantiator p = (PolymorphWithDefaultInstantiator) pojo;
+      assertEquals(18, p.getNumber());
+      assertAttributeDataPresent(p.getAttr());
+    } else if (pojo instanceof PolymorphWithStaticInstantiator) {
+      PolymorphWithStaticInstantiator p = (PolymorphWithStaticInstantiator) pojo;
+      assertEquals(18, p.getNumber());
+      assertAttributeDataPresent(p.getAttr());
+    } else if (pojo instanceof PolymorphWithoutInstantiator) {
+      PolymorphWithoutInstantiator p = (PolymorphWithoutInstantiator) pojo;
+      assertEquals(18, p.getNumber());
+      assertAttributeDataPresent(p.getAttr());
+    } else {
+      fail("unknown type");
+    }
+  }
+
+  static void assertAttributeDataPresent(Object pojo) {
+    assertNotNull(pojo);
+
+    if (pojo instanceof PolymorphWithDefaultInstantiator.Instance) {
+      PolymorphWithDefaultInstantiator.Instance a = (PolymorphWithDefaultInstantiator.Instance) pojo;
+      assertEquals("hello", a.getText());
+      assertEquals(2, a.getVersion());
+    } else if (pojo instanceof PolymorphWithStaticInstantiator.Instance) {
+      PolymorphWithStaticInstantiator.Instance a = (PolymorphWithStaticInstantiator.Instance) pojo;
+      assertEquals("hello", a.getText());
+      assertEquals(2, a.getVersion());
+    } else if (pojo instanceof PolymorphWithoutInstantiator.Instance) {
+      PolymorphWithoutInstantiator.Instance a = (PolymorphWithoutInstantiator.Instance) pojo;
+      assertEquals("hello", a.getText());
+      assertEquals(2, a.getVersion());
+    } else {
+      fail("unknown type");
+    }
+  }
+
   static void assertDeepFlawedPropertyIssuesCollected(String propertyIssues) {
     assertTrue(propertyIssues.contains("stringToObject"));
     assertTrue(propertyIssues.contains("numberToObject"));

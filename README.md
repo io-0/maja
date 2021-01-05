@@ -57,7 +57,7 @@ public class Person extends PropertyBundle {
 ```
 This example also demonstrates the use of `@WithUnconventionalName` Annotations.
 
-If a property type is an `Interface` Maja tries to instantiate it if a default or static method exists that returns the interface type and takes Map<String, Object> as parameter.
+If a property type is an `Interface` Maja tries to instantiate it if a default method, static method or context instantiator exists that returns the interface type and takes Map<String, Object> as parameter.
 The following example assumes that ImplementationA implements InterfaceA:
 ```Java
 public interface InterfaceA {
@@ -87,7 +87,7 @@ Example:
 String json = "{ \"first name\": \"Maja\" }";
 PropertyIssues mappingIssues = PropertyIssues.of();
 
-Person person = Mapper.fromJson(json, Person.class, mappingIssues::add);
+Person person = Mapper.fromJson(json, mappingIssues::add, Person.class);
 
 Person validPerson = Validator.of(mappingIssues).and(PersonValidator.instance).ensureValidity(person);
 

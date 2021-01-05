@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
  *   so that I can interact with APIs that require YAML
  *
  *   and I want to be able to distinguish between absent and null YAML values
- *   so that I can call APIs that implement e.g. RFC 7386 - YAML Merge Patch
  *
  *   and I want to be able to deal with YAML names
  *   so that I don't get problems with Java naming conventions or enums
@@ -234,6 +233,26 @@ class MapToYamlTests {
     String referenceA = resourceAsString("AttributeRef.yaml");
     PolymorphWithStaticInstantiator p = new PolymorphWithStaticInstantiator(18, new PolymorphWithStaticInstantiator.Instance("hello", 2));
     PolymorphWithStaticInstantiator.Attribute a = new PolymorphWithStaticInstantiator.Instance("hello", 2);
+
+    // When serialized
+    String yamlP = Mapper.toYaml(p);
+    String yamlA = Mapper.toYaml(a);
+
+    // Result should match reference
+    assertEquals(referenceP, yamlP);
+    assertEquals(referenceA, yamlA);
+  }
+
+  /**
+   * Scenario: It should be possible to serialize Java interfaces (without instantiate functions)
+   */
+  @Test
+  void serializeWithPolymorphismWithoutInstantiator() {
+    // Given a yaml reference and a model
+    String referenceP = resourceAsString("PolymorphRef.yaml");
+    String referenceA = resourceAsString("AttributeRef.yaml");
+    PolymorphWithoutInstantiator p = new PolymorphWithoutInstantiator(18, new PolymorphWithoutInstantiator.Instance("hello", 2));
+    PolymorphWithoutInstantiator.Attribute a = new PolymorphWithoutInstantiator.Instance("hello", 2);
 
     // When serialized
     String yamlP = Mapper.toYaml(p);
