@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deepFlawed>
+  <numberToEnum>9</numberToEnum>
+  <numberToObject>42</numberToObject>
+  <objectArrayToObjectList>
+    <element>
+      <booleanToBoolean>string</booleanToBoolean>
+      <numberArrayToIntegerSet>
+        <element>0</element>
+        <element>string</element>
+      </numberArrayToIntegerSet>
+      <numberToBigDecimal>string</numberToBigDecimal>
+      <stringArrayToStringList>42</stringArrayToStringList>
+      <stringToUUID>no uuid</stringToUUID>
+    </element>
+    <element>
+      <booleanToBoolean>string</booleanToBoolean>
+      <numberArrayToIntegerSet>
+        <element>0</element>
+        <element>string</element>
+      </numberArrayToIntegerSet>
+      <numberToBigDecimal>string</numberToBigDecimal>
+      <stringArrayToStringList>42</stringArrayToStringList>
+      <stringToUUID>no uuid</stringToUUID>
+    </element>
+  </objectArrayToObjectList>
+  <objectArrayToObjectSet>
+    <element>
+      <booleanToBoolean>string</booleanToBoolean>
+      <numberArrayToIntegerSet>
+        <element>0</element>
+        <element>string</element>
+      </numberArrayToIntegerSet>
+      <numberToBigDecimal>string</numberToBigDecimal>
+      <stringArrayToStringList>42</stringArrayToStringList>
+      <stringToUUID>no uuid</stringToUUID>
+    </element>
+    <element>
+      <booleanToBoolean>string</booleanToBoolean>
+      <numberArrayToIntegerSet>
+        <element>0</element>
+        <element>string</element>
+      </numberArrayToIntegerSet>
+      <numberToBigDecimal>string</numberToBigDecimal>
+      <stringArrayToStringList>42</stringArrayToStringList>
+      <stringToUUID>no uuid</stringToUUID>
+    </element>
+  </objectArrayToObjectSet>
+  <objectToIntMap>
+    <string>2</string>
+  </objectToIntMap>
+  <objectToMap>
+    <booleanToBoolean>string</booleanToBoolean>
+    <numberArrayToIntegerSet>
+      <element>0</element>
+      <element>string</element>
+    </numberArrayToIntegerSet>
+    <numberToBigDecimal>string</numberToBigDecimal>
+    <stringArrayToStringList>42</stringArrayToStringList>
+    <stringToUUID>no uuid</stringToUUID>
+  </objectToMap>
+  <objectToPojo>
+    <booleanToBoolean>string</booleanToBoolean>
+    <numberArrayToIntegerSet>
+      <element>0</element>
+      <element>string</element>
+    </numberArrayToIntegerSet>
+    <numberToBigDecimal>string</numberToBigDecimal>
+    <stringArrayToStringList>42</stringArrayToStringList>
+    <stringToUUID>no uuid</stringToUUID>
+  </objectToPojo>
+  <stringToObject>42</stringToObject>
+</deepFlawed>

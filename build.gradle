@@ -24,6 +24,7 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.4'
   implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.4'
   implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.4'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.4'
   implementation 'com.pivovarit:throwing-function:1.5.1'
   implementation 'org.jooq:joor:0.9.13'
   testImplementation 'org.skyscreamer:jsonassert:1.5.0'

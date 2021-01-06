@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
@@ -42,7 +43,7 @@ public class Mapper {
 
   public static <T> T fromJson(String json, Context context, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
-      mapWithJsonObjectMapper(oM -> prepForJsonOrYamlMapping(oM, ctx)
+      mapWithJsonObjectMapper(oM -> prepForDeserialization(oM, ctx)
         .readValue(json, oM.getTypeFactory().constructParametricType(type, subTypes))
       )
     );
@@ -58,7 +59,7 @@ public class Mapper {
 
   public static <T> T readJson(Reader reader, Context context, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
-      mapWithJsonObjectMapper(oM -> prepForJsonOrYamlMapping(oM, ctx)
+      mapWithJsonObjectMapper(oM -> prepForDeserialization(oM, ctx)
         .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes))
       )
     );
@@ -74,7 +75,7 @@ public class Mapper {
 
   public static <T> T fromYaml(String yaml, Context context, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
-      mapWithYamlObjectMapper(oM -> prepForJsonOrYamlMapping(oM, ctx)
+      mapWithYamlObjectMapper(oM -> prepForDeserialization(oM, ctx)
         .readValue(yaml, oM.getTypeFactory().constructParametricType(type, subTypes))
       )
     );
@@ -90,7 +91,39 @@ public class Mapper {
 
   public static <T> T readYaml(Reader reader, Context context, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
-      mapWithYamlObjectMapper(oM -> prepForJsonOrYamlMapping(oM, ctx)
+      mapWithYamlObjectMapper(oM -> prepForDeserialization(oM, ctx)
+        .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes))
+      )
+    );
+  }
+
+  public static <T> T fromXml(String xml, Class<T> type, Class<?>... subTypes) {
+    return fromXml(xml, Context.of(), type, subTypes);
+  }
+
+  public static <T> T fromXml(String xml, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return fromXml(xml, Context.ofPropertyIssueConsumer(propertyIssueConsumer), type, subTypes);
+  }
+
+  public static <T> T fromXml(String xml, Context context, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
+      mapWithXmlObjectMapper(oM -> prepForDeserialization(oM, ctx)
+        .readValue(xml, oM.getTypeFactory().constructParametricType(type, subTypes))
+      )
+    );
+  }
+
+  public static <T> T readXml(Reader reader, Class<T> type, Class<?>... subTypes) {
+    return readXml(reader, Context.of(), type, subTypes);
+  }
+
+  public static <T> T readXml(Reader reader, Consumer<PropertyIssue> propertyIssueConsumer, Class<T> type, Class<?>... subTypes) {
+    return readXml(reader, Context.ofPropertyIssueConsumer(propertyIssueConsumer), type, subTypes);
+  }
+
+  public static <T> T readXml(Reader reader, Context context, Class<T> type, Class<?>... subTypes) {
+    return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
+      mapWithXmlObjectMapper(oM -> prepForDeserialization(oM, ctx)
         .readValue(reader, oM.getTypeFactory().constructParametricType(type, subTypes))
       )
     );
@@ -106,30 +139,48 @@ public class Mapper {
 
   public static <T> T fromMap(Map<String, ?> map, Context context, Class<T> type, Class<?>... subTypes) {
     return throwMappingExceptionIfIssuesAndNoIssueConsumer(context, ctx ->
-      mapWithYamlObjectMapper(oM -> prepForJsonOrYamlMapping(oM, ctx)
+      mapWithYamlObjectMapper(oM -> prepForDeserialization(oM, ctx)
         .convertValue(map, oM.getTypeFactory().constructParametricType(type, subTypes))
       )
     );
   }
 
   public static <T> String toJson(T obj) {
-    return mapWithJsonObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
+    return mapWithJsonObjectMapper(oM -> prepForSerialization(oM).writeValueAsString(obj));
   }
 
   public static <T> void writeJson(Writer writer, T obj) {
-    mapWithJsonObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+    mapWithJsonObjectMapper(oM -> { prepForSerialization(oM).writeValue(writer, obj); return null; });
   }
 
   public static <T> String toYaml(T obj) {
-    return mapWithYamlObjectMapper(oM -> prepForPojoMapping(oM).writeValueAsString(obj));
+    return mapWithYamlObjectMapper(oM -> prepForSerialization(oM).writeValueAsString(obj));
   }
 
   public static <T> void writeYaml(Writer writer, T obj) {
-    mapWithYamlObjectMapper(oM -> { prepForPojoMapping(oM).writeValue(writer, obj); return null; });
+    mapWithYamlObjectMapper(oM -> { prepForSerialization(oM).writeValue(writer, obj); return null; });
+  }
+
+  public static <T> String toXml(T obj) {
+/*
+    if (factory instanceof XmlFactory) {
+      //    new XmlMapper().writer().withRootName(); //  SerializationConfig.withRootName(String) for details.
+      mapper.getSerializationConfig().withRootName("root");
+    }
+
+    FIXME: adding ".writer().withRootName("root")" didn't solve
+      ToXmlGenerator.java:1320 handleMissingName - No element/attribute name specified when trying to output element
+*/
+
+    return mapWithXmlObjectMapper(oM -> prepForSerialization(oM).writer().withRootName("root").writeValueAsString(obj));
+  }
+
+  public static <T> void writeXml(Writer writer, T obj) {
+    mapWithXmlObjectMapper(oM -> { prepForSerialization(oM).writer().withRootName("root").writeValue(writer, obj); return null; });
   }
 
   public static <T> Map<String, Object> toMap(T obj) {
-    return mapWithJsonObjectMapper(oM -> prepForPojoMapping(oM).convertValue(obj, new TypeReference<>() {}));
+    return mapWithJsonObjectMapper(oM -> prepForSerialization(oM).convertValue(obj, new TypeReference<>() {}));
   }
 
   @Builder(toBuilder = true)
@@ -210,7 +261,7 @@ public class Mapper {
     return fromMap(map, propertyIssueConsumer, type);
   }
   
-  private static ObjectMapper prepForJsonOrYamlMapping(ObjectMapper oM, Context ctx) {
+  private static ObjectMapper prepForDeserialization(ObjectMapper oM, Context ctx) {
     if (nonNull(ctx.instantiators)) {
       oM.registerModule(Instantiator.toModule(ctx.instantiators));
     }
@@ -222,8 +273,9 @@ public class Mapper {
       .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(ctx.propertyIssueConsumer));
   }
 
-  private static ObjectMapper prepForPojoMapping(ObjectMapper oM) {
+  private static ObjectMapper prepForSerialization(ObjectMapper oM) {
     return oM
+//      .enable(SerializationFeature.WRAP_ROOT_VALUE)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
       .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
@@ -237,6 +289,10 @@ public class Mapper {
 
   private static <T> T mapWithYamlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
     return mapWithObjectMapper(new YAMLFactory(), cb);
+  }
+
+  private static <T> T mapWithXmlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    return mapWithObjectMapper(new XmlFactory(), cb);
   }
 
   private static <T> T mapWithObjectMapper(JsonFactory factory, ThrowingFunction<ObjectMapper, T, IOException> cb) {
