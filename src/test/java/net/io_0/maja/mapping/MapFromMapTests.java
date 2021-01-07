@@ -2,12 +2,12 @@ package net.io_0.maja.mapping;
 
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssues;
+import net.io_0.maja.mapping.Mapper.MappingException;
 import net.io_0.maja.models.*;
 import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static net.io_0.maja.TestUtils.*;
 import static net.io_0.maja.mapping.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +31,7 @@ class MapFromMapTests {
    */
   @Test
   void mapFromNothing() {
-    assertThrows(Mapper.MappingException.class, () -> Mapper.fromMap(null, null));
+    assertThrows(MappingException.class, () -> Mapper.fromMap(null, null));
   }
 
   /**
@@ -115,44 +115,77 @@ class MapFromMapTests {
   void mapFromDeepFlawedMap() {
     Map<String, Object> map = deepFlawedMap;
 
-    Mapper.MappingException t = assertThrows(Mapper.MappingException.class, () -> Mapper.fromMap(map, DeepFlawed.class));
+    MappingException t = assertThrows(MappingException.class, () -> Mapper.fromMap(map, DeepFlawed.class));
 
     assertDeepFlawedPropertyIssuesCollected(t.getMessage());
   }
 
-  private void assertDeepFlawedDataPresent(DeepFlawed pojo) {
-    assertNotNull(pojo);
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should search for a default function to instantiate
+   */
+  @Test
+  void mapFromMapWithPolymorphismAndDefaultInstantiator() {
+    Map<String, Object> mapP = polymorphMap;
+    Map<String, Object> mapA = attributeMap;
 
-    assertNull(pojo.getStringToObject());
-    assertNull(pojo.getNumberToObject());
-    assertNull(pojo.getNumberToEnum());
+    PolymorphWithDefaultInstantiator p = Mapper.fromMap(mapP, PolymorphWithDefaultInstantiator.class);
+    PolymorphWithDefaultInstantiator.Attribute a = Mapper.fromMap(mapA, PolymorphWithDefaultInstantiator.Attribute.class);
 
-    assertNotNull(pojo.getObjectToPojo());
-    assertNull(pojo.getObjectToPojo().getStringToUUID());
-    assertNull(pojo.getObjectToPojo().getNumberToBigDecimal());
-    assertNull(pojo.getObjectToPojo().getStringArrayToStringList());
-    Set<Integer> intSet = new HashSet<>(); intSet.add(0); intSet.add(null);
-    assertCollectionEquals(intSet, pojo.getObjectToPojo().getNumberArrayToIntegerSet());
-    assertNull(pojo.getObjectToPojo().getBooleanToBoolean());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
+  }
 
-    assertNotNull(pojo.getObjectToMap());
-    assertTrue(pojo.getObjectToMap().containsKey("stringToUUID"));
-    assertTrue(pojo.getObjectToMap().containsKey("numberToBigDecimal"));
-    assertTrue(pojo.getObjectToMap().containsKey("stringArrayToStringList"));
-    assertTrue(pojo.getObjectToMap().containsKey("numberArrayToIntegerSet"));
-    assertTrue(pojo.getObjectToMap().containsKey("booleanToBoolean"));
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should search for a static function to instantiate
+   */
+  @Test
+  void mapFromMapWithPolymorphismAndStaticInstantiator() {
+    Map<String, Object> mapP = polymorphMap;
+    Map<String, Object> mapA = attributeMap;
 
-    assertNotNull(pojo.getObjectArrayToObjectList());
-    assertEquals(2, pojo.getObjectArrayToObjectList().size());
-    assertEquals("Nested(stringToUUID=null, numberToBigDecimal=null, stringArrayToStringList=null, numberArrayToIntegerSet=[0, null], booleanToBoolean=null)",
-      pojo.getObjectArrayToObjectList().get(0).toString());
-    assertEquals("Nested(stringToUUID=null, numberToBigDecimal=null, stringArrayToStringList=null, numberArrayToIntegerSet=[0, null], booleanToBoolean=null)",
-      pojo.getObjectArrayToObjectList().get(1).toString());
+    PolymorphWithStaticInstantiator p = Mapper.fromMap(mapP, PolymorphWithStaticInstantiator.class);
+    PolymorphWithStaticInstantiator.Attribute a = Mapper.fromMap(mapA, PolymorphWithStaticInstantiator.Attribute.class);
 
-    assertNotNull(pojo.getObjectArrayToObjectSet());
-    assertEquals(1, pojo.getObjectArrayToObjectSet().size());
-    assertEquals("Nested(stringToUUID=null, numberToBigDecimal=null, stringArrayToStringList=null, numberArrayToIntegerSet=[0, null], booleanToBoolean=null)",
-      pojo.getObjectArrayToObjectSet().toArray()[0].toString());
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
+  }
+
+  /**
+   * Scenario: It should be possible to use Java interfaces. Maja should use context instantiator
+   */
+  @Test
+  void mapFromMapWithPolymorphismAndContextInstantiator() {
+    Map<String, Object> mapP = polymorphMap;
+    Map<String, Object> mapA = attributeMap;
+
+    var ctx = Mapper.Context.ofInstantiators(Mapper.Instantiator.of(
+      PolymorphWithoutInstantiator.Attribute.class, PolymorphWithoutInstantiator.Instance::instHelper
+    ));
+
+    PolymorphWithoutInstantiator p = Mapper.fromMap(mapP, ctx, PolymorphWithoutInstantiator.class);
+    PolymorphWithoutInstantiator.Attribute a = Mapper.fromMap(mapA, ctx, PolymorphWithoutInstantiator.Attribute.class);
+
+    assertPolymorphDataPresent(p);
+    assertAttributeDataPresent(a);
+  }
+
+  /**
+   * Scenario: A mapping error should be present if no context instantiator for required type is present
+   */
+  @Test
+  void dontMapFromMapWithPolymorphismAndWrongContextInstantiator() {
+    Map<String, Object> mapP = polymorphMap;
+    Map<String, Object> mapA = attributeMap;
+
+    var ctx = Mapper.Context.ofInstantiators(Mapper.Instantiator.of(
+      Flat.class, (Map<String, Object> data) -> new Flat()
+    ));
+
+    MappingException p = assertThrows(MappingException.class, () -> Mapper.fromMap(mapP, ctx, PolymorphWithoutInstantiator.class));
+    MappingException a = assertThrows(MappingException.class, () -> Mapper.fromMap(mapA, ctx, PolymorphWithoutInstantiator.Attribute.class));
+
+    assertTrue(p.getMessage().contains("attr"));
+    assertTrue(a.getMessage().contains("*"));
   }
 
   private void assertDeepFlawedPropertyIssuesCollected(String propertyIssues) {
@@ -329,4 +362,7 @@ class MapFromMapTests {
       )
     )
   );
+
+  private static Map<String, Object> attributeMap = Map.of("text", "hello", "version", 2);
+  private static Map<String, Object> polymorphMap = Map.of("number", 18, "attr", attributeMap);
 }

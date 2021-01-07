@@ -1,7 +1,7 @@
 # Maja
 
 ## About
-**Ma**ps **Ja**va to JSON Objects and back without information loss.
+**Ma**ps **Ja**va Objects to JSON (or YAML or Maps) and back without information loss.
 Provides validators to tighten mapping.
 
 Combining those features enables one to implement e.g. [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification).
@@ -24,7 +24,7 @@ repositories {
 ```Gradle
 dependencies {
   ...
-  implementation "com.github.io-0:maja:1.5.1"
+  implementation "com.github.io-0:maja:1.6.0"
   ...
 }
 ```
@@ -57,7 +57,7 @@ public class Person extends PropertyBundle {
 ```
 This example also demonstrates the use of `@WithUnconventionalName` Annotations.
 
-If a property type is an `Interface` Maja tries to instantiate it if a default method exists that returns the interface type and takes Map<String, Object> as parameter.
+If a property type is an `Interface` Maja tries to instantiate it if a default method, static method or context instantiator exists that returns the interface type and takes Map<String, Object> as parameter.
 The following example assumes that ImplementationA implements InterfaceA:
 ```Java
 public interface InterfaceA {
@@ -87,7 +87,7 @@ Example:
 String json = "{ \"first name\": \"Maja\" }";
 PropertyIssues mappingIssues = PropertyIssues.of();
 
-Person person = Mapper.fromJson(json, Person.class, mappingIssues::add);
+Person person = Mapper.fromJson(json, mappingIssues::add, Person.class);
 
 Person validPerson = Validator.of(mappingIssues).and(PersonValidator.instance).ensureValidity(person);
 

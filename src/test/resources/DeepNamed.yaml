@@ -1,0 +1,18 @@
+x-obj:
+  stringToUUID: 3fa85f64-5717-4562-b3fc-2c963f66afa1
+  numberToBigDecimal: 1
+  stringArrayToStringList: [a, a, a ,a]
+  numberArrayToIntegerSet: [0, 1, 2, 3, 2, 1, 0]
+  bool: true
+objectArrayToObjectSet:
+  - stringToUUID: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+    numberToBigDecimal: 43
+    stringArrayToStringList: [a, b, b ,a]
+    numberArrayToIntegerSet: [0, 1, 2, 3, 2, 1, 0]
+    bool: true
+  - stringToUUID: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+    numberToBigDecimal: 43
+    stringArrayToStringList: [a, b, b ,a]
+    numberArrayToIntegerSet: [0, 1, 2, 3, 2, 1, 0]
+    bool: true
+stringArrayToEnumList: [str 1, str-2, STR3]
