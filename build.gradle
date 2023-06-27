@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'net.io_0'
-version = "1.7.2-SNAPSHOT"
+version = "1.7.2"
 sourceCompatibility = 17
 
 repositories {
