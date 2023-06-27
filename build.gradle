@@ -2,33 +2,33 @@ plugins {
   id "io.freefair.lombok" version "8.0.1"
   id 'java-library'
   id 'maven-publish'
-  id 'com.github.ben-manes.versions' version '0.46.0'
+  id 'com.github.ben-manes.versions' version '0.47.0'
   id 'se.patrikerdes.use-latest-versions' version '0.2.18'
 }
 
 group = 'net.io_0'
 version = "1.7.2-SNAPSHOT"
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  implementation 'ch.qos.logback:logback-classic:1.4.7'
+  implementation 'ch.qos.logback:logback-classic:1.4.8'
   implementation 'commons-validator:commons-validator:1.7', {
     exclude group: 'commons-beanutils', module: 'commons-beanutils' // potential security issue
     exclude group: 'commons-digester', module: 'commons-digester'
     exclude group: 'commons-logging', module: 'commons-logging'
   }
-  implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
-  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
-  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
   implementation 'com.pivovarit:throwing-function:1.5.1'
   implementation 'org.jooq:joor:0.9.14'
   testImplementation 'org.skyscreamer:jsonassert:1.5.1'
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 }
 
 test {
