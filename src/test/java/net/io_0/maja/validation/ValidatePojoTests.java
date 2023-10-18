@@ -318,6 +318,8 @@ class ValidatePojoTests {
       inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.three").map(Issue::getCode));
     assertEquals(Optional.of("IP V6 Format Violation"),
       inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.four").map(Issue::getCode));
+    assertEquals(Optional.of("Url Format Violation"),
+      inValid.getPropertyIssues().getPropertyIssue("morePatternStrings.five").map(Issue::getCode));
     assertEquals(Optional.of("Max Length Violation, 4"),
       inValid.getPropertyIssues().getPropertyIssue("lengthRestrictedStrings.one").map(Issue::getCode));
     assertEquals(Optional.of("Min Length Violation, 4"),
@@ -430,7 +432,8 @@ class ValidatePojoTests {
       on(ONE, emailFormat),
       on(TWO, hostnameFormat),
       on(THREE, ipV4Format),
-      on(FOUR, ipV6Format)
+      on(FOUR, ipV6Format),
+      on(FIVE, urlFormat)
     ))),
     on(LENGTH_RESTRICTED_STRINGS, PropertyValidators.valid(of(
       on(ONE, maxLength(4)),
@@ -560,6 +563,7 @@ class ValidatePojoTests {
       .setTwo("wikipedia")
       .setThree("127.0.0")
       .setFour("0000:0000:0000:0000:0000:0000:0001")
+      .setFive("invalidUrl")
     )
     .setLengthRestrictedStrings(new StringBundle()
       .setOne("01234")
