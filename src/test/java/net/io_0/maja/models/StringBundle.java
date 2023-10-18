@@ -12,11 +12,13 @@ public class StringBundle extends PropertyBundle {
   public static final String TWO = "two";
   public static final String THREE = "three";
   public static final String FOUR = "four";
+  public static final String FIVE = "five";
 
   private String one;
   private String two;
   private String three;
   private String four;
+  private String five;
 
   public StringBundle setOne(String one) {
     this.one = one;
@@ -39,6 +41,12 @@ public class StringBundle extends PropertyBundle {
   public StringBundle setFour(String four) {
     this.four = four;
     markPropertySet(FOUR);
+    return this;
+  }
+
+  public StringBundle setFive(String five) {
+    this.five = five;
+    markPropertySet(FIVE);
     return this;
   }
 }

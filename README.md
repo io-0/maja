@@ -119,6 +119,7 @@ Most validators will only act if a non null value is present. If this is not des
   * ipV6Format
   * maxLength
   * minLength
+  * urlFormat
 
 ### Integer, Long, Float, Double, BigDecimal Types
   * exclusiveMaximum

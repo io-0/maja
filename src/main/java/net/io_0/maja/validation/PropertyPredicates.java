@@ -1,10 +1,8 @@
 package net.io_0.maja.validation;
 
 import net.io_0.maja.Property;
-import org.apache.commons.validator.routines.DomainValidator;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.InetAddressValidator;
-import org.apache.commons.validator.routines.RegexValidator;
+import org.apache.commons.validator.routines.*;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 
@@ -93,6 +91,7 @@ public interface PropertyPredicates {
 
   PropertyPredicate<String> inet6Address = property -> InetAddressValidator.getInstance().isValidInet6Address(property.getValue());
 
+  PropertyPredicate<String> url = property -> UrlValidator.getInstance().isValid(property.getValue());
   static PropertyPredicate<Number> multipleOf(Number number) {
     return property -> new BigDecimal(property.getValue().toString()).remainder(new BigDecimal(number.toString())).abs().floatValue() < 0.0000001;
   }

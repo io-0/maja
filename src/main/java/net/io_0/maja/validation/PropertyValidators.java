@@ -60,6 +60,11 @@ public interface PropertyValidators {
     Issue.of("IP V6 Format Violation", "Must fit IP v6 format")
   );
 
+  PropertyValidator<String> urlFormat = PropertyValidator.of(
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.url),
+    Issue.of("Url Format Violation", "Must fit url format")
+  );
+
   static PropertyValidator<String> maxLength(Integer parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lengthLte(parameter)),
