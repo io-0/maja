@@ -60,24 +60,29 @@ public interface PropertyValidators {
     Issue.of("IP V6 Format Violation", "Must fit IP v6 format")
   );
 
+  PropertyValidator<String> urlFormat = PropertyValidator.of(
+    PropertyPredicates.unassignedOrNullOr(PropertyPredicates.url),
+    Issue.of("Url Format Violation", "Must fit url format")
+  );
+
   static PropertyValidator<String> maxLength(Integer parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lengthLte(parameter)),
-      Issue.of(format("Max Length Violation, %s", parameter), format("Must be shorter than %s characters", parameter))
+      Issue.of(format("Max Length Violation, %s", parameter), format("Must be at most %s characters long", parameter))
     );
   }
 
   static PropertyValidator<String> minLength(Integer parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNullOr(PropertyPredicates.lengthGte(parameter)),
-      Issue.of(format("Min Length Violation, %s", parameter), format("Must be longer than %s characters", parameter))
+      Issue.of(format("Min Length Violation, %s", parameter), format("Must be at least %s characters long", parameter))
     );
   }
 
   static PropertyValidator<Number> exclusiveMaximum(Number parameter) {
     return PropertyValidator.of(
       PropertyPredicates.unassignedOrNullOr(PropertyPredicates.gt(parameter)),
-      Issue.of(format("Exclusive Maximum Violation, %s", parameter), format("Must be lessen than %s", parameter))
+      Issue.of(format("Exclusive Maximum Violation, %s", parameter), format("Must be lesser than %s", parameter))
     );
   }
 
