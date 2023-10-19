@@ -92,6 +92,7 @@ public interface PropertyPredicates {
   PropertyPredicate<String> inet6Address = property -> InetAddressValidator.getInstance().isValidInet6Address(property.getValue());
 
   PropertyPredicate<String> url = property -> UrlValidator.getInstance().isValid(property.getValue());
+
   static PropertyPredicate<Number> multipleOf(Number number) {
     return property -> new BigDecimal(property.getValue().toString()).remainder(new BigDecimal(number.toString())).abs().floatValue() < 0.0000001;
   }
