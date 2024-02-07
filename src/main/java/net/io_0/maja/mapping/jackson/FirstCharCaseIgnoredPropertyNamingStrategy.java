@@ -1,6 +1,6 @@
 package net.io_0.maja.mapping.jackson;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import static net.io_0.maja.StringUtils.*;
  * This naming strategy tries to find the field with lower or upper case first character.
  * It requires MapperFeature.USE_STD_BEAN_NAMING to work.
  */
-public class FirstCharCaseIgnoredPropertyNamingStrategy extends PropertyNamingStrategy.PropertyNamingStrategyBase {
+public class FirstCharCaseIgnoredPropertyNamingStrategy extends PropertyNamingStrategies.NamingBase {
   @Override
   public String nameForGetterMethod(MapperConfig<?> config, AnnotatedMethod method, String defaultName) {
     return translate(defaultName, method.getDeclaringClass());
