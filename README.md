@@ -24,7 +24,7 @@ repositories {
 ```Gradle
 dependencies {
   ...
-  implementation "com.github.io-0:maja:1.8.1"
+  implementation "com.github.io-0:maja:develop-SNAPSHOT"
   ...
 }
 ```
