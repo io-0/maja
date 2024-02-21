@@ -1,5 +1,5 @@
 plugins {
-  id 'io.freefair.lombok' version '8.4'
+  id 'io.freefair.lombok' version '8.6'
   id 'java-library'
   id 'maven-publish'
   id 'com.github.ben-manes.versions' version '0.51.0'
@@ -15,12 +15,12 @@ repositories {
 }
 
 ext {
-  jacksonVersion = '2.15.2'
+  jacksonVersion = '2.16.1'
   junitVersion = '5.10.2'
 }
 
 dependencies {
-  implementation 'ch.qos.logback:logback-classic:1.4.14'
+  implementation 'ch.qos.logback:logback-classic:1.5.0'
   implementation 'commons-validator:commons-validator:1.8.0', {
     exclude group: 'commons-beanutils', module: 'commons-beanutils' // potential security issue
     exclude group: 'commons-digester', module: 'commons-digester'

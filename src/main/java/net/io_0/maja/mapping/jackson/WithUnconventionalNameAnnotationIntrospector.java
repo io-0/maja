@@ -1,10 +1,14 @@
 package net.io_0.maja.mapping.jackson;
 
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import net.io_0.maja.WithUnconventionalName;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class WithUnconventionalNameAnnotationIntrospector extends NopAnnotationIntrospector {
@@ -13,12 +17,12 @@ public class WithUnconventionalNameAnnotationIntrospector extends NopAnnotationI
     if (annotated.hasAnnotation(WithUnconventionalName.class)) {
       return List.of(com.fasterxml.jackson.databind.PropertyName.construct(annotated.getAnnotation(WithUnconventionalName.class).value()));
     }
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
-  public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
-    return Arrays.stream(enumType.getFields()).map(field ->
+  public String[] findEnumValues(MapperConfig<?> config, AnnotatedClass annotatedClass, Enum<?>[] enumValues, String[] names) {
+    return Arrays.stream(annotatedClass.getAnnotated().getFields()).map(field ->
       field.isAnnotationPresent(WithUnconventionalName.class) ? field.getAnnotation(WithUnconventionalName.class).value() : field.getName()
     ).toArray(String[]::new);
   }
