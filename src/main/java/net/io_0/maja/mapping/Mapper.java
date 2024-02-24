@@ -1,12 +1,12 @@
 package net.io_0.maja.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.ThrowingFunction;
 import lombok.Builder;
@@ -14,9 +14,10 @@ import lombok.NoArgsConstructor;
 import net.io_0.maja.PropertyIssue;
 import net.io_0.maja.PropertyIssues;
 import net.io_0.maja.mapping.jackson.FirstCharCaseIgnoredPropertyNamingStrategy;
-import net.io_0.maja.mapping.jackson.WithUnconventionalNameAnnotationIntrospector;
-import net.io_0.maja.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
 import net.io_0.maja.mapping.jackson.PropertyBundleBeanSerializerModifier;
+import net.io_0.maja.mapping.jackson.PropertyIssueCollectingDeserializationProblemHandler;
+import net.io_0.maja.mapping.jackson.WithUnconventionalNameAnnotationIntrospector;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -232,33 +233,33 @@ public class Mapper {
   }
 
   private static <T> T mapWithJsonObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
-    return mapWithObjectMapper(new JsonFactory(), cb);
-  }
-
-  private static <T> T mapWithYamlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
-    return mapWithObjectMapper(new YAMLFactory(), cb);
-  }
-
-  private static <T> T mapWithObjectMapper(JsonFactory factory, ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    var m = JsonMapper.builder()
+      .addModule(new JavaTimeModule())
+      .annotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
+      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+      .enable(MapperFeature.USE_STD_BEAN_NAMING)                                 // circumventJacksonBeanNamingConventionProblems
+      .propertyNamingStrategy(new FirstCharCaseIgnoredPropertyNamingStrategy())  // circumventJacksonBeanNamingConventionProblems
+      .build();
     try {
-      return cb.apply(getPreConfiguredObjectMapper(factory));
+      return cb.apply(m);
     } catch (Exception e) {
       throw new MappingException(e);
     }
   }
 
-  private static ObjectMapper getPreConfiguredObjectMapper(JsonFactory factory) {
-    ObjectMapper mapper = new ObjectMapper(factory)
-      .registerModule(new JavaTimeModule())
-      .setAnnotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
-      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-    return circumventJacksonBeanNamingConventionProblems(mapper);
-  }
-
-  private static ObjectMapper circumventJacksonBeanNamingConventionProblems(ObjectMapper mapper) {
-    return mapper
-      .enable(MapperFeature.USE_STD_BEAN_NAMING)
-      .setPropertyNamingStrategy(new FirstCharCaseIgnoredPropertyNamingStrategy());
+  private static <T> T mapWithYamlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
+    var m = YAMLMapper.builder()
+      .addModule(new JavaTimeModule())
+      .annotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
+      .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+      .enable(MapperFeature.USE_STD_BEAN_NAMING)                                 // circumventJacksonBeanNamingConventionProblems
+      .propertyNamingStrategy(new FirstCharCaseIgnoredPropertyNamingStrategy())  // circumventJacksonBeanNamingConventionProblems
+      .build();
+    try {
+      return cb.apply(m);
+    } catch (Exception e) {
+      throw new MappingException(e);
+    }
   }
 
   private static <T> T throwMappingExceptionIfIssuesAndNoIssueConsumer(Context context, Function<Context, T> cb) {
