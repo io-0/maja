@@ -13,38 +13,12 @@ public interface PropertyPredicates {
 
   PropertyPredicate<?> assignedAndNotNull = assigned.and(not(Property::isNull));
 
-  /**
-   * @deprecated use assignedAndNotNull
-   */
-  @Deprecated(forRemoval = true)
-  PropertyPredicate<?> assignedAndNotEmpty = assignedAndNotNull;
-
   PropertyPredicate<?> unassignedOrNull = not(assignedAndNotNull);
-
-  /**
-   * @deprecated use unassignedOrNull
-   */
-  @Deprecated(forRemoval = true)
-  PropertyPredicate<?> unassignedOrEmpty = unassignedOrNull;
 
   PropertyPredicate<?> unassignedOrNotNull = not(assigned).or(not(Property::isNull));
 
-  /**
-   * @deprecated use unassignedOrNotNull
-   */
-  @Deprecated(forRemoval = true)
-  PropertyPredicate<?> unassignedOrNotEmpty = unassignedOrNotNull;
-
   static <T> PropertyPredicate<T> unassignedOrNullOr(PropertyPredicate<T> predicate) {
-    return not(Property<T>::isAssigned).or(Property<T>::isNull).or(predicate);
-  }
-
-  /**
-   * @deprecated use unassignedOrNullOr
-   */
-  @Deprecated(forRemoval = true)
-  static <T> PropertyPredicate<T> unassignedOrEmptyOr(PropertyPredicate<T> predicate) {
-    return unassignedOrNullOr(predicate);
+    return not(Property<T>::isAssigned).or(Property::isNull).or(predicate);
   }
 
   static PropertyPredicate<Number> lte(Number number) {

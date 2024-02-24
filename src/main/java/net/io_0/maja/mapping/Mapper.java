@@ -187,30 +187,6 @@ public class Mapper {
     }
   }
 
-  /**
-   * @deprecated Use {@link #fromJson(String, Consumer, Class, Class...)} instead
-   */
-  @Deprecated(forRemoval = true)
-  public static <T> T fromJson(String json, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return fromJson(json, propertyIssueConsumer, type);
-  }
-
-  /**
-   * @deprecated Use {@link #readJson(Reader, Consumer, Class, Class...)} instead
-   */
-  @Deprecated(forRemoval = true)
-  public static <T> T readJson(Reader reader, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return readJson(reader, propertyIssueConsumer, type);
-  }
-
-  /**
-   * @deprecated Use {@link #fromMap(Map, Consumer, Class, Class...)} instead
-   */
-  @Deprecated(forRemoval = true)
-  public static <T> T fromMap(Map<String, ?> map, Class<T> type, Consumer<PropertyIssue> propertyIssueConsumer) {
-    return fromMap(map, propertyIssueConsumer, type);
-  }
-  
   private static ObjectMapper prepForJsonOrYamlMapping(ObjectMapper oM, Context ctx) {
     if (nonNull(ctx.instantiators)) {
       oM.registerModule(Instantiator.toModule(ctx.instantiators));

@@ -19,7 +19,7 @@ import static net.io_0.maja.PropertyBuildingUtils.extractProperty;
  * This means one can't use e.g. lombok @Setter, @AllArgsConstructor, or @Builder
  */
 public abstract class PropertyBundle {
-  private Set<String> setProperties = new HashSet<>();
+  private final Set<String> setProperties = new HashSet<>();
 
   /**
    * Marks a property as set, meant to be called within setter

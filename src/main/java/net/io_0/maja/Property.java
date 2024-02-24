@@ -20,14 +20,6 @@ public interface Property<T> {
    */
   boolean isNull();
 
-  /**
-   * @deprecated use #isNull()
-   */
-  @Deprecated(forRemoval = true)
-  default boolean isEmpty() {
-    return isNull();
-  }
-
   static <T> Property<T> from(Object model, String propertyName) {
     return model instanceof PropertyBundle ?
       ((PropertyBundle) model).getProperty(propertyName) : PojoProperty.from(model, propertyName);
