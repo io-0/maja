@@ -20,7 +20,6 @@ repositories {
 }
 
 ext {
-  jacksonVersion = '2.21.2'
   junitVersion = '6.0.3'
 }
 
@@ -31,9 +30,9 @@ dependencies {
     exclude group: 'commons-digester', module: 'commons-digester'
     exclude group: 'commons-logging', module: 'commons-logging'
   }
-  implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
-  implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+  implementation platform("tools.jackson:jackson-bom:3.1.2")
+  implementation "tools.jackson.core:jackson-databind"
+  implementation "tools.jackson.dataformat:jackson-dataformat-yaml"
   implementation 'com.pivovarit:throwing-function:1.6.1'
   implementation 'org.jooq:joor:0.9.15'
   testImplementation 'org.skyscreamer:jsonassert:1.5.3'

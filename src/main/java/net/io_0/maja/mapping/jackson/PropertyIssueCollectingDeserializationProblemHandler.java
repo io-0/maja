@@ -1,17 +1,17 @@
 package net.io_0.maja.mapping.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import com.fasterxml.jackson.databind.deser.ValueInstantiator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.deser.DeserializationProblemHandler;
+import tools.jackson.databind.deser.ValueInstantiator;
+import tools.jackson.dataformat.yaml.YAMLParser;
 import lombok.extern.slf4j.Slf4j;
 import net.io_0.maja.PropertyIssue;
 import org.joor.Reflect;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -56,15 +56,15 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
   @Override
   public Object handleUnexpectedToken(DeserializationContext ctx, JavaType targetType, JsonToken t, JsonParser p, String failureMsg) {
     if (targetType.isTypeOrSubTypeOf(String.class) && t.isStructStart()) {
-      try {
-        if (p instanceof YAMLParser) {
-          return new Yaml().dump(p.readValueAs(Object.class));
-        } else {
+//      try {
+//        if (p instanceof YAMLParser) {
+//          return new Yaml().dump(p.readValueAs(Object.class));
+//        } else {
           return p.readValueAsTree().toString();
-        }
-      } catch (IOException e) {
-        log.debug("Failed to convert json to string", e);
-      }
+//        }
+//      } catch (IOException e) {
+//        log.debug("Failed to convert json to string", e);
+//      }
     }
     return addErrorAndReturnNull(ctx, "Unexpected Token", stringifyAndJoinWithComma(t, failureMsg));
   }
@@ -113,7 +113,8 @@ public class PropertyIssueCollectingDeserializationProblemHandler extends Deseri
    * @return simplified path
    */
   private static String extractAttributeName(JsonParser parser) {
-    String path = parser.getParsingContext().pathAsPointer().toString();
+    String path = JsonPointer.forPath(parser.streamReadContext(), true).toString();
+//            parser.getParsingContext().pathAsPointer().toString();
     return path.length() > 0 ? path.substring(1).replace("/", ".") : "*";
   }
 

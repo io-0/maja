@@ -1,7 +1,7 @@
 package net.io_0.maja.mapping.jackson;
 
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.*;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.*;
 import net.io_0.maja.WithUnconventionalName;
 
 import java.util.Arrays;
@@ -10,15 +10,15 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 public class WithUnconventionalNameAnnotationIntrospector extends NopAnnotationIntrospector {
-  @Override
-  public List<com.fasterxml.jackson.databind.PropertyName> findPropertyAliases(Annotated annotated) {
+//  @Override
+  public List<tools.jackson.databind.PropertyName> findPropertyAliases(Annotated annotated) {
     if (annotated.hasAnnotation(WithUnconventionalName.class)) {
-      return List.of(com.fasterxml.jackson.databind.PropertyName.construct(annotated.getAnnotation(WithUnconventionalName.class).value()));
+      return List.of(tools.jackson.databind.PropertyName.construct(annotated.getAnnotation(WithUnconventionalName.class).value()));
     }
     return emptyList();
   }
 
-  @Override
+//  @Override
   public String[] findEnumValues(Class<?> enumType, Enum<?>[] enumValues, String[] names) {
     return Arrays.stream(enumType.getFields()).map(field ->
       field.isAnnotationPresent(WithUnconventionalName.class) ? field.getAnnotation(WithUnconventionalName.class).value() : field.getName()
@@ -32,10 +32,10 @@ public class WithUnconventionalNameAnnotationIntrospector extends NopAnnotationI
     ).toArray(String[]::new);
   }
 
-  @Override
-  public com.fasterxml.jackson.databind.PropertyName findNameForSerialization(Annotated annotated) {
+//  @Override
+  public tools.jackson.databind.PropertyName findNameForSerialization(Annotated annotated) {
     if (annotated.hasAnnotation(WithUnconventionalName.class)) {
-      return com.fasterxml.jackson.databind.PropertyName.construct(annotated.getAnnotation(WithUnconventionalName.class).value());
+      return tools.jackson.databind.PropertyName.construct(annotated.getAnnotation(WithUnconventionalName.class).value());
     }
     return null;
   }
@@ -44,7 +44,7 @@ public class WithUnconventionalNameAnnotationIntrospector extends NopAnnotationI
    * Jackson has "problems" with names like 'aSpecialName' because of the bean naming conventions it applies.
    * It won't find the annotation if we don't intervene.
    */
-  @Override
+//  @Override
   public String findImplicitPropertyName(AnnotatedMember member) {
     String name = member.getName();
     if (breaksNamingConvention(name)) {

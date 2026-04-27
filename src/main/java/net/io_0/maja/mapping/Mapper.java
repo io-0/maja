@@ -1,13 +1,12 @@
 package net.io_0.maja.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.*;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import com.pivovarit.function.ThrowingFunction;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -21,9 +20,13 @@ import net.io_0.maja.mapping.jackson.WithUnconventionalNameAnnotationIntrospecto
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -167,7 +170,7 @@ public class Mapper {
     public static <T> Instantiator of(Class<T> target, Function<Map<String, Object>, ? extends T> constructor) {
       return new Instantiator(target, constructor);
     }
-
+/*
     @SuppressWarnings("unchecked")
     private static SimpleModule toModule(List<Instantiator> instantiators) {
       SimpleModule sm = new SimpleModule();
@@ -179,6 +182,7 @@ public class Mapper {
       }));
       return sm;
     }
+*/
   }
 
   public static class MappingException extends RuntimeException {
@@ -189,31 +193,29 @@ public class Mapper {
 
   private static ObjectMapper prepForJsonOrYamlMapping(ObjectMapper oM, Context ctx) {
     if (nonNull(ctx.instantiators)) {
-      oM.registerModule(Instantiator.toModule(ctx.instantiators));
+//      oM.registerModule(Instantiator.toModule(ctx.instantiators));
     }
-    return oM
-      .disable(
-        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
-        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
-      )
-      .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(ctx.propertyIssueConsumer));
+    return oM;
+//      .disable(
+//        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
+//        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES // ignore unknown fields
+//      )
+//      .addHandler(new PropertyIssueCollectingDeserializationProblemHandler(ctx.propertyIssueConsumer));
   }
 
   private static ObjectMapper prepForPojoMapping(ObjectMapper oM) {
-    return oM
-      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
-      .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
-        new PropertyBundleBeanSerializerModifier()
-      ));
+    return oM;
+//      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+//      .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+//      .setSerializerFactory(oM.getSerializerFactory().withSerializerModifier(
+//        new PropertyBundleBeanSerializerModifier()
+//      ));
   }
 
   private static <T> T mapWithJsonObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
     var m = JsonMapper.builder()
-      .addModule(new JavaTimeModule())
       .annotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-      .enable(MapperFeature.USE_STD_BEAN_NAMING)                                 // circumventJacksonBeanNamingConventionProblems
       .propertyNamingStrategy(new FirstCharCaseIgnoredPropertyNamingStrategy())  // circumventJacksonBeanNamingConventionProblems
       .build();
     try {
@@ -225,10 +227,8 @@ public class Mapper {
 
   private static <T> T mapWithYamlObjectMapper(ThrowingFunction<ObjectMapper, T, IOException> cb) {
     var m = YAMLMapper.builder()
-      .addModule(new JavaTimeModule())
       .annotationIntrospector(new WithUnconventionalNameAnnotationIntrospector())
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-      .enable(MapperFeature.USE_STD_BEAN_NAMING)                                 // circumventJacksonBeanNamingConventionProblems
       .propertyNamingStrategy(new FirstCharCaseIgnoredPropertyNamingStrategy())  // circumventJacksonBeanNamingConventionProblems
       .build();
     try {

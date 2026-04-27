@@ -1,11 +1,11 @@
 package net.io_0.maja.mapping.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.SerializationConfig;
+//import tools.jackson.databind.SerializerProvider;
+import tools.jackson.databind.ser.BeanPropertyWriter;
+import tools.jackson.databind.ser.ValueSerializerModifier;
 import net.io_0.maja.PropertyBundle;
 import java.util.List;
 
@@ -18,9 +18,9 @@ import static net.io_0.maja.PropertyBuildingUtils.annotatedNameToJavaName;
  * The first condition defines us that we serialize null if a property was actively set to null via setter.
  * The second one can be archived for instance with the serializationInclusion(JsonInclude.Include.NON_ABSENT) configuration.
  */
-public class PropertyBundleBeanSerializerModifier extends BeanSerializerModifier {
+public class PropertyBundleBeanSerializerModifier extends ValueSerializerModifier {
   @Override
-  public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
+  public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription.Supplier beanDesc, List<BeanPropertyWriter> beanProperties) {
     if (extendsPropertyBundle(beanDesc.getBeanClass())) {
       for (int i = 0; i < beanProperties.size(); i++) {
         BeanPropertyWriter beanPropertyWriter = beanProperties.get(i);
@@ -42,7 +42,7 @@ public class PropertyBundleBeanSerializerModifier extends BeanSerializerModifier
     private PropertyBundleBeanPropertyWriter(BeanPropertyWriter base, String newSimpleName) {
       super(base, base.getFullName().withSimpleName(newSimpleName));
     }
-
+/*
     @Override
     public void serializeAsField(Object bean, JsonGenerator gen, SerializerProvider prov) throws Exception {
       if (extendsPropertyBundle(bean.getClass())) {
@@ -64,5 +64,6 @@ public class PropertyBundleBeanSerializerModifier extends BeanSerializerModifier
 
       super.serializeAsField(bean, gen, prov);
     }
+*/
   }
 }

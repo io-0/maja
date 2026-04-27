@@ -1,8 +1,8 @@
 package net.io_0.maja.mapping.jackson;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.AnnotatedMethod;
 import java.util.Optional;
 
 import static net.io_0.maja.StringUtils.*;
